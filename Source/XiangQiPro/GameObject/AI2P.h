@@ -35,6 +35,10 @@ private:
 
     // 时间限制（毫秒）
     int32 timeLimit = 5000;
+
+    // 历史启发表
+    int32 historyTable[10][9][10][9]; // [fromX][fromY][toX][toY]
+
 public:
 
     UAI2P();
@@ -45,8 +49,20 @@ public:
     // 设置棋盘状态
     void SetBoard(TWeakObjectPtr<UChessBoard2P> newBoard);
 
-    // 评估函数 - 简单实现，只考虑棋子价值
+    // 评估函数
     int32 Evaluate();
+
+    // 位置价值评估
+    void InitializePositionScores(int32 positionScores[2][10][9]);
+
+    // 行动力评估
+    int32 EvaluateMobility(EChessColor color);
+
+    // 威胁评估
+    int32 EvaluateThreats(EChessColor color);
+
+    // 静态走法评估函数
+    int32 EvaluateMove(const FChessMove2P& move) const;
 
     // 检查是否超时
     bool IsTimeOut();
@@ -54,8 +70,16 @@ public:
     // 极小化极大算法
     int32 Minimax(int32 depth, int32 alpha, int32 beta, bool maximizingPlayer);
 
-    // 走法排序函数
+    // 静态搜索（Quiescence Search）避免水平线效应
+    int32 QuiescenceSearch(int32 alpha, int32 beta, bool maximizingPlayer);
+
+    TArray<FChessMove2P> GenerateCaptureMoves(EChessColor color);
+
     void SortMoves(TArray<FChessMove2P>& moves);
+
+    void SortMovesWithHistory(TArray<FChessMove2P>& moves, int32 depth);
+
+    void UpdateHistoryTable(const FChessMove2P& move, int32 depth);
 
     // 获取AI的最佳走法
     TWeakObjectPtr<AChesses> GetBestMove(FChessMove2P& bestMove);

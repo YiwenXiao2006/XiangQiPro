@@ -96,7 +96,7 @@ void AXQPGameStateBase::RunAI2P()
         AI2P->AddToRoot();
     }
 
-    AI2P->SetDepth(5); // ËÑË÷Éî¶È
+    AI2P->SetDepth(8); // ËÑË÷Éî¶È
     AI2P->SetBoard(board2P); // ÆåÅÌ×´Ì¬
     battleTurn = EBattleTurn::AI;
     board2P->SetSideToMove(EChessColor::BLACK);
