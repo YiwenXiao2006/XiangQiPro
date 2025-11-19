@@ -361,3 +361,12 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Binaries
+/Build/Android
+/Intermediate
+/enc_temp_folder/e1de2035a35744ad16ad6ef6d42347
+/Saved/Autosaves/Game/Level/BattelLevel_Auto0.umap
+/Saved
+/.vsconfig
+/XiangQiPro.sln
+/XiangQiPro.uproject
