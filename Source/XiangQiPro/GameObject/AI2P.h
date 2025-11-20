@@ -50,7 +50,7 @@ public:
     void SetBoard(TWeakObjectPtr<UChessBoard2P> newBoard);
 
     // 评估函数
-    int32 Evaluate();
+    int32 Evaluate(EChessColor color = EChessColor::BLACK);
 
     // 位置价值评估
     void InitializePositionScores(int32 positionScores[2][10][9]);
@@ -61,8 +61,23 @@ public:
     // 威胁评估
     int32 EvaluateThreats(EChessColor color);
 
+    // 评估将/帅安全性
+    int32 EvaluateKingSafety(EChessColor color);
+
     // 静态走法评估函数
-    int32 EvaluateMove(const FChessMove2P& move) const;
+    int32 EvaluateMove(const FChessMove2P& move);
+
+    // 评估走法后的位置价值
+    int32 EvaluatePositionValue(const FChessMove2P& move, TWeakObjectPtr<AChesses> movingChess) const;
+
+    // 评估走法后对对方的威胁
+    int32 EvaluateThreatAfterMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> movingChess) const;
+
+    // 检查棋子是否能攻击指定位置
+    bool CanAttackPosition(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor attackerColor) const;
+
+    // 检查走法是否保护将/帅
+    bool IsMoveProtectingKing(const FChessMove2P& move, EChessColor color) const;
 
     // 检查是否超时
     bool IsTimeOut();
@@ -83,4 +98,22 @@ public:
 
     // 获取AI的最佳走法
     TWeakObjectPtr<AChesses> GetBestMove(FChessMove2P& bestMove);
+
+    // 专门处理被将军情况的搜索
+    TWeakObjectPtr<AChesses> GetBestMoveWhenInCheck(FChessMove2P& bestMove, TArray<FChessMove2P>& allMoves);
+
+    // 快速评估保将走法
+    int32 QuickEvaluateEscapeMove(const FChessMove2P& move);
+
+    // 评估走法安全性
+    int32 EvaluateMoveSafety(const FChessMove2P& move);
+
+    // 被将军时的特殊Minimax搜索，使用更激进的剪枝
+    int32 MinimaxWhenInCheck(int32 depth, int32 alpha, int32 beta, bool maximizingPlayer);
+
+    // 快速评估函数，用于被将军时的快速评估
+    int32 QuickEvaluate();
+
+    // 获取最佳的几个保将走法
+    TArray<FChessMove2P> GetTopEscapeMoves(const TArray<FChessMove2P>& escapeMoves, int32 count);
 };

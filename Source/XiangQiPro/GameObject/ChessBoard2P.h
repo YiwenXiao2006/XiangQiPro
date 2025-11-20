@@ -31,7 +31,7 @@ public:
 
 	UChessBoard2P();
 
-    TArray<TArray<TWeakObjectPtr<AChesses>>> Board;  // 10行9列的棋盘
+    TArray<TArray<TWeakObjectPtr<AChesses>>> AllChess;  // 10行9列的棋盘
 
     TArray<TArray<FVector>> BoardLocs; // 棋盘置棋点位置
 
@@ -102,6 +102,16 @@ public:
     // 生成兵/卒的走法
     void GenerateBingMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const;
 
-    // 检查是否将死
-    bool IsCheckmate(EChessColor color);
+    // 将军检测
+    bool IsKingInCheck(EChessColor color);
+
+    bool CanAttackPosition(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor attackerColor) const;
+
+    bool CanJiangAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const;
+    bool CanShiAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const;
+    bool CanXiangAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const;
+    bool CanMaAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const;
+    bool CanJvAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const;
+    bool CanPaoAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const;
+    bool CanBingAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const;
 };

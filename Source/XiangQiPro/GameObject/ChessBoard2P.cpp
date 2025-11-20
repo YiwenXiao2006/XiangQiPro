@@ -26,7 +26,7 @@ void UChessBoard2P::InitializeBoard(TWeakObjectPtr<AChessBoard2PActor> ChessBoar
         {
             ChessList.Add(nullptr);
         }
-        Board.Add(ChessList);
+        AllChess.Add(ChessList);
     }
     for (int32 i = 0; i < 10; i++)
     {
@@ -94,7 +94,7 @@ TWeakObjectPtr<AChesses> UChessBoard2P::GetChess(int32 x, int32 y) const
 {
     if (x >= 0 && x < 10 && y >= 0 && y < 9)
     {
-        return Board[x][y];
+        return AllChess[x][y];
     }
     return nullptr;
 }
@@ -103,7 +103,7 @@ void UChessBoard2P::SetChess(int32 x, int32 y, TWeakObjectPtr<AChesses> Chess)
 {
     if (x >= 0 && x < 10 && y >= 0 && y < 9) 
     {
-        Board[x][y] = Chess;
+        AllChess[x][y] = Chess;
     }
 }
 
@@ -165,36 +165,34 @@ int32 UChessBoard2P::CountPiecesBetween(int32 fromX, int32 fromY, int32 toX, int
 
     if (fromX == toX) // 同一行
     {
-        int32 minY = Math::Min(fromY, toY);
-        int32 maxY = Math::Max(fromY, toY);
-        for (int32 y = minY + 1; y < maxY; y++) 
+        int32 minY = FMath::Min(fromY, toY);
+        int32 maxY = FMath::Max(fromY, toY);
+        for (int32 y = minY + 1; y < maxY; y++)
         {
-            TWeakObjectPtr<AChesses> Chess = GetChess(fromX, y);
-            if (!Chess.IsValid())
-            {
-                continue;
-            }
-
-            if (Chess->GetType() != EChessType::EMPTY)
+            TWeakObjectPtr<AChesses> chess = GetChess(fromX, y);
+            if (chess.IsValid() && chess->GetType() != EChessType::EMPTY)
             {
                 count++;
             }
         }
     }
     else if (fromY == toY) // 同一列
-    { 
-        int32 minX = Math::Min(fromX, toX);
-        int32 maxX = Math::Max(fromX, toX);
-        for (int32 x = minX + 1; x < maxX; x++) {
-            TWeakObjectPtr<AChesses> Chess = GetChess(x, fromY);
-            if (!Chess.IsValid())
+    {
+        int32 minX = FMath::Min(fromX, toX);
+        int32 maxX = FMath::Max(fromX, toX);
+        for (int32 x = minX + 1; x < maxX; x++)
+        {
+            TWeakObjectPtr<AChesses> chess = GetChess(x, fromY);
+            if (chess.IsValid() && chess->GetType() != EChessType::EMPTY)
             {
-                continue;
-            }
-            if (Chess->GetType() != EChessType::EMPTY) {
                 count++;
             }
         }
+    }
+    // 如果不是直线，返回-1表示无效
+    else
+    {
+        return -1;
     }
 
     return count;
@@ -530,9 +528,237 @@ void UChessBoard2P::GenerateBingMoves(int32 x, int32 y, EChessColor color, TArra
     }
 }
 
-bool UChessBoard2P::IsCheckmate(EChessColor color)
+bool UChessBoard2P::IsKingInCheck(EChessColor color)
 {
-    // 简化实现：检查是否无棋可走
-    TArray<FChessMove2P> moves = GenerateAllMoves(color);
-    return moves.IsEmpty();
+    if (!IsValidPosition(0, 0)) return false; // 简单检查棋盘是否有效
+
+    // 找到将/帅的位置
+    int32 kingX = -1, kingY = -1;
+
+    for (int32 i = 0; i < 10; i++)
+    {
+        for (int32 j = 0; j < 9; j++)
+        {
+            TWeakObjectPtr<AChesses> chess = GetChess(i, j);
+            if (chess.IsValid() && chess->GetType() == EChessType::JIANG && chess->GetColor() == color)
+            {
+                kingX = i;
+                kingY = j;
+                break;
+            }
+        }
+        if (kingX != -1) break;
+    }
+
+    if (kingX == -1 || kingY == -1)
+    {
+        // 将/帅不存在，这通常意味着已经被将死
+        //ULogger::LogWarning(TEXT("UChessBoard2P::IsKingInCheck: King not found! Possibly checkmate."));
+        return true;
+    }
+
+    EChessColor opponentColor = (color == EChessColor::RED) ? EChessColor::BLACK : EChessColor::RED;
+
+    // 检查每个对手棋子是否能攻击到将/帅
+    for (int32 i = 0; i < 10; i++)
+    {
+        for (int32 j = 0; j < 9; j++)
+        {
+            TWeakObjectPtr<AChesses> chess = GetChess(i, j);
+            if (!chess.IsValid() || chess->GetColor() != opponentColor)
+                continue;
+
+            // 检查这个棋子是否能攻击到将/帅
+            if (CanAttackPosition(i, j, kingX, kingY, opponentColor))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// 检查指定位置的棋子是否能攻击目标位置
+bool UChessBoard2P::CanAttackPosition(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor attackerColor) const
+{
+    TWeakObjectPtr<AChesses> attacker = GetChess(fromX, fromY);
+    if (!attacker.IsValid()) return false;
+
+    EChessType type = attacker->GetType();
+
+    // 根据棋子类型检查攻击能力
+    switch (type)
+    {
+    case EChessType::JIANG:
+        return CanJiangAttack(fromX, fromY, toX, toY, attackerColor);
+
+    case EChessType::SHI:
+        return CanShiAttack(fromX, fromY, toX, toY, attackerColor);
+
+    case EChessType::XIANG:
+        return CanXiangAttack(fromX, fromY, toX, toY, attackerColor);
+
+    case EChessType::MA:
+        return CanMaAttack(fromX, fromY, toX, toY, attackerColor);
+
+    case EChessType::JV:
+        return CanJvAttack(fromX, fromY, toX, toY, attackerColor);
+
+    case EChessType::PAO:
+        return CanPaoAttack(fromX, fromY, toX, toY, attackerColor);
+
+    case EChessType::BING:
+        return CanBingAttack(fromX, fromY, toX, toY, attackerColor);
+
+    default:
+        return false;
+    }
+}
+
+// 将/帅的攻击判断
+bool UChessBoard2P::CanJiangAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
+{
+    // 将/帅只能移动一格
+    if (FMath::Abs(fromX - toX) + FMath::Abs(fromY - toY) != 1)
+        return false;
+
+    // 必须在九宫内
+    if (!IsInPalace(toX, toY, color))
+        return false;
+
+    // 检查路径上是否有棋子阻挡（将/帅移动一格，不需要检查阻挡）
+    return true;
+}
+
+// 士的攻击判断
+bool UChessBoard2P::CanShiAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
+{
+    // 士走斜线一格
+    if (FMath::Abs(fromX - toX) != 1 || FMath::Abs(fromY - toY) != 1)
+        return false;
+
+    // 必须在九宫内
+    if (!IsInPalace(toX, toY, color))
+        return false;
+
+    return true;
+}
+
+// 象的攻击判断
+bool UChessBoard2P::CanXiangAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
+{
+    // 象走田字
+    if (FMath::Abs(fromX - toX) != 2 || FMath::Abs(fromY - toY) != 2)
+        return false;
+
+    // 不能过河
+    if ((color == EChessColor::BLACK && toX > 4) || (color == EChessColor::RED && toX < 5))
+        return false;
+
+    // 检查象眼是否被塞住
+    int32 eyeX = (fromX + toX) / 2;
+    int32 eyeY = (fromY + toY) / 2;
+
+    if (GetChess(eyeX, eyeY).IsValid())
+        return false;
+
+    return true;
+}
+
+// 马的攻击判断
+bool UChessBoard2P::CanMaAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
+{
+    int32 dx = FMath::Abs(fromX - toX);
+    int32 dy = FMath::Abs(fromY - toY);
+
+    // 马走日字
+    if (!((dx == 1 && dy == 2) || (dx == 2 && dy == 1)))
+        return false;
+
+    // 检查马腿是否被绊
+    int32 legX, legY;
+    if (dx == 1)
+    {
+        // 竖着走日字
+        legX = fromX;
+        legY = (fromY + toY) / 2;
+    }
+    else
+    {
+        // 横着走日字
+        legX = (fromX + toX) / 2;
+        legY = fromY;
+    }
+
+    if (GetChess(legX, legY).IsValid())
+        return false;
+
+    return true;
+}
+
+// 车的攻击判断
+bool UChessBoard2P::CanJvAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
+{
+    // 车走直线
+    if (fromX != toX && fromY != toY)
+        return false;
+
+    // 检查路径上是否有其他棋子
+    if (CountPiecesBetween(fromX, fromY, toX, toY) > 0)
+        return false;
+
+    return true;
+}
+
+// 炮的攻击判断
+bool UChessBoard2P::CanPaoAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
+{
+    // 炮走直线
+    if (fromX != toX && fromY != toY)
+        return false;
+
+    int32 piecesBetween = CountPiecesBetween(fromX, fromY, toX, toY);
+    TWeakObjectPtr<AChesses> target = GetChess(toX, toY);
+
+    if (target.IsValid())
+    {
+        // 吃子需要恰好有一个棋子作为炮架
+        return piecesBetween == 1;
+    }
+    else
+    {
+        // 移动不能有棋子阻挡
+        return piecesBetween == 0;
+    }
+}
+
+// 兵的攻击判断
+bool UChessBoard2P::CanBingAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
+{
+    int32 dx = toX - fromX;
+    int32 dy = toY - fromY;
+
+    if (color == EChessColor::BLACK)
+    {
+        // 黑兵：向下移动，或过河后左右移动
+        if (dx == -1 && dy == 0) return true; // 向下
+        if (fromX <= 4)
+        {
+            // 过河后可以左右移动
+            if (dx == 0 && (dy == 1 || dy == -1)) return true;
+        }
+    }
+    else
+    {
+        // 红兵：向上移动，或过河后左右移动
+        if (dx == 1 && dy == 0) return true; // 向上
+        if (fromX >= 5)
+        {
+            // 过河后可以左右移动
+            if (dx == 0 && (dy == 1 || dy == -1)) return true;
+        }
+    }
+
+    return false;
 }
