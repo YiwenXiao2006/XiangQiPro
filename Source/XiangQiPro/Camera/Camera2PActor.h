@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Components/AudioComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Camera2PActor.generated.h"
 
@@ -52,6 +53,12 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* GameCamera;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Music")
+    UAudioComponent* BattleAudio;
+
+    UPROPERTY(EditAnywhere, Category = "Music")
+    USoundBase* BattleMusic;
 
     UPROPERTY(EditAnywhere, Category = "Camera")
     float TargetArmLength;

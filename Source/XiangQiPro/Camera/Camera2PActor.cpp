@@ -28,6 +28,10 @@ ACamera2PActor::ACamera2PActor()
 	GameCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	GameCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 
+	// 创建音频组件
+	BattleAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("BattleAudio"));
+	BattleAudio->SetupAttachment(GameCamera);
+
 	// 初始化变量
 	bIsRotatingCamera = false;
 	TargetRotation = FRotator::ZeroRotator;
@@ -39,6 +43,10 @@ ACamera2PActor::ACamera2PActor()
 void ACamera2PActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	BattleAudio->SetSound(BattleMusic); // 设置音频资源
+	BattleAudio->Play(); // 开始播放背景音乐
+
 	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
 		HUD = Cast<AXQP_HUD>(PC->GetHUD());

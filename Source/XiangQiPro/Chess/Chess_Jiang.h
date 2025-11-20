@@ -23,6 +23,8 @@ public:
 
 	virtual void Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard2P> board2P) override;
 
+	virtual void Defeated() override;
+
 	virtual void GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target) override;
 	
 };

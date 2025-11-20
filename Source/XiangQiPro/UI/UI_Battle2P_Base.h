@@ -8,6 +8,8 @@
 
 class UTextBlock;
 
+enum class EChessColor : uint8;
+
 typedef UUI_Battle2P_Base UI_Battle2P_Base;
 
 /**
@@ -36,6 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* Text_Score_P2;
 
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	UTextBlock* Text_AIThinking;
+
 public:
 
 	virtual void NativeConstruct() override;
@@ -43,5 +48,11 @@ public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	void UpdateScore(int32 score1, int32 score2);
+
+	// 设置是否为AI回合
+	void SetAITurn(bool bAITurn);
+
+	// 显示游戏结束
+	void ShowGameOver(EChessColor winner);
 	
 };

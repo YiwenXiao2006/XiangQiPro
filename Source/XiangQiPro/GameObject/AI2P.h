@@ -67,17 +67,52 @@ public:
     // 静态走法评估函数
     int32 EvaluateMove(const FChessMove2P& move);
 
+    // 评估士的走法
+    int32 EvaluateShiMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> shi);
+
+    // 评估象的走法
+    int32 EvaluateXiangMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> xiang);
+
+    // 评估进攻棋子的走法（适当降低优先级）
+    int32 EvaluateAttackMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> attacker);
+
     // 评估走法后的位置价值
-    int32 EvaluatePositionValue(const FChessMove2P& move, TWeakObjectPtr<AChesses> movingChess) const;
+    int32 EvaluatePositionValue(const FChessMove2P& move, TWeakObjectPtr<AChesses> movingChess);
+
+    // 评估士的位置价值
+    int32 EvaluateShiPosition(int32 x, int32 y, EChessColor color);
+
+    // 评估象的位置价值
+    int32 EvaluateXiangPosition(int32 x, int32 y, EChessColor color);
+
+    // 检查象眼是否通畅
+    bool IsXiangEyeClear(int32 x, int32 y);
+
+    // 评估士和象的协同防守
+    int32 EvaluateShiXiangCooperation(int32 shiCount, int32 xiangCount, EChessColor color);
+
+    // 评估防守结构
+    int32 EvaluateDefensiveStructure(EChessColor color);
 
     // 评估走法后对对方的威胁
-    int32 EvaluateThreatAfterMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> movingChess) const;
+    int32 EvaluateThreatAfterMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> movingChess);
+
+    bool IsBlockingAttack(const FChessMove2P& move, EChessColor color);
+
+    // 检查走法是否保护了关键位置
+    bool IsProtectingKeySquare(const FChessMove2P& move, EChessColor color);
 
     // 检查棋子是否能攻击指定位置
-    bool CanAttackPosition(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor attackerColor) const;
+    bool CanAttackPosition(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor attackerColor);
 
     // 检查走法是否保护将/帅
-    bool IsMoveProtectingKing(const FChessMove2P& move, EChessColor color) const;
+    bool IsMoveProtectingKing(const FChessMove2P& move, EChessColor color);
+
+    // 检查棋子是否在防守位置
+    bool IsInDefensivePosition(int32 x, int32 y, EChessColor color);
+
+    // 计算棋子的防守贡献
+    int32 CalculateDefensiveContribution(int32 x, int32 y, TWeakObjectPtr<AChesses> chess);
 
     // 检查是否超时
     bool IsTimeOut();

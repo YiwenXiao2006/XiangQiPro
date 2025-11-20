@@ -58,17 +58,26 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// 点击事件处理函数
 	UFUNCTION()
-	void OnComponentClicked(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
+	void OnInputTouchEnter(ETouchIndex::Type FingerIndex, UPrimitiveComponent* TouchedComponent);
 
-	// 鼠标悬停
 	UFUNCTION()
-	void OnComponentBeginCursorOver(UPrimitiveComponent* TouchedComponent);
+	void OnInputTouchLeave(ETouchIndex::Type FingerIndex, UPrimitiveComponent* TouchedComponent);
 
-	// 鼠标离开
 	UFUNCTION()
-	void OnComponentEndCursorOver(UPrimitiveComponent* TouchedComponent);
+	void OnInputTouchEnd(ETouchIndex::Type FingerIndex, UPrimitiveComponent* TouchedComponent);
+
+	// 统一的悬停进入处理
+	UFUNCTION()
+	void HandleHoverStart(UPrimitiveComponent* TouchedComponent);
+
+	// 统一的悬停离开处理
+	UFUNCTION()
+	void HandleHoverEnd(UPrimitiveComponent* TouchedComponent);
+
+	// 统一的点击处理
+	UFUNCTION()
+	void HandleClick(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed);
 
 	// 激活组件
 	void SetActivate(bool bInActive);

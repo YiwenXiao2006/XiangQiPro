@@ -28,9 +28,16 @@ ASettingPoint::ASettingPoint()
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
 	Sphere->SetSphereRadius(2);
 	Sphere->SetupAttachment(PointNiagara);
-	Sphere->OnClicked.AddDynamic(this, &ASettingPoint::OnComponentClicked);
-	Sphere->OnBeginCursorOver.AddDynamic(this, &ASettingPoint::OnComponentBeginCursorOver);
-	Sphere->OnEndCursorOver.AddDynamic(this, &ASettingPoint::OnComponentEndCursorOver);
+	
+	// 鼠标事件
+	Sphere->OnClicked.AddDynamic(this, &ASettingPoint::HandleClick);
+	Sphere->OnBeginCursorOver.AddDynamic(this, &ASettingPoint::HandleHoverStart);
+	Sphere->OnEndCursorOver.AddDynamic(this, &ASettingPoint::HandleHoverEnd);
+
+	// 触摸事件
+	Sphere->OnInputTouchEnter.AddDynamic(this, &ASettingPoint::OnInputTouchEnter);
+	Sphere->OnInputTouchLeave.AddDynamic(this, &ASettingPoint::OnInputTouchLeave);
+	Sphere->OnInputTouchEnd.AddDynamic(this, &ASettingPoint::OnInputTouchEnd);
 }
 
 // Called when the game starts or when spawned
@@ -47,19 +54,37 @@ void ASettingPoint::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ASettingPoint::OnComponentClicked(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed)
+void ASettingPoint::OnInputTouchEnter(ETouchIndex::Type FingerIndex, UPrimitiveComponent* TouchedComponent)
 {
-	GameState->ApplyMove2P(TargetChess, FChessMove2P(TargetChess->GetSimpPosition(), Position2P));
+	HandleHoverStart(TouchedComponent);
 }
 
-void ASettingPoint::OnComponentBeginCursorOver(UPrimitiveComponent* TouchedComponent)
+void ASettingPoint::OnInputTouchLeave(ETouchIndex::Type FingerIndex, UPrimitiveComponent* TouchedComponent)
+{
+	HandleHoverEnd(TouchedComponent);
+}
+
+void ASettingPoint::OnInputTouchEnd(ETouchIndex::Type FingerIndex, UPrimitiveComponent* TouchedComponent)
+{
+	HandleClick(TouchedComponent, EKeys::LeftMouseButton);
+}
+
+// 统一的悬停进入处理
+void ASettingPoint::HandleHoverStart(UPrimitiveComponent* TouchedComponent)
 {
 	PointNiagara->SetVectorParameter(FName(TEXT("RayColor")), FVector(1, 0, 0));
 }
 
-void ASettingPoint::OnComponentEndCursorOver(UPrimitiveComponent* TouchedComponent)
+// 统一的悬停离开处理
+void ASettingPoint::HandleHoverEnd(UPrimitiveComponent* TouchedComponent)
 {
 	PointNiagara->SetVectorParameter(FName(TEXT("RayColor")), FVector(1, 1, 1));
+}
+
+// 统一的点击处理
+void ASettingPoint::HandleClick(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed)
+{
+	GameState->ApplyMove2P(TargetChess, FChessMove2P(TargetChess->GetSimpPosition(), Position2P));
 }
 
 void ASettingPoint::SetActivate(bool bInActive)
