@@ -82,7 +82,7 @@ void AChessBoard2PActor::GenerateChesses(TWeakObjectPtr<UChessBoard2P> board2P)
         Chess->FinishSpawning(Transform);
 
         // 将棋子保存到棋盘中
-        board2P->Board[Indexs[i].Key][Indexs[i].Value] = Chess;
+        board2P->AllChess[Indexs[i].Key][Indexs[i].Value] = Chess;
     }
 
     for (int32 i = 0; i < 10; i++)

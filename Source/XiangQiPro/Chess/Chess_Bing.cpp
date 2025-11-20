@@ -21,9 +21,9 @@ void AChess_Bing::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBo
 	}
 }
 
-void AChess_Bing::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P)
+void AChess_Bing::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target)
 {
-	Super::GenerateMove2P(board2P);
+	Super::GenerateMove2P(board2P, target);
 
 	// 获取所有移动方式
 	TArray<FChessMove2P> Moves;

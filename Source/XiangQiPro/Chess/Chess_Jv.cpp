@@ -21,9 +21,9 @@ void AChess_Jv::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoar
 	}
 }
 
-void AChess_Jv::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P)
+void AChess_Jv::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target)
 {
-	Super::GenerateMove2P(board2P);
+	Super::GenerateMove2P(board2P, target);
 
 	// 获取所有移动方式
 	TArray<FChessMove2P> Moves;

@@ -43,6 +43,8 @@ protected:
 
 	TWeakObjectPtr<UChessBoard2P> Board2P;
 
+	bool bSelected = false;
+
 public:
 	// Sets default values for this pawn's properties
 	AChesses();
@@ -77,11 +79,18 @@ public:
 	// 点击事件处理函数
 	virtual void NotifyActorOnClicked(FKey ButtonPressed = EKeys::LeftMouseButton) override;
 
+	virtual void NotifyActorOnInputTouchEnd(const ETouchIndex::Type FingerIndex) override;
+
 	// 鼠标悬停
 	virtual void NotifyActorBeginCursorOver() override;
 
 	// 鼠标离开
 	virtual void NotifyActorEndCursorOver() override;
+
+	virtual void NotifyActorOnInputTouchBegin(const ETouchIndex::Type FingerIndex) override;
+
+	// 处理点击事件
+	void HandleClick();
 
 	// 棋子战败
 	virtual void Defeated();
@@ -94,7 +103,7 @@ public:
 
 	FVector2D GetSimpPosition() const;
 
-	virtual void GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P);
+	virtual void GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target);
 
 	virtual void ApplyMove(FChessMove2P Move);
 

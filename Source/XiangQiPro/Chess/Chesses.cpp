@@ -72,30 +72,7 @@ void AChesses::NotifyActorOnClicked(FKey ButtonPressed)
 
 	if (ButtonPressed == EKeys::LeftMouseButton)
 	{
-		if (GameState)
-		{
-			if (GameState->GetBattleTurn() != EBattleTurn::AI)
-			{
-				if (GameState->GetBattleType() == EBattleType::P2)
-				{
-					if (MyColor != EChessColor::BLACK) // 不是AI的棋子
-					{
-						if (Board2P.IsValid())
-						{
-							GenerateMove2P(Board2P);
-						}
-						else
-						{
-							ULogger::LogError(TEXT("Chesses OnClicked: ChessBoard2P instance is nullptr!"));
-						}
-					}
-				}
-			}
-		}
-		else
-		{
-			ULogger::LogError(TEXT("Chesses OnClicked: GameState instance is nullptr!"));
-		}
+		HandleClick();
 	}
 }
 
@@ -108,7 +85,68 @@ void AChesses::NotifyActorBeginCursorOver()
 void AChesses::NotifyActorEndCursorOver()
 {
 	Super::NotifyActorEndCursorOver();
-	ChessMesh->SetOverlayMaterial(nullptr); // 移除描边材质
+	if (!bSelected) // 未被选中
+	{
+		ChessMesh->SetOverlayMaterial(nullptr); // 移除描边材质
+	}
+}
+
+void AChesses::NotifyActorOnInputTouchBegin(const ETouchIndex::Type FingerIndex)
+{
+	Super::NotifyActorOnInputTouchBegin(FingerIndex);
+	if (FingerIndex == ETouchIndex::Touch1)
+		if (!bSelected)
+			ChessMesh->SetOverlayMaterial(MI_Stroke); // 添加描边材质
+}
+
+void AChesses::NotifyActorOnInputTouchEnd(const ETouchIndex::Type FingerIndex)
+{
+	Super::NotifyActorOnInputTouchEnd(FingerIndex);
+
+	// 对于触摸事件，我们直接处理，不区分手指索引（或者只处理第一根手指）
+	if (FingerIndex == ETouchIndex::Touch1)
+	{
+		HandleClick();
+	}
+}
+
+void AChesses::HandleClick()
+{
+	if (GameState)
+	{
+		if (GameState->GetBattleTurn() != EBattleTurn::AI)
+		{
+			if (GameState->GetBattleType() == EBattleType::P2)
+			{
+				if (MyColor != EChessColor::BLACK) // AI
+				{
+					if (bSelected)
+					{
+						bSelected = false; // 移除被选中状态
+						GameState->DismissSettingPoint2P(); // 清除落子点
+						ChessMesh->SetOverlayMaterial(nullptr); // 移除描边材质
+					}
+					else
+					{
+						if (Board2P.IsValid())
+						{
+							bSelected = true;
+							ChessMesh->SetOverlayMaterial(MI_Stroke); // 添加描边材质
+							GenerateMove2P(Board2P, this);
+						}
+						else
+						{
+							ULogger::LogError(TEXT("Chesses OnClicked: ChessBoard2P instance is nullptr!"));
+						}
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		ULogger::LogError(TEXT("Chesses OnClicked: GameState instance is nullptr!"));
+	}
 }
 
 void AChesses::Defeated()
@@ -132,8 +170,20 @@ FVector2D AChesses::GetSimpPosition() const
 	return Pos;
 }
 
-void AChesses::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P)
+void AChesses::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target)
 {
+	for (int32 i = 0; i < 10; i++)
+	{
+		for (int32 j = 0; j < 9; j++)
+		{
+			TWeakObjectPtr<AChesses> captureChess = Board2P->AllChess[i][j];
+			if (captureChess != nullptr && captureChess != target.Get())
+			{
+				captureChess->ChessMesh->SetOverlayMaterial(nullptr); // 移除描边材质
+				captureChess->bSelected = false; // 清除被选择状态
+			}
+		}
+	}
 }
 
 void AChesses::ApplyMove(FChessMove2P Move)
@@ -144,6 +194,8 @@ void AChesses::ApplyMove(FChessMove2P Move)
 	FVector WorldLoc = Board2P->BoardLocs[Move.to.X][Move.to.Y];
 	SetActorLocation(WorldLoc);
 
+	bSelected = false; // 移除被选中状态
+	ChessMesh->SetOverlayMaterial(nullptr); // 移除描边材质
 	GameState->DismissSettingPoint2P(); // 隐藏所有落子点
 }
 
