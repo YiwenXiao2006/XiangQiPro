@@ -13,12 +13,16 @@ UAI2P::UAI2P()
 void UAI2P::SetDepth(int32 Depth)
 {
     maxDepth = Depth;
-    timeLimit = (Depth + 2) * 1000;
 }
 
 void UAI2P::SetBoard(TWeakObjectPtr<ChessBoard2P> newBoard)
 {
     board2P = newBoard;
+}
+
+void UAI2P::StopThinkingImmediately()
+{
+    timeLimit = 0;
 }
 
 int32 UAI2P::Evaluate(EChessColor color)
@@ -1250,6 +1254,7 @@ TWeakObjectPtr<AChesses> UAI2P::GetBestMove(FChessMove2P& bestMove)
 {
     if (!board2P.IsValid()) return nullptr;
 
+    timeLimit = (maxDepth + 2) * 1000;
     Timer.Start();
 
     // 首先检查当前是否被将军

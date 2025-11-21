@@ -9,6 +9,7 @@
 #include "XQPGameStateBase.generated.h"
 
 class UAI2P;
+class UAsyncWorker;
 class UChessBoard2P;
 class UUI_Battle2P_Base;
 class AChessBoard2PActor;
@@ -66,10 +67,19 @@ private:
 
 	bool bGameOver = false;
 
+	// AI异步任务
+	UAsyncWorker* AIAsync;
+
 private:
 
 	// 更新得分
 	void UpdateScore();
+
+	// AI2P计算后得到的移动结果
+	FChessMove2P AIMove2P;
+
+	// AI2P移动的棋子
+	TWeakObjectPtr<AChesses> AIMovedChess;
 
 public:
 

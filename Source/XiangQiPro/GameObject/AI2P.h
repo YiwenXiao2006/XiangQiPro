@@ -49,6 +49,9 @@ public:
     // 设置棋盘状态
     void SetBoard(TWeakObjectPtr<UChessBoard2P> newBoard);
 
+    // 立刻停止思考
+    void StopThinkingImmediately();
+
     // 评估函数
     int32 Evaluate(EChessColor color = EChessColor::BLACK);
 

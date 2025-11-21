@@ -13,6 +13,7 @@
 #include "../Util/Logger.h"
 #include "../Util/ChessMove.h"
 #include "../Util/ChessInfo.h"
+#include "../Util/AsyncWorker.h"
 
 void AXQPGameStateBase::UpdateScore()
 {
@@ -39,6 +40,15 @@ void AXQPGameStateBase::BeginPlay()
 
 void AXQPGameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    if (AIAsync)
+    {
+        if (AIAsync->IsRunning())
+        {
+            AI2P->StopThinkingImmediately(); // 停止AI工作
+            AIAsync->StopAsyncWork(); // 停止异步任务
+        }
+    }
+
     // 释放掉UObject对象
     if (board2P.IsValid())
         board2P->RemoveFromRoot();
@@ -137,35 +147,37 @@ void AXQPGameStateBase::ApplyMove2P(TWeakObjectPtr<AChesses> target, FChessMove2
         return;
     }
     UpdateScore(); // 更新得分
-
+    HUD2P->AddOperatingRecord(EBattleTurn::P1, target, move); // 记录走子
     RunAI2P(); // 轮到AI
 }
 
 void AXQPGameStateBase::RunAI2P()
 {
     AI2P->SetBoard(board2P); // 棋盘状态
-    battleTurn = EBattleTurn::AI;
     board2P->SetSideToMove(EChessColor::BLACK);
+    battleTurn = EBattleTurn::AI;
     HUD2P->SetAITurn(true);
 
-    // 使用Async函数将任务提交到线程池
-    Async(EAsyncExecution::ThreadPool, [this]()
-        {
-            // 获取最佳移动方式和要移动的棋子
-            FChessMove2P aiMove;
-            TWeakObjectPtr<AChesses> movedChess = AI2P->GetBestMove(aiMove);
-
-            // 使用AsyncTask将后续操作派送回游戏线程
-            AsyncTask(ENamedThreads::GameThread, [this, aiMove, movedChess]()
-                {
-                    // 应用棋子的移动
-                    board2P->ApplyMove(movedChess, aiMove);
-                    battleTurn = EBattleTurn::P1;
-                    board2P->SetSideToMove(EChessColor::RED);
-                    UpdateScore(); // 更新得分
-                    HUD2P->SetAITurn(false); // 更新AI回合结束
-                });
-        });
+     AIAsync = UAsyncWorker::CreateAndStartWorker(
+         [this](std::atomic<bool>& bShouldStop)
+         {
+             // 获取最佳移动方式和要移动的棋子 
+             AIMovedChess = AI2P->GetBestMove(AIMove2P);
+         },
+         [this](EAsyncWorkerState State)
+         {
+             if (State != EAsyncWorkerState::Cancelled) // 任务正常执行完成
+             {
+                 // 应用棋子的移动
+                 board2P->ApplyMove(AIMovedChess, AIMove2P);
+                 battleTurn = EBattleTurn::P1;
+                 board2P->SetSideToMove(EChessColor::RED);
+                 UpdateScore(); // 更新得分
+                 HUD2P->SetAITurn(false); // 更新AI回合结束
+                 HUD2P->AddOperatingRecord(EBattleTurn::AI, AIMovedChess, AIMove2P); // 记录走子
+             }
+         }
+    );
 }
 
 void AXQPGameStateBase::GameOver(EChessColor winner)
