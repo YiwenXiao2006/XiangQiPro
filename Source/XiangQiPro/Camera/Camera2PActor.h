@@ -44,17 +44,13 @@ public:
 
 	ACamera2PActor();
 
-    // 组件
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-    USceneComponent* RootSceneComponent;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
     USpringArmComponent* SpringArm;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* GameCamera;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Music")
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Music")
     UAudioComponent* BattleAudio;
 
     UPROPERTY(EditAnywhere, Category = "Music")
@@ -70,6 +66,10 @@ public:
     UPROPERTY(EditAnywhere, Category = "Touch Control")
     float ZoomInterpSpeed = 5.0f;
 
+    // 鼠标滚轮缩放灵敏度
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Touch Control")
+    float MouseWheelZoomSensitivity = 50.0f;
+
     // 触摸控制参数
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Touch Control")
     float RotationSensitivity = 2.0f;
@@ -77,11 +77,15 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Touch Control")
     float ZoomSensitivity = 0.5f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Touch Control")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
     float MinZoomDistance = 100.0f;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+    float MaxZoomDistance = 2000.0f; 
+    
+    // 最小捏合距离，避免误触
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Touch Control")
-    float MaxZoomDistance = 2000.0f;
+    float MinPinchDistance = 20.0f;
 
     // 旋转控制变量
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
@@ -108,6 +112,7 @@ public:
     void OnMouseRightButtonReleased();
     void OnMouseX(float Value);
     void OnMouseY(float Value);
+    void OnMouseWheel(float Value);
 
     // 触摸输入处理
     void OnTouchBegin(ETouchIndex::Type FingerIndex, FVector Location);
@@ -116,5 +121,10 @@ public:
 
     // 双指手势处理
     void HandleTwoFingerGesture();
+
+private:
+
+    // 双指捏合距离是否合法
+    bool IsValidTwoFingerGesture();
 	
 };
