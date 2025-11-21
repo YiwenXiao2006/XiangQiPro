@@ -1,4 +1,4 @@
-// Copyright 2026 Ultimate Player All Rights Reserved.
+ï»¿// Copyright 2026 Ultimate Player All Rights Reserved.
 
 
 #include "Chess_Pao.h"
@@ -19,13 +19,15 @@ void AChess_Pao::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoa
 	{
 		ChessMask->SetDecalMaterial(OM::GetObject<UMaterialInterface>(PATH_MI_CHESSMASK_BLACK_PAO));
 	}
+
+	MyName = UTF8_TO_TCHAR("ç‚®");
 }
 
 void AChess_Pao::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target)
 {
 	Super::GenerateMove2P(board2P, target);
 
-	// »ñÈ¡ËùÓĞÒÆ¶¯·½Ê½
+	// è·å–æ‰€æœ‰ç§»åŠ¨æ–¹å¼
 	TArray<FChessMove2P> Moves;
 	board2P->GeneratePaoMoves(Pos.X, Pos.Y, MyColor, Moves);
 

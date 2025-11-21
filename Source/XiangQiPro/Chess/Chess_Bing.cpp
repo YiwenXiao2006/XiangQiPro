@@ -1,11 +1,11 @@
-// Copyright 2026 Ultimate Player All Rights Reserved.
+Ôªø// Copyright 2026 Ultimate Player All Rights Reserved.
 
 
 #include "Chess_Bing.h"
 
 AChess_Bing::AChess_Bing()
 {
-	MyType = EChessType::BING;
+	MyType = EChessType::BING; 
 }
 
 void AChess_Bing::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard2P> board2P)
@@ -19,13 +19,22 @@ void AChess_Bing::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBo
 	{
 		ChessMask->SetDecalMaterial(OM::GetObject<UMaterialInterface>(PATH_MI_CHESSMASK_BLACK_BING));
 	}
+
+	if (color == EChessColor::BLACK)
+	{
+		MyName = UTF8_TO_TCHAR("Âçí");
+	}
+	else
+	{
+		MyName = UTF8_TO_TCHAR("ÂÖµ");
+	}
 }
 
 void AChess_Bing::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target)
 {
 	Super::GenerateMove2P(board2P, target);
 
-	// ªÒ»°À˘”–“∆∂Ø∑Ω Ω
+	// Ëé∑ÂèñÊâÄÊúâÁßªÂä®ÊñπÂºè
 	TArray<FChessMove2P> Moves;
 	board2P->GenerateBingMoves(Pos.X, Pos.Y, MyColor, Moves);
 

@@ -2,13 +2,21 @@
 
 #pragma once
 
+#include "../Util/ChessInfo.h"
+#include "../Util/ChessMove.h"
+
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "UI_Battle2P_Base.generated.h"
 
+class AChesses;
+class AXQPGameStateBase;
 class UTextBlock;
+class UImage;
+class UMultiLineEditableTextBox;
 
 enum class EChessColor : uint8;
+enum class EBattleTurn : uint8;
 
 typedef UUI_Battle2P_Base UI_Battle2P_Base;
 
@@ -19,6 +27,10 @@ UCLASS()
 class XIANGQIPRO_API UUI_Battle2P_Base : public UUserWidget
 {
 	GENERATED_BODY()
+
+private:
+
+	AXQPGameStateBase* GameState;
 
 public:
 
@@ -41,6 +53,18 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* Text_AIThinking;
 
+	// 落子历史记录
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	UTextBlock* Text_OperatingRecord;
+
+	// 玩家1的回合标记
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	UImage* Image_RoundMark_P1;
+
+	// 玩家2的回合标记
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	UImage* Image_RoundMark_P2;
+
 public:
 
 	virtual void NativeConstruct() override;
@@ -55,4 +79,10 @@ public:
 	// 显示游戏结束
 	void ShowGameOver(EChessColor winner);
 	
+	// 增加落子历史记录
+	void AddOperatingRecord(EBattleTurn player, TWeakObjectPtr<AChesses> targetChess, FChessMove2P move);
+
+	FString GetMoveNotation(TWeakObjectPtr<AChesses> targetChess, FChessMove2P move);
+
+	FString GetEnhancedMoveNotation(TWeakObjectPtr<AChesses> targetChess, FChessMove2P move);
 };

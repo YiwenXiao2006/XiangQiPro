@@ -30,6 +30,9 @@ class XIANGQIPRO_API AChesses : public APawn
 
 protected:
 
+	// 棋子名字
+	FString MyName;
+
 	// 棋子颜色(阵营)
 	EChessColor MyColor;
 
@@ -94,6 +97,10 @@ public:
 
 	// 棋子战败
 	virtual void Defeated();
+
+	// 获取棋子名称
+	UFUNCTION(BlueprintPure, Category = "Chess")
+	FString GetChessName() const;
 
 	UFUNCTION(BlueprintPure, Category = "Chess")
 	EChessColor GetColor() const;

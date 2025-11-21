@@ -4,6 +4,8 @@
 
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
+#include "Components/MultiLineEditableTextBox.h"
 
 #include "UI_Battle2P_Base.h"
 

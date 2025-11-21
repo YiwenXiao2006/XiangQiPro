@@ -1,4 +1,4 @@
-// Copyright 2026 Ultimate Player All Rights Reserved.
+ï»¿// Copyright 2026 Ultimate Player All Rights Reserved.
 
 
 #include "Chess_Jiang.h"
@@ -19,19 +19,28 @@ void AChess_Jiang::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessB
 	{
 		ChessMask->SetDecalMaterial(OM::GetObject<UMaterialInterface>(PATH_MI_CHESSMASK_BLACK_JIANG));
 	}
+
+	if (color == EChessColor::RED)
+	{
+		MyName = UTF8_TO_TCHAR("å¸¥");
+	}
+	else
+	{
+		MyName = UTF8_TO_TCHAR("å°‡");
+	}
 }
 
 void AChess_Jiang::Defeated()
 {
 	Super::Defeated();
-	GameState->GameOver(MyColor == EChessColor::BLACK ? EChessColor::RED : EChessColor::BLACK); // Í¨ÖªÓÎÏ·×´Ì¬£¬ÓÎÏ·»ñÊ¤
+	GameState->GameOver(MyColor == EChessColor::BLACK ? EChessColor::RED : EChessColor::BLACK); // é€šçŸ¥æ¸¸æˆçŠ¶æ€ï¼Œæ¸¸æˆè·èƒœ
 }
 
 void AChess_Jiang::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target)
 {
 	Super::GenerateMove2P(board2P, target);
 
-	// »ñÈ¡ËùÓĞÒÆ¶¯·½Ê½
+	// è·å–æ‰€æœ‰ç§»åŠ¨æ–¹å¼
 	TArray<FChessMove2P> Moves;
 	board2P->GenerateJiangMoves(Pos.X, Pos.Y, MyColor, Moves);
 	

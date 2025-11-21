@@ -155,6 +155,11 @@ void AChesses::Defeated()
 	ChessMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); // ¹Ø±ÕÅö×²Ìå»ı
 }
 
+FString AChesses::GetChessName() const
+{
+	return MyName;
+}
+
 EChessColor AChesses::GetColor() const
 {
 	return MyColor;

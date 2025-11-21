@@ -1,4 +1,4 @@
-// Copyright 2026 Ultimate Player All Rights Reserved.
+ï»¿// Copyright 2026 Ultimate Player All Rights Reserved.
 
 
 #include "Chess_Shi.h"
@@ -19,13 +19,22 @@ void AChess_Shi::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoa
 	{
 		ChessMask->SetDecalMaterial(OM::GetObject<UMaterialInterface>(PATH_MI_CHESSMASK_BLACK_SHI));
 	}
+
+	if (color == EChessColor::RED)
+	{
+		MyName = UTF8_TO_TCHAR("ä»•");
+	}
+	else
+	{
+		MyName = UTF8_TO_TCHAR("å£«");
+	}
 }
 
 void AChess_Shi::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target)
 {
 	Super::GenerateMove2P(board2P, target);
 
-	// »ñÈ¡ËùÓĞÒÆ¶¯·½Ê½
+	// è·å–æ‰€æœ‰ç§»åŠ¨æ–¹å¼
 	TArray<FChessMove2P> Moves;
 	board2P->GenerateShiMoves(Pos.X, Pos.Y, MyColor, Moves);
 

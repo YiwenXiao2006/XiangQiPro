@@ -1,4 +1,4 @@
-// Copyright 2026 Ultimate Player All Rights Reserved.
+Ôªø// Copyright 2026 Ultimate Player All Rights Reserved.
 
 
 #include "Chess_Xiang.h"
@@ -19,13 +19,22 @@ void AChess_Xiang::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessB
 	{
 		ChessMask->SetDecalMaterial(OM::GetObject<UMaterialInterface>(PATH_MI_CHESSMASK_BLACK_XIANG));
 	}
+
+	if (color == EChessColor::RED)
+	{
+		MyName = UTF8_TO_TCHAR("Áõ∏");
+	}
+	else
+	{
+		MyName = UTF8_TO_TCHAR("Ë±°");
+	}
 }
 
 void AChess_Xiang::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target)
 {
 	Super::GenerateMove2P(board2P, target);
 
-	// ªÒ»°À˘”–“∆∂Ø∑Ω Ω
+	// Ëé∑ÂèñÊâÄÊúâÁßªÂä®ÊñπÂºè
 	TArray<FChessMove2P> Moves;
 	board2P->GenerateXiangMoves(Pos.X, Pos.Y, MyColor, Moves);
 
