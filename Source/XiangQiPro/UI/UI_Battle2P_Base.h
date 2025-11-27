@@ -1,4 +1,4 @@
-// Copyright 2026 Ultimate Player All Rights Reserved.
+ï»¿// Copyright 2026 Ultimate Player All Rights Reserved.
 
 #pragma once
 
@@ -34,34 +34,34 @@ private:
 
 public:
 
-	// ÏÔÊ¾Íæ¼Ò1µÄÃû×Ö
+	// æ˜¾ç¤ºç©å®¶1çš„åå­—
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* Text_Name_P1;
 
-	// ÏÔÊ¾Íæ¼Ò2µÄÃû×Ö
+	// æ˜¾ç¤ºç©å®¶2çš„åå­—
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* Text_Name_P2;
 
-	// ÏÔÊ¾Íæ¼Ò2µÄÃû×Ö
+	// æ˜¾ç¤ºç©å®¶2çš„åå­—
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* Text_Score_P1;
 
-	// ÏÔÊ¾Íæ¼Ò2µÄÃû×Ö
+	// æ˜¾ç¤ºç©å®¶2çš„åå­—
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* Text_Score_P2;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* Text_AIThinking;
 
-	// Âä×ÓÀúÊ·¼ÇÂ¼
+	// è½å­å†å²è®°å½•
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* Text_OperatingRecord;
 
-	// Íæ¼Ò1µÄ»ØºÏ±ê¼Ç
+	// ç©å®¶1çš„å›åˆæ ‡è®°
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UImage* Image_RoundMark_P1;
 
-	// Íæ¼Ò2µÄ»ØºÏ±ê¼Ç
+	// ç©å®¶2çš„å›åˆæ ‡è®°
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UImage* Image_RoundMark_P2;
 
@@ -73,13 +73,14 @@ public:
 
 	void UpdateScore(int32 score1, int32 score2);
 
-	// ÉèÖÃÊÇ·ñÎªAI»ØºÏ
+	// è®¾ç½®æ˜¯å¦ä¸ºAIå›åˆ
 	void SetAITurn(bool bAITurn);
 
-	// ÏÔÊ¾ÓÎÏ·½áÊø
+	// æ˜¾ç¤ºæ¸¸æˆç»“æŸ
+	UFUNCTION(BlueprintImplementableEvent)
 	void ShowGameOver(EChessColor winner);
 	
-	// Ôö¼ÓÂä×ÓÀúÊ·¼ÇÂ¼
+	// å¢åŠ è½å­å†å²è®°å½•
 	void AddOperatingRecord(EBattleTurn player, TWeakObjectPtr<AChesses> targetChess, FChessMove2P move);
 
 	FString GetMoveNotation(TWeakObjectPtr<AChesses> targetChess, FChessMove2P move);

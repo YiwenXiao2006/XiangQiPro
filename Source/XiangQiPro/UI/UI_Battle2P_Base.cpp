@@ -41,11 +41,6 @@ void UUI_Battle2P_Base::SetAITurn(bool bAITurn)
 	}
 }
 
-void UUI_Battle2P_Base::ShowGameOver(EChessColor winner)
-{
-
-}
-
 void UUI_Battle2P_Base::AddOperatingRecord(EBattleTurn player, TWeakObjectPtr<AChesses> targetChess, FChessMove2P move)
 {
 	// 获取之前的操作
@@ -114,7 +109,7 @@ FString UUI_Battle2P_Base::GetMoveNotation(TWeakObjectPtr<AChesses> targetChess,
     columnMapBlack.Add(0, TEXT("1"));
 
     // 选择行号映射
-    TMap<int32, FString>& columnMap = (targetChess->GetColor() == EChessColor::RED) ? columnMapRed : columnMapBlack;
+    TMap<int32, FString> columnMap = (targetChess->GetColor() == EChessColor::RED) ? columnMapRed : columnMapBlack;
 
     // 获取起始位置和目标位置
     FString fromColumn = columnMap.Contains(move.from.Y) ? columnMap[move.from.Y] : TEXT("?");
