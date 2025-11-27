@@ -129,7 +129,7 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
             AI2P->AddToRoot();
         }
 
-        AI2P->SetDepth(8); // 搜索深度
+        AI2P->SetDepth(4); // 搜索深度
         AI2P->SetBoard(board2P); // 棋盘状态
     }
     else

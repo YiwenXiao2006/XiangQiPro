@@ -11,13 +11,14 @@
 #include "AI2P.generated.h"
 
 class UChessBoard2P;
+class UTacticsLibrary2P;
 class AChesses;
 
 typedef UAI2P AI2P;
 typedef UKismetMathLibrary Math;
 
 /**
- * 
+ * 象棋AI类
  */
 UCLASS()
 class XIANGQIPRO_API UAI2P : public UObject
@@ -39,9 +40,20 @@ private:
     // 历史启发表
     int32 historyTable[10][9][10][9]; // [fromX][fromY][toX][toY]
 
+    // 战术库实例
+    TWeakObjectPtr<UTacticsLibrary2P> TacticsLibrary;
+
 public:
 
     UAI2P();
+
+    virtual void BeginDestroy() override;
+
+    // 初始化战术库
+    void InitializeTacticsLibrary();
+
+    // 评估战术价值
+    int32 EvaluateTactics(const FChessMove2P& move);
 
     // 设置搜索深度
     void SetDepth(int32 Depth);

@@ -84,6 +84,15 @@ public:
     // 生成将/帅的走法
     void GenerateJiangMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const;
 
+    // 检查将帅是否面对面且中间无棋子阻挡
+    bool AreKingsFacingEachOther() const;
+
+    // 获取将帅之间的棋子数量
+    int32 CountPiecesBetweenKings() const;
+
+    // 生成将帅直接攻击的走法
+    void GenerateKingDirectAttackMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const;
+
     // 生成士/仕的走法
     void GenerateShiMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const;
 

@@ -4,10 +4,53 @@
 #include "AI2P.h"
 #include "ChessBoard2P.h"
 #include "../Chess/Chesses.h"
+#include "../Util/TacticsLibrary2P.h"
 #include <Kismet/GameplayStatics.h>
 
 UAI2P::UAI2P()
 {
+}
+
+void UAI2P::BeginDestroy()
+{
+    // 释放内存
+    if (TacticsLibrary.IsValid())
+    {
+        TacticsLibrary->RemoveFromRoot();
+        TacticsLibrary.Reset();
+    }
+    Super::BeginDestroy();
+}
+
+// 初始化战术库
+void UAI2P::InitializeTacticsLibrary()
+{
+    if (TacticsLibrary.IsValid() && board2P.IsValid())
+    {
+        TacticsLibrary->SetBoard(board2P);
+    }
+}
+
+// 评估战术价值
+int32 UAI2P::EvaluateTactics(const FChessMove2P& move)
+{
+    if (!TacticsLibrary.IsValid())
+    {
+        ULogger::LogWarning(TEXT("UAI2P::EvaluateTactics: Tactics library is not available, because TacticsLibrary is nullptr!"));
+        return 0;
+    }
+
+    FString tacticName;
+    int32 tacticScore = 0;
+
+    if (TacticsLibrary->DetectTactics(move, EChessColor::BLACK, tacticName, tacticScore))
+    {
+        // 记录战术检测结果
+        //ULogger::Log(FString::Printf(TEXT("Detected tactic: %s with score: %d"), *tacticName, tacticScore));
+        return tacticScore;
+    }
+
+    return 0;
 }
 
 void UAI2P::SetDepth(int32 Depth)
@@ -18,6 +61,9 @@ void UAI2P::SetDepth(int32 Depth)
 void UAI2P::SetBoard(TWeakObjectPtr<ChessBoard2P> newBoard)
 {
     board2P = newBoard;
+    TacticsLibrary = NewObject<UTacticsLibrary2P>();
+    TacticsLibrary->AddToRoot();
+    InitializeTacticsLibrary(); // 初始化战术库
 }
 
 void UAI2P::StopThinkingImmediately()
@@ -106,6 +152,20 @@ int32 UAI2P::Evaluate(EChessColor color)
     score += EvaluateThreats(color) - EvaluateThreats(colorOtherSide);
     score += EvaluateKingSafety(color) - EvaluateKingSafety(colorOtherSide);
     score += EvaluateDefensiveStructure(color) - EvaluateDefensiveStructure(colorOtherSide);
+    
+    // 将帅面对面情况评估（非常重要！）
+    if (board2P->AreKingsFacingEachOther())
+    {
+        // 如果当前轮到AI走棋，且将帅面对面，AI有极大优势
+        if (color == EChessColor::BLACK) // 假设AI是黑方
+        {
+            score += 800; // 巨大优势，因为可以立即吃掉对方将/帅
+        }
+        else
+        {
+            score -= 800; // 巨大劣势
+        }
+    }
 
     return score;
 }
@@ -217,6 +277,21 @@ int32 UAI2P::EvaluateMove(const FChessMove2P& move)
     TWeakObjectPtr<AChesses> targetChess = board2P->GetChess(move.to.X, move.to.Y);
     TWeakObjectPtr<AChesses> movingChess = board2P->GetChess(move.from.X, move.from.Y);
 
+    if (targetChess.IsValid() && targetChess->GetType() == EChessType::JIANG &&
+        targetChess->GetColor() != movingChess->GetColor())
+    {
+        // 这是将死对方的走法，给予最高奖励
+        score += 10000;
+
+        // 额外检查是否是将帅直接面对面的吃法
+        if (board2P->AreKingsFacingEachOther())
+        {
+            score += 5000; // 额外奖励
+        }
+
+        return score; // 直接返回，不再评估其他因素
+    }
+
     // 1. 检查这个走法是否会导致自己被将军（非常重要！）
     TWeakObjectPtr<AChesses> capturedChess = board2P->GetChess(move.to.X, move.to.Y);
     board2P->MakeTestMove(move);
@@ -275,6 +350,9 @@ int32 UAI2P::EvaluateMove(const FChessMove2P& move)
 
     // 6. 威胁评估：这个走法是否威胁对方重要棋子
     score += EvaluateThreatAfterMove(move, movingChess);
+
+    // 7. 战术评估：检测经典象棋战术
+    score += EvaluateTactics(move);
 
     return score;
 }
@@ -1254,7 +1332,7 @@ TWeakObjectPtr<AChesses> UAI2P::GetBestMove(FChessMove2P& bestMove)
 {
     if (!board2P.IsValid()) return nullptr;
 
-    timeLimit = (maxDepth + 2) * 1000;
+    timeLimit = (maxDepth + 2) * 1500;
     Timer.Start();
 
     // 首先检查当前是否被将军
@@ -1266,7 +1344,7 @@ TWeakObjectPtr<AChesses> UAI2P::GetBestMove(FChessMove2P& bestMove)
     // 如果被将军，使用专门的保将搜索
     if (inCheck)
     {
-        ULogger::Log(TEXT("AI is in check! Prioritizing king safety moves."));
+        ULogger::Log(TEXT("UAI2P::GetBestMove: AI is in check! Prioritizing king safety moves."));
         return GetBestMoveWhenInCheck(bestMove, moves);
     }
 
@@ -1294,13 +1372,13 @@ TWeakObjectPtr<AChesses> UAI2P::GetBestMove(FChessMove2P& bestMove)
     // 如果没有安全的走法，记录警告但继续搜索所有走法
     if (safeMoves.IsEmpty())
     {
-        ULogger::LogWarning(TEXT("No safe moves found! AI may move into check."));
+        ULogger::LogWarning(TEXT("UAI2P::GetBestMove: No safe moves found! AI may move into check."));
         safeMoves = moves; // 使用所有走法，包括不安全的
     }
     else
     {
         moves = safeMoves; // 使用安全走法
-        ULogger::Log(FString::Printf(TEXT("Filtered to %d safe moves"), safeMoves.Num()));
+        ULogger::Log(FString::Printf(TEXT("UAI2P::GetBestMove: Filtered to %d safe moves"), safeMoves.Num()));
     }
 
     for (int32 depth = 1; depth <= maxDepth; depth++)
@@ -1359,11 +1437,11 @@ TWeakObjectPtr<AChesses> UAI2P::GetBestMove(FChessMove2P& bestMove)
 
             if (isSafe)
             {
-                ULogger::Log(FString::Printf(TEXT("Depth %d: Found safe move with value %d"), depth, currentBestValue));
+                ULogger::Log(FString::Printf(TEXT("UAI2P::GetBestMove: Depth %d: Found safe move with value %d"), depth, currentBestValue));
             }
             else
             {
-                ULogger::LogWarning(FString::Printf(TEXT("Depth %d: Best move causes check! Value: %d"), depth, currentBestValue));
+                ULogger::LogWarning(FString::Printf(TEXT("UAI2P::GetBestMove: Depth %d: Best move causes check! Value: %d"), depth, currentBestValue));
             }
         }
     }
@@ -1458,7 +1536,7 @@ TWeakObjectPtr<AChesses> UAI2P::GetBestMoveWhenInCheck(FChessMove2P& bestMove, T
 
     bestMove = bestEscapeMove;
 
-    ULogger::Log(FString::Printf(TEXT("Selected escape move with value %d"), bestEscapeValue));
+    ULogger::Log(FString::Printf(TEXT("UAI2P::GetBestMoveWhenInCheck: Selected escape move with value %d"), bestEscapeValue));
 
     return bestEscapeChess;
 }

@@ -268,7 +268,7 @@ void UChessBoard2P::GenerateJiangMoves(int32 x, int32 y, EChessColor color, TArr
     // 将/帅的移动方向：上、下、左、右
     int32 directions[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
 
-    for (int32 i = 0; i < 4; i++) 
+    for (int32 i = 0; i < 4; i++)
     {
         int32 newX = x + directions[i][0];
         int32 newY = y + directions[i][1];
@@ -284,35 +284,151 @@ void UChessBoard2P::GenerateJiangMoves(int32 x, int32 y, EChessColor color, TArr
         }
     }
 
-    // 检查将帅相对
-    if (color == EChessColor::RED) 
+    // 添加将帅直接攻击的走法
+    GenerateKingDirectAttackMoves(x, y, color, moves);
+}
+
+bool UChessBoard2P::AreKingsFacingEachOther() const
+{
+    // 查找黑将和红帅的位置
+    int32 blackKingX = -1, blackKingY = -1;
+    int32 redKingX = -1, redKingY = -1;
+
+    for (int32 i = 0; i < 10; i++)
     {
-        for (int32 i = x - 1; i >= 0; i--) 
+        for (int32 j = 0; j < 9; j++)
         {
-            TWeakObjectPtr<AChesses> target = GetChess(i, y);
-            if (target != nullptr)
+            TWeakObjectPtr<AChesses> chess = GetChess(i, j);
+            if (chess.IsValid() && chess->GetType() == EChessType::JIANG)
             {
-                if (target->GetType() == EChessType::JIANG && target->GetColor() != color)
+                if (chess->GetColor() == EChessColor::BLACK)
                 {
-                    moves.Add(FChessMove2P(Position(x, y), Position(i, y)));
+                    blackKingX = i;
+                    blackKingY = j;
                 }
-                break;
+                else
+                {
+                    redKingX = i;
+                    redKingY = j;
+                }
             }
         }
     }
-    else 
+
+    // 如果没找到将或帅，返回false
+    if (blackKingX == -1 || redKingX == -1)
+        return false;
+
+    // 将帅必须在同一列（y坐标相同）
+    if (blackKingY != redKingY)
+        return false;
+
+    // 检查中间是否有棋子阻挡
+    int32 minX = FMath::Min(blackKingX, redKingX);
+    int32 maxX = FMath::Max(blackKingX, redKingX);
+
+    for (int32 x = minX + 1; x < maxX; x++)
     {
-        for (int32 i = x + 1; i < 10; i++)
+        TWeakObjectPtr<AChesses> chess = GetChess(x, blackKingY);
+        if (chess.IsValid() && chess->GetType() != EChessType::EMPTY)
         {
-            TWeakObjectPtr<AChesses> target = GetChess(i, y);
-            if (target != nullptr)
+            return false; // 中间有棋子阻挡
+        }
+    }
+
+    return true; // 将帅面对面且中间无阻挡
+}
+
+int32 UChessBoard2P::CountPiecesBetweenKings() const
+{
+    // 查找黑将和红帅的位置
+    int32 blackKingX = -1, blackKingY = -1;
+    int32 redKingX = -1, redKingY = -1;
+
+    for (int32 i = 0; i < 10; i++)
+    {
+        for (int32 j = 0; j < 9; j++)
+        {
+            TWeakObjectPtr<AChesses> chess = GetChess(i, j);
+            if (chess.IsValid() && chess->GetType() == EChessType::JIANG)
             {
-                if (target->GetType() == EChessType::JIANG && target->GetColor() != color)
+                if (chess->GetColor() == EChessColor::BLACK)
                 {
-                    moves.Add(FChessMove2P(Position(x, y), Position(i, y)));
+                    blackKingX = i;
+                    blackKingY = j;
                 }
+                else
+                {
+                    redKingX = i;
+                    redKingY = j;
+                }
+            }
+        }
+    }
+
+    if (blackKingX == -1 || redKingX == -1 || blackKingY != redKingY)
+        return -1;
+
+    int32 count = 0;
+    int32 minX = FMath::Min(blackKingX, redKingX);
+    int32 maxX = FMath::Max(blackKingX, redKingX);
+
+    for (int32 x = minX + 1; x < maxX; x++)
+    {
+        TWeakObjectPtr<AChesses> chess = GetChess(x, blackKingY);
+        if (chess.IsValid() && chess->GetType() != EChessType::EMPTY)
+        {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+void UChessBoard2P::GenerateKingDirectAttackMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const
+{
+    // 查找对方将/帅的位置
+    EChessColor opponentColor = (color == EChessColor::BLACK) ? EChessColor::RED : EChessColor::BLACK;
+    int32 opponentKingX = -1, opponentKingY = -1;
+
+    for (int32 i = 0; i < 10; i++)
+    {
+        for (int32 j = 0; j < 9; j++)
+        {
+            TWeakObjectPtr<AChesses> chess = GetChess(i, j);
+            if (chess.IsValid() && chess->GetType() == EChessType::JIANG && chess->GetColor() == opponentColor)
+            {
+                opponentKingX = i;
+                opponentKingY = j;
                 break;
             }
+        }
+        if (opponentKingX != -1) break;
+    }
+
+    if (opponentKingX == -1) return;
+
+    // 检查是否在同一列且中间无棋子
+    if (y == opponentKingY)
+    {
+        int32 minX = FMath::Min(x, opponentKingX);
+        int32 maxX = FMath::Max(x, opponentKingX);
+        bool hasPieceBetween = false;
+
+        for (int32 checkX = minX + 1; checkX < maxX; checkX++)
+        {
+            TWeakObjectPtr<AChesses> chess = GetChess(checkX, y);
+            if (chess.IsValid() && chess->GetType() != EChessType::EMPTY)
+            {
+                hasPieceBetween = true;
+                break;
+            }
+        }
+
+        // 如果中间没有棋子，可以吃掉对方将/帅
+        if (!hasPieceBetween)
+        {
+            moves.Add(FChessMove2P(Position(x, y), Position(opponentKingX, opponentKingY)));
         }
     }
 }

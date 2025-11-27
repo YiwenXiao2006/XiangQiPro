@@ -71,7 +71,7 @@ public:
     bool IsRunning() const { return CurrentState == EAsyncWorkerState::Running; }
 
     /**
-     * 设置工作函数（C++专用）
+     * 设置工作函数
      */
     void SetWorkFunction(TFunction<void(std::atomic<bool>&)> InWorkFunction) { WorkFunction = MoveTemp(InWorkFunction); }
 
@@ -127,13 +127,13 @@ private:
     // 当前状态
     std::atomic<EAsyncWorkerState> CurrentState;
 
-    // 工作函数（C++使用）
+    // 工作函数
     TFunction<void(std::atomic<bool>&)> WorkFunction;
 
-    // 完成委托（蓝图使用）
+    // 完成委托
     FOnAsyncWorkCompleted CompletedDelegate;
 
-    // 进度委托（蓝图使用）
+    // 进度委托
     FOnAsyncWorkProgress ProgressDelegate;
 
     // 线程同步
