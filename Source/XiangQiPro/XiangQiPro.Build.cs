@@ -19,11 +19,8 @@ public class XiangQiPro : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-        if (Target.Platform == UnrealTargetPlatform.Android)
-        {
-            // 启用异常处理
-            bEnableExceptions = true;
-        }
+        // 启用异常处理(try语句)
+        bEnableExceptions = true;
 
         // Uncomment if you are using Slate UI
         // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
