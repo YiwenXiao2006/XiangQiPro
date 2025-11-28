@@ -1460,12 +1460,21 @@ TWeakObjectPtr<AChesses> UAI2P::GetBestMoveWhenInCheck(FChessMove2P& bestMove, T
     for (const FChessMove2P& move : allMoves)
     {
         TWeakObjectPtr<AChesses> capturedChess = board2P->GetChess(move.to.X, move.to.Y);
+
+        // 能直接吃掉红方的帅
+        if (capturedChess.IsValid() && capturedChess->GetColor() == EChessColor::RED && capturedChess->GetType() == EChessType::JIANG)
+        {
+            bestMove = move;
+            return board2P->GetChess(move.from.X, move.from.Y); // 不需要搜索了,可以直接胜利
+        }
+
         board2P->MakeTestMove(move);
 
         bool stillInCheck = board2P->IsKingInCheck(EChessColor::BLACK);
 
         board2P->UndoTestMove(move, capturedChess);
 
+        // 破除将军状态
         if (!stillInCheck)
         {
             escapeMoves.Add(move);

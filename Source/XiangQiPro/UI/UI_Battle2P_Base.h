@@ -16,7 +16,7 @@ class UImage;
 class UMultiLineEditableTextBox;
 
 enum class EChessColor : uint8;
-enum class EBattleTurn : uint8;
+enum class EPlayerTag : uint8;
 
 typedef UUI_Battle2P_Base UI_Battle2P_Base;
 
@@ -81,7 +81,7 @@ public:
 	void ShowGameOver(EChessColor winner);
 	
 	// 增加落子历史记录
-	void AddOperatingRecord(EBattleTurn player, TWeakObjectPtr<AChesses> targetChess, FChessMove2P move);
+	void AddOperatingRecord(EPlayerTag player, TWeakObjectPtr<AChesses> targetChess, FChessMove2P move);
 
 	FString GetMoveNotation(TWeakObjectPtr<AChesses> targetChess, FChessMove2P move);
 

@@ -1,4 +1,4 @@
-// Copyright 2026 Ultimate Player All Rights Reserved.
+ï»¿// Copyright 2026 Ultimate Player All Rights Reserved.
 
 
 #include "Chesses.h"
@@ -6,21 +6,33 @@
 // Sets default values
 AChesses::AChesses()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	ChessMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ChessMeshComponent"));
-	ChessMesh->SetStaticMesh(OM::GetConstructorObject<UStaticMesh>(PATH_SM_CHESS));
-	RootComponent = ChessMesh;
+	UStaticMesh* Mesh = OM::GetConstructorObject<UStaticMesh>(PATH_SM_CHESS);
 
-	MI_ChessMask = OM::GetConstructorObject<UMaterialInterface>(PATH_M_CHESSMASK);
-	MI_Stroke = OM::GetConstructorObject<UMaterialInterface>(PATH_MI_STROKE_CHESS);
+	ChessMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ChessMeshComponent"));
+	ChessMesh->SetStaticMesh(Mesh);
+	RootComponent = ChessMesh;
 
 	ChessMask = CreateDefaultSubobject<UDecalComponent>(TEXT("Mask"));
 	ChessMask->SetDecalMaterial(MI_ChessMask);
 	ChessMask->SetupAttachment(ChessMesh);
 	ChessMask->SetRelativeLocation(FVector(0, 0, 1));
 	ChessMask->SetRelativeScale3D(FVector(0.0025f, 0.008f, 0.008f));
+
+	FadeNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Niagara_Fade"));
+	FadeNiagara->SetAsset(OM::GetConstructorObject<UNiagaraSystem>(PATH_NS_FADE));
+	FadeNiagara->SetVariableStaticMesh(FName("ChessMesh"), Mesh);
+	FadeNiagara->SetupAttachment(ChessMesh);
+	FadeNiagara->bAutoActivate = false;
+	FadeNiagara->SetActive(false);
+
+	TimeLine_ChessMove = CreateDefaultSubobject<UTimelineComponent>(TEXT("TimeLine_ChessMove"));
+	Timeline_Fade = CreateDefaultSubobject<UTimelineComponent>(TEXT("Timeline_Fade"));
+
+	MI_ChessMask = OM::GetConstructorObject<UMaterialInterface>(PATH_M_CHESSMASK);
+	MI_Stroke = OM::GetConstructorObject<UMaterialInterface>(PATH_MI_STROKE_CHESS);
+	CF_ChessMove = OM::GetConstructorObject<UCurveFloat>(PATH_CF_CHESSMOVE);
 }
 
 void AChesses::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard2P> board2P)
@@ -32,7 +44,7 @@ void AChesses::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard
 	GameState = Cast<GS>(GetWorld()->GetGameState());
 	if (GameState)
 	{
-		if (GameState->GetBattleType() == EBattleType::P2)
+		if (GameState->GetBattleType() == EBattleType::P2 || GameState->GetBattleType() == EBattleType::P2_AI)
 		{
 			if (color == EChessColor::RED)
 			{
@@ -44,12 +56,68 @@ void AChesses::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard
 			}
 		}
 	}
+
+	TWeakObjectPtr<AChesses> WeakThis(this);
+	TimeLine_ChessMove->AddInterpFloat(CF_ChessMove, FOnTimelineFloatStatic::CreateLambda([WeakThis](float value) {
+		if (WeakThis.IsValid() && WeakThis->Board2P.IsValid())
+		{
+			FVector2D pos = WeakThis->Pos;
+			FVector2D targetPos = WeakThis->TargetPos;
+			FVector	Start = WeakThis->Board2P->BoardLocs[pos.X][pos.Y];				// èµ·å§‹ä½ç½®
+			FVector End = WeakThis->Board2P->BoardLocs[targetPos.X][targetPos.Y];   // ç»ˆæ­¢ä½ç½®
+
+			FVector Vertex;
+			Vertex = (End - Start) / 2 + Start + FVector(0, 0, 5);					// é¡¶ç‚¹ä½ç½®
+
+			FVector result = WeakThis->CalculateParabolicPosition(Start, Vertex, End, value);
+
+			WeakThis->SetActorLocation(result); // æ›´æ–°Actorä½ç½®
+		}
+		}));
+	TimeLine_ChessMove->SetTimelineFinishedFunc(FOnTimelineEventStatic::CreateLambda([WeakThis]() {
+		if (WeakThis.IsValid())
+		{
+			if (WeakThis->GameState)
+			{
+				WeakThis->Pos = WeakThis->TargetPos;
+				WeakThis->GameState->OnFinishMove2P();
+			}
+		}
+		}));
+
+
+
+	// ç”¨æ—¶é—´è½´æ§åˆ¶è¾¹ç¼˜æ¶ˆæ•£æ•ˆæœ
+	Timeline_Fade->AddInterpFloat(CF_ChessMove, FOnTimelineFloatStatic::CreateLambda([WeakThis](float value) {
+		if (WeakThis.IsValid())
+		{
+			WeakThis->ChessMesh->SetScalarParameterValueOnMaterials(FName(UTF8_TO_TCHAR("Fade")), value);
+			WeakThis->FadeNiagara->SetVariableFloat(FName(UTF8_TO_TCHAR("Fade")), value);
+		}
+		}));
+
+	Timeline_Fade->SetTimelineFinishedFunc(FOnTimelineEventStatic::CreateLambda([WeakThis]() {
+		if (WeakThis.IsValid())
+		{
+			WeakThis->ChessMesh->SetHiddenInGame(true); // åƒæ‰ï¼Œå°†å…¶éšè—
+			WeakThis->ChessMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); // å…³é—­ç¢°æ’ä½“ç§¯
+		}
+		}));
 }
 
 // Called when the game starts or when spawned
 void AChesses::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void AChesses::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// åœæ­¢æ‰€æœ‰æ—¶é—´çº¿
+	TimeLine_ChessMove->Stop();
+	Timeline_Fade->Stop();
+
+	Super::EndPlay(EndPlayReason);
 }
 
 // Called every frame
@@ -79,15 +147,15 @@ void AChesses::NotifyActorOnClicked(FKey ButtonPressed)
 void AChesses::NotifyActorBeginCursorOver()
 {
 	Super::NotifyActorBeginCursorOver();
-	ChessMesh->SetOverlayMaterial(MI_Stroke); // Ìí¼ÓÃè±ß²ÄÖÊ
+	ChessMesh->SetOverlayMaterial(MI_Stroke); // æ·»åŠ æè¾¹æè´¨
 }
 
 void AChesses::NotifyActorEndCursorOver()
 {
 	Super::NotifyActorEndCursorOver();
-	if (!bSelected) // Î´±»Ñ¡ÖĞ
+	if (!bSelected) // æœªè¢«é€‰ä¸­
 	{
-		ChessMesh->SetOverlayMaterial(nullptr); // ÒÆ³ıÃè±ß²ÄÖÊ
+		ChessMesh->SetOverlayMaterial(nullptr); // ç§»é™¤æè¾¹æè´¨
 	}
 }
 
@@ -96,14 +164,14 @@ void AChesses::NotifyActorOnInputTouchBegin(const ETouchIndex::Type FingerIndex)
 	Super::NotifyActorOnInputTouchBegin(FingerIndex);
 	if (FingerIndex == ETouchIndex::Touch1)
 		if (!bSelected)
-			ChessMesh->SetOverlayMaterial(MI_Stroke); // Ìí¼ÓÃè±ß²ÄÖÊ
+			ChessMesh->SetOverlayMaterial(MI_Stroke); // æ·»åŠ æè¾¹æè´¨
 }
 
 void AChesses::NotifyActorOnInputTouchEnd(const ETouchIndex::Type FingerIndex)
 {
 	Super::NotifyActorOnInputTouchEnd(FingerIndex);
 
-	// ¶ÔÓÚ´¥ÃşÊÂ¼ş£¬ÎÒÃÇÖ±½Ó´¦Àí£¬²»Çø·ÖÊÖÖ¸Ë÷Òı£¨»òÕßÖ»´¦ÀíµÚÒ»¸ùÊÖÖ¸£©
+	// å¯¹äºè§¦æ‘¸äº‹ä»¶ï¼Œæˆ‘ä»¬ç›´æ¥å¤„ç†ï¼Œä¸åŒºåˆ†æ‰‹æŒ‡ç´¢å¼•ï¼ˆæˆ–è€…åªå¤„ç†ç¬¬ä¸€æ ¹æ‰‹æŒ‡ï¼‰
 	if (FingerIndex == ETouchIndex::Touch1)
 	{
 		HandleClick();
@@ -114,45 +182,50 @@ void AChesses::HandleClick()
 {
 	if (GameState)
 	{
-		if (GameState->GetBattleTurn() != EBattleTurn::AI)
+		if (GameState->IsMyTurn()) // åˆ¤æ–­æ˜¯å¦åˆ°äº†æˆ‘çš„å›åˆ
 		{
-			if (GameState->GetBattleType() == EBattleType::P2)
+			if (GameState->GetBattleType() == EBattleType::P2 || GameState->GetBattleType() == EBattleType::P2_AI)
 			{
 				if (MyColor != EChessColor::BLACK) // AI
 				{
 					if (bSelected)
 					{
-						bSelected = false; // ÒÆ³ı±»Ñ¡ÖĞ×´Ì¬
-						GameState->DismissSettingPoint2P(); // Çå³ıÂä×Óµã
-						ChessMesh->SetOverlayMaterial(nullptr); // ÒÆ³ıÃè±ß²ÄÖÊ
+						bSelected = false; // ç§»é™¤è¢«é€‰ä¸­çŠ¶æ€
+						GameState->DismissSettingPoint2P(); // æ¸…é™¤è½å­ç‚¹
+						ChessMesh->SetOverlayMaterial(nullptr); // ç§»é™¤æè¾¹æè´¨
 					}
 					else
 					{
 						if (Board2P.IsValid())
 						{
 							bSelected = true;
-							ChessMesh->SetOverlayMaterial(MI_Stroke); // Ìí¼ÓÃè±ß²ÄÖÊ
+							ChessMesh->SetOverlayMaterial(MI_Stroke); // æ·»åŠ æè¾¹æè´¨
 							GenerateMove2P(Board2P, this);
 						}
 						else
 						{
-							ULogger::LogError(TEXT("Chesses OnClicked: ChessBoard2P instance is nullptr!"));
+							ULogger::LogError(TEXT("AChesses::HandleClick: ChessBoard2P instance is nullptr!"));
 						}
 					}
 				}
 			}
 		}
+		else
+		{
+			ULogger::Log(TEXT("AChesses::HandleClick: Not your turn"));
+		}
 	}
 	else
 	{
-		ULogger::LogError(TEXT("Chesses OnClicked: GameState instance is nullptr!"));
+		ULogger::LogError(TEXT("AChesses::HandleClick: GameState instance is nullptr!"));
 	}
 }
 
 void AChesses::Defeated()
 {
-	SetActorHiddenInGame(true); // ³Ôµô£¬½«ÆäÒş²Ø
-	ChessMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); // ¹Ø±ÕÅö×²Ìå»ı
+	FadeNiagara->SetActive(true);
+	ChessMask->SetHiddenInGame(true); // æå‰éšè—æ‰
+	Timeline_Fade->PlayFromStart(); // æ‰§è¡Œå‡»è´¥æ•ˆæœçš„æ›²çº¿
 }
 
 FString AChesses::GetChessName() const
@@ -184,8 +257,8 @@ void AChesses::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObject
 			TWeakObjectPtr<AChesses> captureChess = Board2P->AllChess[i][j];
 			if (captureChess != nullptr && captureChess != target.Get())
 			{
-				captureChess->ChessMesh->SetOverlayMaterial(nullptr); // ÒÆ³ıÃè±ß²ÄÖÊ
-				captureChess->bSelected = false; // Çå³ı±»Ñ¡Ôñ×´Ì¬
+				captureChess->ChessMesh->SetOverlayMaterial(nullptr); // ç§»é™¤æè¾¹æè´¨
+				captureChess->bSelected = false; // æ¸…é™¤è¢«é€‰æ‹©çŠ¶æ€
 			}
 		}
 	}
@@ -193,18 +266,30 @@ void AChesses::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObject
 
 void AChesses::ApplyMove(FChessMove2P Move)
 {
-	Pos = FVector2D(Move.to.X, Move.to.Y); // ¸üĞÂ¼ò»¯×ø±ê
+	TargetPos = FVector2D(Move.to.X, Move.to.Y); // è·å–ç§»åŠ¨çš„ç›®æ ‡ä½ç½®
 
-	// ¸üĞÂÊÀ½ç×ø±ê
-	FVector WorldLoc = Board2P->BoardLocs[Move.to.X][Move.to.Y];
-	SetActorLocation(WorldLoc);
+	PlayMoveAnim();
 
-	bSelected = false; // ÒÆ³ı±»Ñ¡ÖĞ×´Ì¬
-	ChessMesh->SetOverlayMaterial(nullptr); // ÒÆ³ıÃè±ß²ÄÖÊ
-	GameState->DismissSettingPoint2P(); // Òş²ØËùÓĞÂä×Óµã
+	bSelected = false; // ç§»é™¤è¢«é€‰ä¸­çŠ¶æ€
+	ChessMesh->SetOverlayMaterial(nullptr); // ç§»é™¤æè¾¹æè´¨
+	GameState->DismissSettingPoint2P(); // éšè—æ‰€æœ‰è½å­ç‚¹
 }
 
 void AChesses::PlayMoveAnim()
 {
+	TimeLine_ChessMove->PlayFromStart(); // å¼€å§‹æ’­æ”¾ç§»åŠ¨åŠ¨ç”»
+}
+
+FVector AChesses::CalculateParabolicPosition(const FVector& Start, const FVector& Vertex, const FVector& End, float T)
+{
+	// è®¡ç®—æ§åˆ¶ç‚¹P1ï¼Œå‡è®¾æŠ›ç‰©çº¿å¯¹ç§°ï¼Œé¡¶ç‚¹åœ¨t=0.5
+	FVector P0 = Start;
+	FVector P2 = End;
+	FVector P1 = 2 * Vertex - 0.5f * P0 - 0.5f * P2;
+
+	// äºŒæ¬¡è´å¡å°”æ›²çº¿å…¬å¼
+	float OneMinusT = 1 - T;
+	FVector Result = (OneMinusT * OneMinusT) * P0 + 2 * OneMinusT * T * P1 + (T * T) * P2;
+	return Result;
 }
 

@@ -7,6 +7,9 @@
 
 #include "../GameMode/XQPGameStateBase.h"
 
+using EChessColor::RED;
+using EChessColor::BLACK;
+
 void UUI_Battle2P_Base::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -41,7 +44,7 @@ void UUI_Battle2P_Base::SetAITurn(bool bAITurn)
 	}
 }
 
-void UUI_Battle2P_Base::AddOperatingRecord(EBattleTurn player, TWeakObjectPtr<AChesses> targetChess, FChessMove2P move)
+void UUI_Battle2P_Base::AddOperatingRecord(EPlayerTag player, TWeakObjectPtr<AChesses> targetChess, FChessMove2P move)
 {
 	// 获取之前的操作
 	FString text = Text_OperatingRecord->GetText().ToString();
@@ -50,11 +53,11 @@ void UUI_Battle2P_Base::AddOperatingRecord(EBattleTurn player, TWeakObjectPtr<AC
 	// 获取玩家名称
 	switch (player)
 	{
-	case EBattleTurn::P1:
+	case EPlayerTag::P1:
 		playerName = Text_Name_P1->GetText().ToString();
 		break;
-	case EBattleTurn::AI:
-	case EBattleTurn::P2:
+	case EPlayerTag::AI:
+	case EPlayerTag::P2:
 		playerName = Text_Name_P2->GetText().ToString();
 		break;
 	default:

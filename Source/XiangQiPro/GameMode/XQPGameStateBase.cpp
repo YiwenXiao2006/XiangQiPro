@@ -29,7 +29,7 @@ void AXQPGameStateBase::UpdateScore()
     }
 }
 
-AXQPGameStateBase::AXQPGameStateBase() : Super(), battleType(EBattleType::P2)
+AXQPGameStateBase::AXQPGameStateBase() : Super(), battleType(EBattleType::P2_AI)
 {
 }
 
@@ -84,7 +84,7 @@ EBattleType AXQPGameStateBase::GetBattleType()
     return battleType;
 }
 
-EBattleTurn AXQPGameStateBase::GetBattleTurn()
+EPlayerTag AXQPGameStateBase::GetBattleTurn()
 {
     return battleTurn;
 }
@@ -140,23 +140,40 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
 
 void AXQPGameStateBase::ApplyMove2P(TWeakObjectPtr<AChesses> target, FChessMove2P move)
 {
+    HUD2P->AddOperatingRecord(battleTurn, target, move); // 记录走子
+    SwitchBattleTurn(); // 轮换执棋
     board2P->ApplyMove(target, move);
+}
+
+void AXQPGameStateBase::OnFinishMove2P()
+{
     if (bGameOver)
     {
-        ULogger::Log(TEXT("GameOver"));
+        ULogger::Log(TEXT("AXQPGameStateBase::OnFinishMove2P: GameOver"));
         return;
     }
+
+    switch (battleTurn) // 表示当前该谁了
+    {
+    case EPlayerTag::P1:
+        HUD2P->SetAITurn(false); // 更新AI回合结束
+        board2P->SetSideToMove(EChessColor::RED);
+        break;
+    case EPlayerTag::AI:
+        board2P->SetSideToMove(EChessColor::BLACK);
+        RunAI2P(); // 轮到AI
+        break;
+    case EPlayerTag::P2:
+        board2P->SetSideToMove(EChessColor::BLACK);
+        break;
+    }
     UpdateScore(); // 更新得分
-    HUD2P->AddOperatingRecord(EBattleTurn::P1, target, move); // 记录走子
-    RunAI2P(); // 轮到AI
 }
 
 void AXQPGameStateBase::RunAI2P()
 {
-    AI2P->SetBoard(board2P); // 棋盘状态
-    board2P->SetSideToMove(EChessColor::BLACK);
-    battleTurn = EBattleTurn::AI;
     HUD2P->SetAITurn(true);
+    AI2P->SetBoard(board2P); // 棋盘状态
 
      AIAsync = UAsyncWorker::CreateAndStartWorker(
          [this](std::atomic<bool>& bShouldStop)
@@ -169,15 +186,37 @@ void AXQPGameStateBase::RunAI2P()
              if (State != EAsyncWorkerState::Cancelled) // 任务正常执行完成
              {
                  // 应用棋子的移动
-                 board2P->ApplyMove(AIMovedChess, AIMove2P);
-                 battleTurn = EBattleTurn::P1;
-                 board2P->SetSideToMove(EChessColor::RED);
-                 UpdateScore(); // 更新得分
-                 HUD2P->SetAITurn(false); // 更新AI回合结束
-                 HUD2P->AddOperatingRecord(EBattleTurn::AI, AIMovedChess, AIMove2P); // 记录走子
+                 ApplyMove2P(AIMovedChess, AIMove2P);
+                 ULogger::Log(TEXT("AXQPGameStateBase::RunAI2P: AI FINISH"));
+             }
+             else
+             {
+                 ULogger::LogWarning(TEXT("AXQPGameStateBase::RunAI2P: AI's work has been cancelled."));
              }
          }
     );
+}
+
+bool AXQPGameStateBase::IsMyTurn() const
+{
+    return MyPlayerTag == battleTurn;
+}
+
+void AXQPGameStateBase::SwitchBattleTurn()
+{
+    switch (battleType)
+    {
+    case EBattleType::P2:
+        battleTurn = battleTurn == EPlayerTag::P1 ? EPlayerTag::P2 : EPlayerTag::P1;
+        break;
+    case EBattleType::P2_AI:
+        battleTurn = battleTurn == EPlayerTag::AI ? EPlayerTag::P1 : EPlayerTag::AI;
+        break;
+    case EBattleType::P3:
+        break;
+    default:
+        break;
+    }
 }
 
 void AXQPGameStateBase::GameOver(EChessColor winner)

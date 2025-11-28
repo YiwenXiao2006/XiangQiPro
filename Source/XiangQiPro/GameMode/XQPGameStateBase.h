@@ -23,10 +23,11 @@ UENUM(BlueprintType)
 enum class EBattleType : uint8
 {
 	P2 = 0 UMETA(DisplayName = "2Players"),
-	P3 = 1 UMETA(DisplayName = "3Players"),  
+	P2_AI = 1 UMETA(DisplayName = "2Players With AI"),
+	P3 = 2 UMETA(DisplayName = "3Players"),  
 };
 
-enum class EBattleTurn : uint8
+enum class EPlayerTag : uint8
 {
 	AI = 0,
 	P1 = 1,
@@ -52,7 +53,9 @@ private:
 
 	EBattleType battleType;
 
-	EBattleTurn battleTurn = EBattleTurn::P1;
+	EPlayerTag battleTurn = EPlayerTag::P1;
+
+	EPlayerTag MyPlayerTag = EPlayerTag::P1;
 
 	TWeakObjectPtr<UUI_Battle2P_Base> HUD2P;
 
@@ -102,7 +105,7 @@ public:
 	EBattleType GetBattleType();
 
 	// 获取执棋对象
-	EBattleTurn GetBattleTurn();
+	EPlayerTag GetBattleTurn();
 
 	void SetHUD2P(TWeakObjectPtr<UUI_Battle2P_Base> hud2P);
 
@@ -121,9 +124,18 @@ public:
 	// 应用棋子移动
 	void ApplyMove2P(TWeakObjectPtr<AChesses> target, FChessMove2P move);
 
+	// 双人对战棋子移动完毕
+	void OnFinishMove2P();
+
 	// 运行双人象棋AI
 	UFUNCTION(BlueprintCallable, Category = "AI")
 	void RunAI2P();
+
+	// 判断是否到了玩家的回合
+	bool IsMyTurn() const;
+
+	// 转换进攻方
+	void SwitchBattleTurn();
 
 	// 游戏结束
 	void GameOver(EChessColor winner);

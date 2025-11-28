@@ -12,6 +12,9 @@
 
 #include "Components/StaticMeshComponent.h"
 #include "Components/DecalComponent.h"
+#include "Components/TimelineComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
@@ -20,6 +23,8 @@
 #define PATH_SM_CHESS TEXT("/Script/Engine.StaticMesh'/Game/Mesh/Chess/SM_Chess.SM_Chess'")
 #define PATH_M_CHESSMASK TEXT("/Script/Engine.Material'/Game/Material/Decal/ChessMask/M_ChessMask.M_ChessMask'")
 #define PATH_MI_STROKE_CHESS TEXT("/Script/Engine.MaterialInstanceConstant'/Game/Material/Chess/MI_Stroke_Chess.MI_Stroke_Chess'")
+#define PATH_CF_CHESSMOVE TEXT("/Script/Engine.CurveFloat'/Game/Curve/Chess/CF_ChessMove.CF_ChessMove'")
+#define PATH_NS_FADE TEXT("/Script/Niagara.NiagaraSystem'/Game/Niagara/NiagaraSystem/NS_LeakParticles.NS_LeakParticles'")
 
 struct FChessMove2P;
 
@@ -42,11 +47,16 @@ protected:
 	// 棋子当前的简化坐标
 	FVector2D Pos;
 
+	// 目标移动的位置
+	FVector2D TargetPos;
+
 	AXQPGameStateBase* GameState;
 
 	TWeakObjectPtr<UChessBoard2P> Board2P;
 
 	bool bSelected = false;
+
+	UCurveFloat* CF_ChessMove;
 
 public:
 	// Sets default values for this pawn's properties
@@ -68,9 +78,20 @@ public:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* MI_Stroke;
 
+	UPROPERTY(EditAnywhere)
+	UNiagaraComponent* FadeNiagara;
+
+	UPROPERTY(EditAnywhere)
+	UTimelineComponent* TimeLine_ChessMove;
+
+	UPROPERTY(EditAnywhere)
+	UTimelineComponent* Timeline_Fade;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:	
 	// Called every frame
@@ -115,4 +136,9 @@ public:
 	virtual void ApplyMove(FChessMove2P Move);
 
 	virtual void PlayMoveAnim();
+
+	/*
+	* 贝塞尔公式计算棋子移动位置
+	*/
+	FVector CalculateParabolicPosition(const FVector& Start, const FVector& Vertex, const FVector& End, float T);
 };

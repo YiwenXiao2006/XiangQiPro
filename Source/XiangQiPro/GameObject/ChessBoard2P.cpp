@@ -735,16 +735,51 @@ bool UChessBoard2P::CanAttackPosition(int32 fromX, int32 fromY, int32 toX, int32
 // 将/帅的攻击判断
 bool UChessBoard2P::CanJiangAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
 {
-    // 将/帅只能移动一格
-    if (FMath::Abs(fromX - toX) + FMath::Abs(fromY - toY) != 1)
-        return false;
+    // 首先检查常规的一步移动攻击
+    if (FMath::Abs(fromX - toX) + FMath::Abs(fromY - toY) == 1)
+    {
+        // 目标位置必须在宫殿内
+        if (IsInPalace(toX, toY, color))
+        {
+            return true;
+        }
+    }
 
-    // 必须在九宫内
-    if (!IsInPalace(toX, toY, color))
-        return false;
+    // 特殊规则：将帅对脸情况下的攻击
+    // 查找对方将的位置
+    EChessColor opponentColor = (color == EChessColor::BLACK) ? EChessColor::RED : EChessColor::BLACK;
+    int32 opponentKingX = -1, opponentKingY = -1;
 
-    // 检查路径上是否有棋子阻挡（将/帅移动一格，不需要检查阻挡）
-    return true;
+    for (int32 i = 0; i < 10; i++)
+    {
+        for (int32 j = 0; j < 9; j++)
+        {
+            TWeakObjectPtr<AChesses> chess = GetChess(i, j);
+            if (chess.IsValid() && chess->GetType() == EChessType::JIANG && chess->GetColor() == opponentColor)
+            {
+                opponentKingX = i;
+                opponentKingY = j;
+                break;
+            }
+        }
+        if (opponentKingX != -1) break;
+    }
+
+    // 如果目标位置就是对方将的位置，且在同一列，中间没有棋子，则可以攻击
+    if (opponentKingX != -1 && toX == opponentKingX && toY == opponentKingY)
+    {
+        // 必须在同一列
+        if (fromY == toY)
+        {
+            // 中间没有棋子，可以攻击
+            if (CountPiecesBetweenKings() == 0)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 // 士的攻击判断
