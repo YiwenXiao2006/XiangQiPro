@@ -31,6 +31,11 @@ public:
 		WorkFunction = nullptr;
 	}
 
+	FORCEINLINE void SetExecutable(bool bNewDoOnce)
+	{
+		bDoOnce = bNewDoOnce;
+	}
+
 	FORCEINLINE bool IsExecutable() const
 	{ 
 		return bDoOnce; 
@@ -42,7 +47,6 @@ public:
 		{
 			bDoOnce = false;
 			Ret value = WorkFunction(Params...); // 执行操作
-			WorkFunction = nullptr;
 			return value; // 返回
 		}
 		return Ret();
@@ -77,6 +81,11 @@ public:
 		WorkFunction = nullptr;
 	}
 
+	FORCEINLINE void SetExecutable(bool bNewDoOnce)
+	{
+		bDoOnce = bNewDoOnce;
+	}
+
 	FORCEINLINE bool IsExecutable() const
 	{
 		return bDoOnce;
@@ -88,7 +97,6 @@ public:
 		{
 			bDoOnce = false;
 			WorkFunction(Params...);
-			WorkFunction = nullptr;
 		}
 	}
 

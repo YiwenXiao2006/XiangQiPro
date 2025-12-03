@@ -15,7 +15,6 @@ class UTextBlock;
 class UImage;
 class UMultiLineEditableTextBox;
 
-enum class EChessColor : uint8;
 enum class EPlayerTag : uint8;
 
 typedef UUI_Battle2P_Base UI_Battle2P_Base;

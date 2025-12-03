@@ -41,7 +41,7 @@ public:
 
 	// loading widget
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUI_LoadingScreen> FirstLoadingWidget;
+	TSubclassOf<UUserWidget> FirstLoadingWidget;
 
 public:
 

@@ -25,7 +25,12 @@ void UXQPGameInstance::Init()
 		// 第一次加载
 		if (FirstLoadingWidget != nullptr)
 		{
-			CurrentWidget = CreateWidget<UI_LoadingScreen>(this, FirstLoadingWidget);
+			CurrentWidget = CreateWidget<UI_TransitionScreen>(this, FirstLoadingWidget);
+
+			if (UI_TransitionScreen* Widget = Cast<UI_TransitionScreen>(CurrentWidget))
+			{
+				Widget->Init(nullptr, 0, 1, 1, FLinearColor::White);	// 初始化淡化UI
+			}
 			LoadingScreen.WidgetLoadingScreen = CurrentWidget->TakeWidget();
 		}
 		else
@@ -62,7 +67,7 @@ void UXQPGameInstance::BeginLoadMap(const FString& MapName)
 		// 非第一次加载
 		if (LoadingWidget != nullptr)
 		{
-			CurrentWidget = CreateWidget<UUserWidget>(this, LoadingWidget);
+			CurrentWidget = CreateWidget<UI_LoadingScreen>(this, LoadingWidget);
 			LoadingScreen.WidgetLoadingScreen = CurrentWidget->TakeWidget();
 		}
 		else

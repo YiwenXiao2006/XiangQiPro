@@ -39,6 +39,32 @@ void UUIManager::AddUI(UUserWidget* InUI)
 	ui_stack.Add(InUI);		   // 把UI加入栈
 }
 
+void UUIManager::RemoveUI(UUserWidget* TargetUI)
+{
+	if (!TargetUI)
+	{
+		return; // 空指针保护
+	}
+
+	int32 Index; // 目标在UI栈中的索引
+	if (!ui_stack.Find(TargetUI, Index)) // 如果目标不在栈中
+	{
+		return;
+	}
+
+	ui_stack[Index]->RemoveFromParent(); // 从屏幕中移除
+	ui_stack.RemoveAt(Index); // 从栈中移除
+	
+	if (ui_stack.IsEmpty())
+	{
+		SetUIVisibility(BasicUI, true); // 重新展示基础UI
+	}
+	else
+	{
+		SetUIVisibility(ui_stack.Top(), true); // 重新显示上一层UI
+	}
+}
+
 void UUIManager::FinishUI()
 {
 	if (ui_stack.IsEmpty())
@@ -53,7 +79,7 @@ void UUIManager::FinishUI()
 	{
 		if (UUserWidget* pop_ui = ui_stack.Pop())
 		{
-			pop_ui->RemoveFromViewport(); // 移除顶层UI
+			pop_ui->RemoveFromParent(); // 移除顶层UI
 		}
 
 		if (ui_stack.IsEmpty())

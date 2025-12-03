@@ -46,6 +46,12 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UIManager")
 	void AddUI(UUserWidget* InUI);
+	/*
+	* 从玩家屏幕移除指定的UI
+	* @param TargetUI 要从玩家屏幕移除的UserWidget实例
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UIManager")
+	void RemoveUI(UUserWidget* TargetUI);
 
 	// 结束正在显示的UserWidget实例, 当仅剩基础界面显示时尝试添加暂停界面到屏幕
 	UFUNCTION(BlueprintCallable, Category = "UIManager")
