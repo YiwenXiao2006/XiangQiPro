@@ -8,6 +8,7 @@
 #include "Components/MultiLineEditableTextBox.h"
 
 #include "UI_Battle2P_Base.h"
+#include "UIManager.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
@@ -26,7 +27,6 @@ class XIANGQIPRO_API AXQP_HUD : public AHUD
 public:
 
 	AXQP_HUD();
-
 
 	TSubclassOf<UI_Battle2P_Base> Class_Battle2P_Base;
 	
