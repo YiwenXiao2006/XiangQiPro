@@ -63,11 +63,10 @@ void AChesses::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard
 		{
 			FVector2D pos = WeakThis->Pos;
 			FVector2D targetPos = WeakThis->TargetPos;
+
 			FVector	Start = WeakThis->Board2P->BoardLocs[pos.X][pos.Y];				// 起始位置
 			FVector End = WeakThis->Board2P->BoardLocs[targetPos.X][targetPos.Y];   // 终止位置
-
-			FVector Vertex;
-			Vertex = (End - Start) / 2 + Start + FVector(0, 0, 5);					// 顶点位置
+			FVector Vertex = (End - Start) / 2 + Start + FVector(0, 0, 5);			// 顶点位置
 
 			FVector result = WeakThis->CalculateParabolicPosition(Start, Vertex, End, value);
 
@@ -282,6 +281,12 @@ void AChesses::PlayMoveAnim()
 
 FVector AChesses::CalculateParabolicPosition(const FVector& Start, const FVector& Vertex, const FVector& End, float T)
 {
+	// 处理百分比异常
+	if (T < 0)
+		T = 0;
+	if (T > 1)
+		T = 1;
+
 	// 计算控制点P1，假设抛物线对称，顶点在t=0.5
 	FVector P0 = Start;
 	FVector P2 = End;

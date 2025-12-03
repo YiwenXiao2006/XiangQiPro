@@ -51,7 +51,10 @@ void ACamera2PActor::BeginPlay()
 		if (HUD)
 		{
 			UI_Battle2P_Base* Base = CreateWidget<UI_Battle2P_Base>(GetWorld(), HUD->Class_Battle2P_Base);
-			Base->AddToPlayerScreen();
+			if (UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>())
+			{
+				UIManager->Init(Base);
+			}
 
 			if (AXQPGameStateBase* GameState = Cast<GS>(GetWorld()->GetGameState()))
 			{

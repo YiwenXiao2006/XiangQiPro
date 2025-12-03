@@ -123,22 +123,30 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Chess")
 	FString GetChessName() const;
 
+	// 获取棋子颜色类型
 	UFUNCTION(BlueprintPure, Category = "Chess")
 	EChessColor GetColor() const;
 
+	// 获取棋子类型
 	UFUNCTION(BlueprintPure, Category = "Chess")
 	EChessType GetType() const;
 
+	// 获取简化坐标
 	FVector2D GetSimpPosition() const;
 
 	virtual void GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target);
 
+	// 应用棋子移动
 	virtual void ApplyMove(FChessMove2P Move);
 
 	virtual void PlayMoveAnim();
 
 	/*
 	* 贝塞尔公式计算棋子移动位置
+	* @param Start 起始世界坐标
+	* @param Vertex 顶点世界坐标
+	* @param End 终点世界坐标
+	* @param T 曲线位置百分比
 	*/
 	FVector CalculateParabolicPosition(const FVector& Start, const FVector& Vertex, const FVector& End, float T);
 };
