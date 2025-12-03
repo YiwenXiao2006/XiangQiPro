@@ -1,0 +1,54 @@
+﻿// Copyright 2026 Ultimate Player All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Subsystems/GameInstanceSubsystem.h"
+#include "Blueprint/UserWidget.h"
+#include "UIManager.generated.h"
+
+
+/**
+ * 玩家UI管理器, 从玩家屏幕添加或移除UI
+ */
+UCLASS()
+class XIANGQIPRO_API UUIManager : public UGameInstanceSubsystem
+{
+	GENERATED_BODY()
+
+private:
+
+	UUserWidget* BasicUI;
+
+	UUserWidget* PauseUI;
+
+	TArray<UUserWidget*> ui_stack;
+
+	UUIManager() : BasicUI(nullptr), PauseUI(nullptr), ui_stack() {};
+
+	/*
+	* 设置UI的可视性
+	* @param ui UserWidget实例
+	* @param bVisible 可视性
+	*/
+	void SetUIVisibility(UUserWidget* ui, bool bVisible);
+
+public:
+
+	void Init(UUserWidget* InBasicUI);
+
+	UFUNCTION(BlueprintCallable, Category = "UIManager")
+	void Init(UUserWidget* InBasicUI, UUserWidget* InPauseUI);
+
+	/*
+	* 添加UI到玩家屏幕
+	* @param InUI 要添加到玩家屏幕的UserWidget实例
+	*/
+	UFUNCTION(BlueprintCallable, Category = "UIManager")
+	void AddUI(UUserWidget* InUI);
+
+	// 结束正在显示的UserWidget实例, 当仅剩基础界面显示时尝试添加暂停界面到屏幕
+	UFUNCTION(BlueprintCallable, Category = "UIManager")
+	void FinishUI();
+	
+};
