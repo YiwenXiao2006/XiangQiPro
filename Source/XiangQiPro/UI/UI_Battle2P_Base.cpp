@@ -7,6 +7,9 @@
 
 #include "../GameMode/XQPGameStateBase.h"
 
+using EChessColor::RED;
+using EChessColor::BLACK;
+
 void UUI_Battle2P_Base::NativeConstruct()
 {
 	Super::NativeConstruct();

@@ -4,6 +4,9 @@
 #include "../GameObject/ChessBoard2P.h"
 #include "../Chess/Chesses.h"
 
+using EChessColor::RED;
+using EChessColor::BLACK;
+
 UTacticsLibrary2P::UTacticsLibrary2P()
 {
 }

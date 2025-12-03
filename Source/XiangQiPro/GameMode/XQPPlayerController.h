@@ -19,10 +19,5 @@ class XIANGQIPRO_API AXQPPlayerController : public APlayerController
 public:
 
 	virtual void BeginPlay() override;
-
-	virtual void SetupInputComponent() override;
-
-	UFUNCTION()
-	void OnEscapePressed();
 	
 };

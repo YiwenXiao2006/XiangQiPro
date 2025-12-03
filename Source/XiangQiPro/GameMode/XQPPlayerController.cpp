@@ -2,7 +2,6 @@
 
 
 #include "XQPPlayerController.h"
-#include "../UI/UIManager.h"
 
 void AXQPPlayerController::BeginPlay()
 {
@@ -14,20 +13,4 @@ void AXQPPlayerController::BeginPlay()
 	this->bShowMouseCursor = true;
 	this->bEnableTouchEvents = true;
 	this->bEnableTouchOverEvents = true;
-}
-
-void AXQPPlayerController::SetupInputComponent()
-{
-	Super::SetupInputComponent();
-
-	// °ó¶¨Esc°´¼ü
-	InputComponent->BindAction("Escape", IE_Pressed, this, &AXQPPlayerController::OnEscapePressed);
-}
-
-void AXQPPlayerController::OnEscapePressed()
-{
-	if (UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>())
-	{
-		UIManager->FinishUI();
-	}
 }
