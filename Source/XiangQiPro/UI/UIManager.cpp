@@ -6,7 +6,9 @@
 void UUIManager::Init(UUserWidget* InBasicUI)
 {
 	ui_stack.Empty();
+
 	BasicUI = InBasicUI;
+
 	if (BasicUI)
 		BasicUI->AddToPlayerScreen();
 }
@@ -14,8 +16,10 @@ void UUIManager::Init(UUserWidget* InBasicUI)
 void UUIManager::Init(UUserWidget* InBasicUI, UUserWidget* InPauseUI)
 {
 	ui_stack.Empty();
+
 	BasicUI = InBasicUI;
 	PauseUI = InPauseUI;
+
 	if (BasicUI)
 		BasicUI->AddToPlayerScreen();
 }
