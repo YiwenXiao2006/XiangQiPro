@@ -101,7 +101,7 @@ void ACameraMainActor::Tick(float DeltaTime)
 	if (bMouseInputEnabled)
 	{
 		HandleMouseMovement(DeltaTime);
-	}
+}
 
 	// 更新相机位置以保持聚焦目标
 	if (FocusTarget)
