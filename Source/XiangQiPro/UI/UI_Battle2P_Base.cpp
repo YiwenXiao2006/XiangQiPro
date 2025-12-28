@@ -5,10 +5,8 @@
 #include "XQP_HUD.h"
 #include "../Chess/Chesses.h"
 
+#include "../Util/ChessInfo.h"
 #include "../GameMode/XQPGameStateBase.h"
-
-using EChessColor::BLACK;
-using EChessColor::RED;
 
 void UUI_Battle2P_Base::NativeConstruct()
 {

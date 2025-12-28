@@ -15,6 +15,9 @@
 #include "../Util/ChessInfo.h"
 #include "../Util/AsyncWorker.h"
 
+#include <Kismet/GameplayStatics.h>
+#include <Blueprint/WidgetBlueprintLibrary.h>
+
 void AXQPGameStateBase::UpdateScore()
 {
     score1 = AI2P->Evaluate(EChessColor::RED);
@@ -140,7 +143,14 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
 
 void AXQPGameStateBase::ApplyMove2P(TWeakObjectPtr<AChesses> target, FChessMove2P move)
 {
-    HUD2P->AddOperatingRecord(battleTurn, target, move); // 记录走子
+    if (HUD2P.IsValid())
+    {
+        HUD2P->AddOperatingRecord(battleTurn, target, move); // 记录走子
+    }
+    else
+    {
+        ULogger::LogWarning(TEXT("AXQPGameStateBase::ApplyMove2P"), TEXT("HUD2P is nullptr!"));
+    }
     SwitchBattleTurn(); // 轮换执棋
     board2P->ApplyMove(target, move);
 }
@@ -223,4 +233,27 @@ void AXQPGameStateBase::GameOver(EChessColor winner)
 {
     bGameOver = true;
     HUD2P->ShowGameOver(winner);
+
+    TArray<AActor*> AllActors;
+    TArray<UUserWidget*> AllWidgets;
+
+    // 获取所有继承接口的对象
+    UGameplayStatics::GetAllActorsWithInterface(this, UIF_GameState::StaticClass(), AllActors);
+    UWidgetBlueprintLibrary::GetAllWidgetsWithInterface(this, AllWidgets, UIF_GameState::StaticClass(), false);
+
+    TArray<UObject*> AllObject(AllActors);
+    AllObject.Append(AllWidgets);
+
+    for (UObject* object : AllObject)
+    {
+        IIF_GameState* IF = Cast<IIF_GameState>(object);
+        if (!IF)
+        {
+            // Directly call the functions in the blueprint
+            IF->Execute_GameOver(object);
+            continue;
+        }
+
+        IF->GameOver(object);
+    }
 }

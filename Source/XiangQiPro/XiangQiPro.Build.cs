@@ -17,7 +17,9 @@ public class XiangQiPro : ModuleRules
             "Niagara",
             "MoviePlayer", });
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[] {
+            "CinematicCamera" 
+        });
 
         // 启用异常处理(try语句)
         bEnableExceptions = true;

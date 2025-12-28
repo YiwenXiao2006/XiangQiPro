@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "../Interface/IF_GameState.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -15,7 +17,7 @@ class AXQP_HUD;
  * 
  */
 UCLASS()
-class XIANGQIPRO_API ACamera2PActor : public APawn
+class XIANGQIPRO_API ACamera2PActor : public APawn, public IIF_GameState
 {
 	GENERATED_BODY()
 
@@ -24,6 +26,7 @@ private:
 	AXQP_HUD* HUD;
 
 private:
+
     // 触摸状态
     bool bIsSingleTouchActive;
     bool bIsTwoFingerTouchActive;
@@ -57,7 +60,11 @@ public:
     USoundBase* BattleMusic;
 
     UPROPERTY(EditAnywhere, Category = "Camera")
-    float TargetArmLength;
+    float TargetArmLength = 90.f;
+
+    // 基准FOV
+    UPROPERTY(EditAnywhere, Category = "Camera")
+    float BaseFOV = 90.f;
 
     // 平滑插值速度
     UPROPERTY(EditAnywhere, Category = "Touch Control")
@@ -78,10 +85,10 @@ public:
     float ZoomSensitivity = 0.5f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-    float MinZoomDistance = 100.0f;
+    float MinZoomDistance = 50.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-    float MaxZoomDistance = 2000.0f; 
+    float MaxZoomDistance = 200.0f; 
     
     // 最小捏合距离，避免误触
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Touch Control")
@@ -101,9 +108,28 @@ protected:
 
 	virtual void BeginPlay() override;
 
+    // 初始化相机
+    void InitCamera();
+
+    // 初始化音频
+    void InitAudio();
+
+    // 初始化用户界面
+    void InitUI();
+
 public:
 
     virtual void Tick(float DeltaTime) override;
+
+    virtual void GamePause(UObject* OwnerObject) override;
+
+    virtual void GameResume(UObject* OwnerObject) override;
+
+    // 窗口大小变化事件
+    void OnViewportResized(FViewport* Viewport, uint32 Param);
+
+    // 更新FOV
+    void UpdateVerticalFOV();
 
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 

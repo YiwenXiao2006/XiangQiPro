@@ -99,7 +99,6 @@ void AChesses::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard
 		if (WeakThis.IsValid())
 		{
 			WeakThis->ChessMesh->SetHiddenInGame(true); // 吃掉，将其隐藏
-			WeakThis->ChessMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 关闭碰撞体积
 		}
 		}));
 }
@@ -108,6 +107,10 @@ void AChesses::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard
 void AChesses::BeginPlay()
 {
 	Super::BeginPlay();
+	if (MyColor == EChessColor::BLACK && GameState->GetBattleType() == EBattleType::P2_AI)
+	{
+		bSelectable = false; // 棋子属于AI，不可被选中
+	}
 }
 
 void AChesses::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -166,6 +169,18 @@ void AChesses::NotifyActorOnInputTouchBegin(const ETouchIndex::Type FingerIndex)
 			ChessMesh->SetOverlayMaterial(MI_Stroke); // 添加描边材质
 }
 
+void AChesses::GameOver(UObject* OwnerObject)
+{
+	bSelectable = false; // 禁止棋子被选中
+	if (bSelected)
+	{
+		bSelected = false; // 移除被选中状态
+		GameState->DismissSettingPoint2P(); // 清除落子点
+		ChessMesh->SetOverlayMaterial(nullptr); // 移除描边材质
+	}
+	IIF_GameState::GameOver(OwnerObject);
+}
+
 void AChesses::NotifyActorOnInputTouchEnd(const ETouchIndex::Type FingerIndex)
 {
 	Super::NotifyActorOnInputTouchEnd(FingerIndex);
@@ -185,7 +200,7 @@ void AChesses::HandleClick()
 		{
 			if (GameState->GetBattleType() == EBattleType::P2 || GameState->GetBattleType() == EBattleType::P2_AI)
 			{
-				if (MyColor != EChessColor::BLACK) // AI
+				if (bSelectable)
 				{
 					if (bSelected)
 					{
@@ -222,8 +237,10 @@ void AChesses::HandleClick()
 
 void AChesses::Defeated()
 {
-	FadeNiagara->SetActive(true);
+	FadeNiagara->SetActive(true); // 激活粒子效果
 	ChessMask->SetHiddenInGame(true); // 提前隐藏掉
+	ChessMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 关闭碰撞体积
+	ChessMesh->SetOverlayMaterial(nullptr); // 移除描边材质
 	Timeline_Fade->PlayFromStart(); // 执行击败效果的曲线
 }
 

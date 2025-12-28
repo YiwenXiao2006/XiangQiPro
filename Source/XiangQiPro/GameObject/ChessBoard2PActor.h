@@ -19,10 +19,10 @@ class XIANGQIPRO_API AChessBoard2PActor : public AActor
 public:
 
 	// фЕелвСоб╫гвЬ╠Й
-	const FVector BorderLoc1 = FVector(-38, -30, 81.3);
+	FVector BorderLoc1 = FVector(-38, -30, 1.3f);
 
 	// фЕелсрио╫гвЬ╠Й
-	const FVector BorderLoc2 = FVector(38, 30, 81.3);
+	FVector BorderLoc2 = FVector(38, 30, 1.3f);
 	
 public:	
 	// Sets default values for this actor's properties

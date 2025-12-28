@@ -26,6 +26,9 @@ AChessBoard2PActor::AChessBoard2PActor()
 void AChessBoard2PActor::BeginPlay()
 {
 	Super::BeginPlay();
+    BorderLoc1 += (GetActorLocation() + FVector(0, 0, 1.5f));
+    BorderLoc2 += (GetActorLocation() + FVector(0, 0, 1.5f));
+    ULogger::Log(BorderLoc1.ToString());
     AXQPGameStateBase* GameState = Cast<AXQPGameStateBase>(GetWorld()->GetGameState());
     if (GameState)
     {
@@ -85,12 +88,14 @@ void AChessBoard2PActor::GenerateChesses(TWeakObjectPtr<UChessBoard2P> board2P)
         board2P->AllChess[Indexs[i].Key][Indexs[i].Value] = Chess;
     }
 
+    /************生成落子点*************/
+
     for (int32 i = 0; i < 10; i++)
     {
         for (int32 j = 0; j < 9; j++)
         {
             FVector WorldLoc = board2P->BoardLocs[i][j]; // 世界坐标
-            WorldLoc.Z = 80; // 和棋子的高度不一样
+            WorldLoc.Z -= 1.3f; // 和棋子的高度不一样
             FTransform Transform(WorldLoc);
 
             // 生成置棋位置Actor

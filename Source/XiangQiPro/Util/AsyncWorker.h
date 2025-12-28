@@ -1,4 +1,4 @@
-// Copyright 2026 Ultimate Player All Rights Reserved.
+ï»¿// Copyright 2026 Ultimate Player All Rights Reserved.
 
 #pragma once
 
@@ -7,14 +7,14 @@
 #include "Async/AsyncWork.h"
 #include "AsyncWorker.generated.h"
 
-// Òì²½²Ù×÷×´Ì¬
+// å¼‚æ­¥æ“ä½œçŠ¶æ€
 UENUM(BlueprintType)
 enum class EAsyncWorkerState : uint8
 {
-    Idle,       // ¿ÕÏĞ
-    Running,    // ÔËĞĞÖĞ
-    Completed,  // Íê³É
-    Cancelled   // È¡Ïû
+    Idle,       // ç©ºé—²
+    Running,    // è¿è¡Œä¸­
+    Completed,  // å®Œæˆ
+    Cancelled   // å–æ¶ˆ
 };
 
 DECLARE_DELEGATE_OneParam(FOnAsyncWorkCompleted, EAsyncWorkerState);
@@ -22,7 +22,7 @@ DECLARE_DELEGATE_OneParam(FOnAsyncWorkProgress, float);
 DECLARE_DELEGATE_OneParam(FOnWorkDelegate, TAtomic<bool>&);
 
 /**
- * Òì²½¹¤×÷Æ÷£¬·â×°ºÄÊ±²Ù×÷µÄÏß³Ì¹ÜÀí
+ * å¼‚æ­¥å·¥ä½œå™¨ï¼Œå°è£…è€—æ—¶æ“ä½œçš„çº¿ç¨‹ç®¡ç†
  */
 UCLASS()
 class XIANGQIPRO_API UAsyncWorker : public UObject
@@ -33,50 +33,50 @@ public:
     UAsyncWorker();
     virtual ~UAsyncWorker();
 
-    // ´´½¨Òì²½¹¤×÷Æ÷
+    // åˆ›å»ºå¼‚æ­¥å·¥ä½œå™¨
     static UAsyncWorker* CreateAndStartWorker(
         TFunction<void(std::atomic<bool>&)> WorkFunction,
         TFunction<void(EAsyncWorkerState)> CompletedCallback = nullptr,
         TFunction<void(float)> ProgressCallback = nullptr);
 
     /**
-     * ¿ªÊ¼Òì²½¹¤×÷£¨»ù´¡°æ±¾£¬²»´ø½ø¶ÈÎ¯ÍĞ£©
+     * å¼€å§‹å¼‚æ­¥å·¥ä½œï¼ˆåŸºç¡€ç‰ˆæœ¬ï¼Œä¸å¸¦è¿›åº¦å§”æ‰˜ï¼‰
      */
     bool StartAsyncWork(
         const FOnAsyncWorkCompleted& CompletedDelegate);
 
     /**
-     * ¿ªÊ¼Òì²½¹¤×÷£¨´ø½ø¶ÈÎ¯ÍĞ°æ±¾£©
+     * å¼€å§‹å¼‚æ­¥å·¥ä½œï¼ˆå¸¦è¿›åº¦å§”æ‰˜ç‰ˆæœ¬ï¼‰
      */
     bool StartAsyncWorkWithProgress(
         const FOnAsyncWorkCompleted& CompletedDelegate,
         const FOnAsyncWorkProgress& ProgressDelegate);
 
     /**
-     * Í£Ö¹Òì²½¹¤×÷£¨Ïß³Ì°²È«£©
+     * åœæ­¢å¼‚æ­¥å·¥ä½œï¼ˆçº¿ç¨‹å®‰å…¨ï¼‰
      */
     UFUNCTION(BlueprintCallable, Category = "Async")
     void StopAsyncWork();
 
     /**
-     * »ñÈ¡µ±Ç°×´Ì¬
+     * è·å–å½“å‰çŠ¶æ€
      */
     UFUNCTION(BlueprintCallable, Category = "Async")
     EAsyncWorkerState GetCurrentState() const { return CurrentState; }
 
     /**
-     * ÊÇ·ñÕıÔÚÔËĞĞ
+     * æ˜¯å¦æ­£åœ¨è¿è¡Œ
      */
     UFUNCTION(BlueprintCallable, Category = "Async")
     bool IsRunning() const { return CurrentState == EAsyncWorkerState::Running; }
 
     /**
-     * ÉèÖÃ¹¤×÷º¯Êı
+     * è®¾ç½®å·¥ä½œå‡½æ•°
      */
     void SetWorkFunction(TFunction<void(std::atomic<bool>&)> InWorkFunction) { WorkFunction = MoveTemp(InWorkFunction); }
 
     /**
-     * ¸üĞÂ½ø¶È£¨Ïß³Ì°²È«£¬¿ÉÔÚ¹¤×÷º¯ÊıÖĞµ÷ÓÃ£©
+     * æ›´æ–°è¿›åº¦ï¼ˆçº¿ç¨‹å®‰å…¨ï¼Œå¯åœ¨å·¥ä½œå‡½æ•°ä¸­è°ƒç”¨ï¼‰
      */
     void ReportProgress(float Progress);
 
@@ -84,7 +84,7 @@ protected:
     virtual void BeginDestroy() override;
 
 private:
-    // ÄÚ²¿Òì²½ÈÎÎñÀà
+    // å†…éƒ¨å¼‚æ­¥ä»»åŠ¡ç±»
     class FWorkerTask : public FNonAbandonableTask
     {
     public:
@@ -102,41 +102,41 @@ private:
         UAsyncWorker* Worker;
     };
 
-    // Êµ¼ÊÆô¶¯¹¤×÷µÄ·½·¨
+    // å®é™…å¯åŠ¨å·¥ä½œçš„æ–¹æ³•
     bool StartWorkInternal();
 
-    // Ïß³Ì°²È«µÄ×´Ì¬¸üĞÂ
+    // çº¿ç¨‹å®‰å…¨çš„çŠ¶æ€æ›´æ–°
     void SetState(EAsyncWorkerState NewState);
 
-    // Íê³É»Øµ÷£¨ÔÚÖ÷Ïß³ÌÖ´ĞĞ£©
+    // å®Œæˆå›è°ƒï¼ˆåœ¨ä¸»çº¿ç¨‹æ‰§è¡Œï¼‰
     void OnWorkCompleted();
 
-    // ½ø¶È¸üĞÂ»Øµ÷£¨ÔÚÖ÷Ïß³ÌÖ´ĞĞ£©
+    // è¿›åº¦æ›´æ–°å›è°ƒï¼ˆåœ¨ä¸»çº¿ç¨‹æ‰§è¡Œï¼‰
     void OnProgressUpdated(float Progress);
 
-    // ÔÚ¹¤×÷Ïß³ÌÖĞÖ´ĞĞ¹¤×÷º¯Êı
+    // åœ¨å·¥ä½œçº¿ç¨‹ä¸­æ‰§è¡Œå·¥ä½œå‡½æ•°
     void ExecuteWorkFunction();
 
 private:
-    // Òì²½ÈÎÎñÊµÀı£¨±ÜÃâÊ¹ÓÃAsyncTaskÃû³Æ£©
+    // å¼‚æ­¥ä»»åŠ¡å®ä¾‹ï¼ˆé¿å…ä½¿ç”¨AsyncTaskåç§°ï¼‰
     FAsyncTask<FWorkerTask>* BackgroundTask;
 
-    // Ïß³Ì°²È«µÄÈ¡Ïû±êÖ¾
+    // çº¿ç¨‹å®‰å…¨çš„å–æ¶ˆæ ‡å¿—
     std::atomic<bool> bShouldStop;
 
-    // µ±Ç°×´Ì¬
+    // å½“å‰çŠ¶æ€
     std::atomic<EAsyncWorkerState> CurrentState;
 
-    // ¹¤×÷º¯Êı
+    // å·¥ä½œå‡½æ•°
     TFunction<void(std::atomic<bool>&)> WorkFunction;
 
-    // Íê³ÉÎ¯ÍĞ
+    // å®Œæˆå§”æ‰˜
     FOnAsyncWorkCompleted CompletedDelegate;
 
-    // ½ø¶ÈÎ¯ÍĞ
+    // è¿›åº¦å§”æ‰˜
     FOnAsyncWorkProgress ProgressDelegate;
 
-    // Ïß³ÌÍ¬²½
+    // çº¿ç¨‹åŒæ­¥
     FCriticalSection CriticalSection;
 
 };

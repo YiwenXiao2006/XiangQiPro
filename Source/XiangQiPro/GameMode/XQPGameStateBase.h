@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../Interface/IF_GameState.h"
 #include "../Util/ChessMove.h"
 
 #include "CoreMinimal.h"

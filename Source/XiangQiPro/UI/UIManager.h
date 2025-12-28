@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "../Interface/IF_GameState.h"
+
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Blueprint/UserWidget.h"

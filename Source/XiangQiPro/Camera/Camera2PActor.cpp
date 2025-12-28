@@ -11,19 +11,18 @@ ACamera2PActor::ACamera2PActor()
 
 	// 创建弹簧臂组件
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	//SpringArm->SetupAttachment();
 	SpringArm->TargetArmLength = 90.0f; // 摄像机距离
 	SpringArm->bUsePawnControlRotation = false; // 重要：不使用Pawn控制旋转
 	SpringArm->bEnableCameraLag = true; // 启用摄像机延迟
 	SpringArm->CameraLagSpeed = 3.0f; // 延迟速度
-	SpringArm->bDoCollisionTest = true; // 碰撞检测（可选）
+	SpringArm->bDoCollisionTest = false; // 碰撞检测（可选）
 	RootComponent = SpringArm;
 
 	// 设置弹簧臂旋转限制
 	SpringArm->SetRelativeRotation(FRotator(-40.0f, 0.0f, 0.0f));
 
 	// 创建摄像机组件
-	GameCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	GameCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	GameCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 
 	// 创建音频组件
@@ -42,23 +41,51 @@ void ACamera2PActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InitCamera();
+	InitAudio();
+	InitUI();
+}
+
+void ACamera2PActor::InitCamera()
+{
+	//// 绑定视口尺寸变化事件
+	//if (GEngine && GEngine->GameViewport && GEngine->GameViewport->Viewport)
+	//{
+	//	GEngine->GameViewport->Viewport->ViewportResizedEvent.AddUObject(
+	//		this, &ACamera2PActor::OnViewportResized);
+	//}
+	
+	//// 初始化时更新一次FOV
+	//UpdateVerticalFOV();
+
+	// 初始化目标旋转为当前旋转
+	TargetRotation = SpringArm->GetRelativeRotation();
+}
+
+void ACamera2PActor::InitAudio()
+{
 	BattleAudio->SetSound(BattleMusic); // 设置音频资源
 	BattleAudio->Play(); // 开始播放背景音乐
+}
 
+void ACamera2PActor::InitUI()
+{
 	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
 		HUD = Cast<AXQP_HUD>(PC->GetHUD());
 		if (HUD)
 		{
 			UI_Battle2P_Base* Base = CreateWidget<UI_Battle2P_Base>(GetWorld(), HUD->Class_Battle2P_Base);
+			UI_InGamePause* PauseMenu = CreateWidget<UI_InGamePause>(GetWorld(), HUD->Class_InGamePause);
+
 			if (UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>())
 			{
-				UIManager->Init(Base);
+				UIManager->Init(Base, PauseMenu); // 初始化用户界面管理器
 			}
 
 			if (AXQPGameStateBase* GameState = Cast<GS>(GetWorld()->GetGameState()))
 			{
-				GameState->SetHUD2P(Base);
+				GameState->SetHUD2P(Base); // 把HUD交给游戏状态
 			}
 			else
 			{
@@ -74,9 +101,6 @@ void ACamera2PActor::BeginPlay()
 	{
 		ULogger::LogError(TEXT("ACamera2PActor::BeginPlay: Player controller is nullptr!"));
 	}
-
-	// 初始化目标旋转为当前旋转
-	TargetRotation = SpringArm->GetRelativeRotation();
 }
 
 // 如果需要每帧更新，可以重写Tick函数
@@ -99,6 +123,70 @@ void ACamera2PActor::Tick(float DeltaTime)
 		float NewLength = FMath::FInterpTo(CurrentLength, TargetArmLength, DeltaTime, ZoomInterpSpeed);
 		SpringArm->TargetArmLength = NewLength;
 	}
+}
+
+void ACamera2PActor::GamePause(UObject* OwnerObject)
+{
+	// 屏蔽输入
+	DisableInput(GetController<APlayerController>());
+	IIF_GameState::GamePause(OwnerObject);
+}
+
+void ACamera2PActor::GameResume(UObject* OwnerObject)
+{
+	// 启用输入
+	EnableInput(GetController<APlayerController>());
+	IIF_GameState::GameResume(OwnerObject);
+}
+
+void ACamera2PActor::OnViewportResized(FViewport* Viewport, uint32 Param)
+{
+	UpdateVerticalFOV();
+}
+
+void ACamera2PActor::UpdateVerticalFOV()
+{
+	TWeakObjectPtr<ACamera2PActor> WeakThis(this);
+	if (!WeakThis.IsValid())
+	{
+		return;
+	}
+	if (!WeakThis->GameCamera)
+	{
+		ULogger::LogError(TEXT("ACamera2PActor::UpdateVerticalFOV"), TEXT("GameCamera is nullptr!"));
+		return;
+	}
+
+	if (WeakThis->BaseFOV <= 0.0f || WeakThis->BaseFOV >= 180.0f)
+	{
+		ULogger::LogWarning(TEXT("ACamera2PActor::UpdateVerticalFOV"), TEXT("Invalid Horizontal FOV"));
+		return;
+	}
+
+	// 获取屏幕参数
+	FVector2D ViewportSize = FVector2D();
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+	float AspectRatio = ViewportSize.X / ViewportSize.Y;
+
+	// 计算目标FOV（确保只增不减）
+	float CurrentAspect = 16.0f / 9.0f;
+	float NewFOV = BaseFOV * FMath::Max(AspectRatio / CurrentAspect, CurrentAspect / AspectRatio);
+
+	// 限制FOV不超过179°
+	NewFOV = FMath::Clamp(NewFOV, BaseFOV, 179.0f); // 最低不低于BaseFOV，最高不超过179°
+
+	// 超宽屏额外限制（如21:9）
+	if (AspectRatio > 2.0f) {
+		float MaxFOVForUltrawide = 160.0f; // 根据项目需求调整
+		NewFOV = FMath::Min(NewFOV, MaxFOVForUltrawide);
+	}
+
+	// 应用FOV
+	WeakThis->GameCamera->SetFieldOfView(FMath::Max(NewFOV, BaseFOV));
+	WeakThis->GameCamera->SetAspectRatio(AspectRatio);
 }
 
 void ACamera2PActor::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

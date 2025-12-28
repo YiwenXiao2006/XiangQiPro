@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "../Interface/IF_GameState.h"
+
 #include "../Util/ObjectManager.h"
 #include "../Util/ChessInfo.h"
 #include "../Util/ChessMove.h"
@@ -29,7 +31,7 @@
 struct FChessMove2P;
 
 UCLASS()
-class XIANGQIPRO_API AChesses : public APawn
+class XIANGQIPRO_API AChesses : public APawn, public IIF_GameState
 {
 	GENERATED_BODY()
 
@@ -54,7 +56,11 @@ protected:
 
 	TWeakObjectPtr<UChessBoard2P> Board2P;
 
+	// 棋子选中状态
 	bool bSelected = false;
+
+	// 棋子可以被选中
+	bool bSelectable = true;
 
 	UCurveFloat* CF_ChessMove;
 
@@ -112,6 +118,9 @@ public:
 	virtual void NotifyActorEndCursorOver() override;
 
 	virtual void NotifyActorOnInputTouchBegin(const ETouchIndex::Type FingerIndex) override;
+
+	// 游戏结束事件
+	virtual void GameOver(UObject* OwnerObject) override;
 
 	// 处理点击事件
 	void HandleClick();

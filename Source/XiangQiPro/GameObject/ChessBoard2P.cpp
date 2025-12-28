@@ -51,7 +51,11 @@ void UChessBoard2P::InitializeBoard(TWeakObjectPtr<AChessBoard2PActor> ChessBoar
         TArray<FVector> LocList = {};
         for (int32 j = 0; j < 9; j++)
         {
-            LocList.Add(FVector(BorderLoc1.X + LengthX * i - 0.02 * i, BorderLoc1.Y + LengthY * j, 81.3f));
+            LocList.Add(FVector(
+                BorderLoc1.X + LengthX * i - 0.02 * i, 
+                BorderLoc1.Y + LengthY * j, 
+                BorderLoc1.Z
+            ));
         }
         BoardLocs.Add(LocList);
     }
