@@ -7,6 +7,9 @@
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "XiangQiPro/UI/XQP_HUD.h"
+#include "XiangQiPro/Util/Logger.h"
+
 // Sets default values
 ACameraMainActor::ACameraMainActor()
 {
@@ -20,6 +23,10 @@ ACameraMainActor::ACameraMainActor()
 	// CineCamera
 	CineCameraComponent = CreateDefaultSubobject<UCineCameraComponent>(TEXT("CineCamera"));
 	CineCameraComponent->SetupAttachment(SceneRoot);
+
+	// 创建音频组件
+	MainAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("MainAudio"));
+	MainAudio->SetupAttachment(CineCameraComponent);
 
 	// 默认值
 	FocusTarget = nullptr;
@@ -48,11 +55,46 @@ void ACameraMainActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InitUI();
+	InitAudio();
+
 	// 计算基础角度（基于当前相机位置和朝向）
 	CalculateBaseAngles();
 
 	UpdateCameraFocus();
 	SetupMouseInput(); // 设置鼠标输入
+}
+
+void ACameraMainActor::InitUI()
+{
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		HUD = Cast<AXQP_HUD>(PC->GetHUD());
+		if (HUD)
+		{
+			UI_Main_Base* Base = CreateWidget<UI_Main_Base>(GetWorld(), HUD->Class_Main_Base);
+
+			if (UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>())
+			{
+				ULogger::Log("111");
+				UIManager->Init(Base); // 初始化用户界面管理器
+			}
+		}
+		else
+		{
+			ULogger::LogError(TEXT("ACameraMainActor::BeginPlay: HUD is nullptr!"));
+		}
+	}
+	else
+	{
+		ULogger::LogError(TEXT("ACameraMainActor::BeginPlay: Player controller is nullptr!"));
+	}
+}
+
+void ACameraMainActor::InitAudio()
+{
+	MainAudio->SetSound(MainMusic); // 设置音频资源
+	MainAudio->Play(); // 开始播放背景音乐
 }
 
 // 计算基础角度
@@ -81,7 +123,7 @@ void ACameraMainActor::UpdateCameraFocus()
 		CalculateBaseAngles();
 
 		CameraDistance = FVector::Distance(GetActorLocation(), FocusTarget->GetActorLocation());
-		CineCameraComponent->FocusSettings.ManualFocusDistance = CameraDistance;
+		CineCameraComponent->FocusSettings.ManualFocusDistance = CameraDistance - 1.5f;
 	}
 
 	EnableForPlayer(0);
@@ -101,7 +143,7 @@ void ACameraMainActor::Tick(float DeltaTime)
 	if (bMouseInputEnabled)
 	{
 		HandleMouseMovement(DeltaTime);
-}
+	}
 
 	// 更新相机位置以保持聚焦目标
 	if (FocusTarget)
