@@ -8,6 +8,7 @@
 #include "Components/MultiLineEditableTextBox.h"
 
 #include "UI_Battle2P_Base.h"
+#include "UI_Main_Base.h"
 #include "UI_TransitionScreen.h"
 #include "UI_InGamePause.h"
 #include "UIManager.h"
@@ -18,6 +19,7 @@
 
 #define PATH_UI_INGAMEPAUSE TEXT("/Game/UMG/Pause/BP_UI_InGamePause.BP_UI_InGamePause_C")
 #define PATH_UI_BATTLE2P_BASE TEXT("/Game/UMG/Battle2P/BP_UI_Battle2P_Base.BP_UI_Battle2P_Base_C")
+#define PATH_UI_MAIN_BASE TEXT("/Game/UMG/Main/BP_UI_Main_Base.BP_UI_Main_Base_C")
 #define PATH_UI_TRANSITIONSCREEN TEXT("/Game/UMG/Util/BP_UI_TransitionScreen.BP_UI_TransitionScreen_C")
 
 /**
@@ -33,6 +35,8 @@ public:
 	AXQP_HUD();
 
 	TSubclassOf<UI_Battle2P_Base> Class_Battle2P_Base;
+
+	TSubclassOf<UI_Main_Base> Class_Main_Base;
 
 	TSubclassOf<UI_TransitionScreen> Class_TransitionScreen;
 
