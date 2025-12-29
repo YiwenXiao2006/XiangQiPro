@@ -1,14 +1,16 @@
 ﻿// Copyright 2026 Ultimate Player All Rights Reserved.
 
-
 #include "AsyncWorker.h"
 #include "Engine/Engine.h"
 #include "Logger.h"
+#include "HAL/Event.h"
 
 UAsyncWorker::UAsyncWorker()
     : BackgroundTask(nullptr)
     , bShouldStop(false)
+    , bShouldPause(false)
     , CurrentState(EAsyncWorkerState::Idle)
+    , PauseEvent(FPlatformProcess::GetSynchEventFromPool(false))
 {
     // 防止被垃圾回收
     AddToRoot();
@@ -17,9 +19,16 @@ UAsyncWorker::UAsyncWorker()
 UAsyncWorker::~UAsyncWorker()
 {
     StopAsyncWork();
+
+    // 清理事件
+    if (PauseEvent)
+    {
+        FPlatformProcess::ReturnSynchEventToPool(PauseEvent);
+        PauseEvent = nullptr;
+    }
 }
 
-UAsyncWorker* UAsyncWorker::CreateAndStartWorker(TFunction<void(std::atomic<bool>&)> WorkFunction, TFunction<void(EAsyncWorkerState)> CompletedCallback, TFunction<void(float)> ProgressCallback)
+UAsyncWorker* UAsyncWorker::CreateAndStartWorker(TFunction<void(UAsyncWorker*)> WorkFunction, TFunction<void(EAsyncWorkerState)> CompletedCallback, TFunction<void(float)> ProgressCallback)
 {
     UAsyncWorker* Worker = NewObject<UAsyncWorker>();
 
@@ -73,21 +82,22 @@ bool UAsyncWorker::StartWorkInternal()
 {
     FScopeLock Lock(&CriticalSection);
 
-    if (CurrentState == EAsyncWorkerState::Running)
+    if (CurrentState == EAsyncWorkerState::Running || CurrentState == EAsyncWorkerState::Paused)
     {
-        ULogger::LogWarning(TEXT("UAsyncWorker::StartWorkInternal: 异步工作器已在运行中"));
+        ULogger::LogWarning(TEXT("UAsyncWorker::StartWorkInternal: 异步工作器已在运行或暂停中"));
         return false;
     }
 
     // 检查是否有工作函数
     if (!WorkFunction)
     {
-        ULogger::LogError(TEXT("UAsyncWorker::StartWorkInternal: 没有设置工作函数，请先调用SetWorkFunction"));
+        ULogger::LogError(TEXT("UAsyncWorker::StartAsyncWork: 没有设置工作函数，请先调用SetWorkFunction"));
         return false;
     }
 
     // 重置状态
     bShouldStop = false;
+    bShouldPause = false;
     SetState(EAsyncWorkerState::Running);
 
     // 创建并启动异步任务
@@ -102,13 +112,20 @@ void UAsyncWorker::StopAsyncWork()
 {
     FScopeLock Lock(&CriticalSection);
 
-    if (CurrentState != EAsyncWorkerState::Running)
+    if (CurrentState != EAsyncWorkerState::Running && CurrentState != EAsyncWorkerState::Paused)
     {
         return;
     }
 
     // 设置停止标志
     bShouldStop = true;
+
+    // 如果处于暂停状态，需要触发事件让线程继续以便检测停止
+    if (CurrentState == EAsyncWorkerState::Paused && PauseEvent)
+    {
+        PauseEvent->Trigger();
+    }
+
     SetState(EAsyncWorkerState::Cancelled);
 
     // 等待任务完成
@@ -119,6 +136,46 @@ void UAsyncWorker::StopAsyncWork()
     }
 
     ULogger::Log(TEXT("UAsyncWorker::StopAsyncWork: 异步工作器已停止"));
+}
+
+bool UAsyncWorker::PauseAsyncWork()
+{
+    FScopeLock Lock(&CriticalSection);
+
+    if (CurrentState != EAsyncWorkerState::Running)
+    {
+        ULogger::LogWarning(TEXT("UAsyncWorker::PauseAsyncWork: 只有运行中的工作器可以暂停"));
+        return false;
+    }
+
+    bShouldPause = true;
+    SetState(EAsyncWorkerState::Paused);
+
+    ULogger::Log(TEXT("UAsyncWorker::PauseAsyncWork: 异步工作器已暂停"));
+    return true;
+}
+
+bool UAsyncWorker::ResumeAsyncWork()
+{
+    FScopeLock Lock(&CriticalSection);
+
+    if (CurrentState != EAsyncWorkerState::Paused)
+    {
+        ULogger::LogWarning(TEXT("UAsyncWorker::ResumeAsyncWork: 只有暂停中的工作器可以恢复"));
+        return false;
+    }
+
+    bShouldPause = false;
+    SetState(EAsyncWorkerState::Running);
+
+    // 触发事件唤醒工作线程
+    if (PauseEvent)
+    {
+        PauseEvent->Trigger();
+    }
+
+    ULogger::Log(TEXT("UAsyncWorker::ResumeAsyncWork: 异步工作器已恢复"));
+    return true;
 }
 
 void UAsyncWorker::ReportProgress(float Progress)
@@ -135,6 +192,15 @@ void UAsyncWorker::ReportProgress(float Progress)
             {
                 OnProgressUpdated(Progress);
             }, TStatId(), nullptr, ENamedThreads::GameThread);
+    }
+}
+
+void UAsyncWorker::CheckPause()
+{
+    // 如果应该暂停，则进入等待状态
+    if (bShouldPause && !bShouldStop)
+    {
+        WaitForResume();
     }
 }
 
@@ -186,7 +252,19 @@ void UAsyncWorker::ExecuteWorkFunction()
 {
     if (WorkFunction)
     {
-        WorkFunction(bShouldStop);
+        WorkFunction(this);
+    }
+}
+
+void UAsyncWorker::WaitForResume()
+{
+    if (PauseEvent)
+    {
+        // 等待恢复事件，超时时间设为100毫秒以便定期检查停止标志
+        while (bShouldPause && !bShouldStop)
+        {
+            PauseEvent->Wait(100); // 等待100毫秒
+        }
     }
 }
 

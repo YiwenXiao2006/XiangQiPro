@@ -13,6 +13,7 @@ enum class EAsyncWorkerState : uint8
 {
     Idle,       // 空闲
     Running,    // 运行中
+    Paused,     // 暂停
     Completed,  // 完成
     Cancelled   // 取消
 };
@@ -27,7 +28,7 @@ DECLARE_DELEGATE_OneParam(FOnWorkDelegate, TAtomic<bool>&);
 UCLASS()
 class XIANGQIPRO_API UAsyncWorker : public UObject
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
     UAsyncWorker();
@@ -35,7 +36,7 @@ public:
 
     // 创建异步工作器
     static UAsyncWorker* CreateAndStartWorker(
-        TFunction<void(std::atomic<bool>&)> WorkFunction,
+        TFunction<void(UAsyncWorker*)> WorkFunction,
         TFunction<void(EAsyncWorkerState)> CompletedCallback = nullptr,
         TFunction<void(float)> ProgressCallback = nullptr);
 
@@ -59,6 +60,18 @@ public:
     void StopAsyncWork();
 
     /**
+     * 暂停异步工作（线程安全）
+     */
+    UFUNCTION(BlueprintCallable, Category = "Async")
+    bool PauseAsyncWork();
+
+    /**
+     * 恢复异步工作（线程安全）
+     */
+    UFUNCTION(BlueprintCallable, Category = "Async")
+    bool ResumeAsyncWork();
+
+    /**
      * 获取当前状态
      */
     UFUNCTION(BlueprintCallable, Category = "Async")
@@ -71,14 +84,35 @@ public:
     bool IsRunning() const { return CurrentState == EAsyncWorkerState::Running; }
 
     /**
+     * 是否已暂停
+     */
+    UFUNCTION(BlueprintCallable, Category = "Async")
+    bool IsPaused() const { return CurrentState == EAsyncWorkerState::Paused; }
+
+    /**
+     * 是否应该停止
+     */
+    bool ShouldStop() const { return bShouldStop; }
+
+    /**
+     * 是否应该暂停
+     */
+    bool ShouldPause() const { return bShouldPause; }
+
+    /**
      * 设置工作函数
      */
-    void SetWorkFunction(TFunction<void(std::atomic<bool>&)> InWorkFunction) { WorkFunction = MoveTemp(InWorkFunction); }
+    void SetWorkFunction(TFunction<void(UAsyncWorker*)> InWorkFunction) { WorkFunction = MoveTemp(InWorkFunction); }
 
     /**
      * 更新进度（线程安全，可在工作函数中调用）
      */
     void ReportProgress(float Progress);
+
+    /**
+     * 检查暂停状态（在工作函数中定期调用）
+     */
+    void CheckPause();
 
 protected:
     virtual void BeginDestroy() override;
@@ -117,6 +151,9 @@ private:
     // 在工作线程中执行工作函数
     void ExecuteWorkFunction();
 
+    // 等待暂停恢复
+    void WaitForResume();
+
 private:
     // 异步任务实例（避免使用AsyncTask名称）
     FAsyncTask<FWorkerTask>* BackgroundTask;
@@ -124,11 +161,14 @@ private:
     // 线程安全的取消标志
     std::atomic<bool> bShouldStop;
 
+    // 线程安全的暂停标志
+    std::atomic<bool> bShouldPause;
+
     // 当前状态
     std::atomic<EAsyncWorkerState> CurrentState;
 
-    // 工作函数
-    TFunction<void(std::atomic<bool>&)> WorkFunction;
+    // 工作函数（现在接受UAsyncWorker*参数，以便访问暂停功能）
+    TFunction<void(UAsyncWorker*)> WorkFunction;
 
     // 完成委托
     FOnAsyncWorkCompleted CompletedDelegate;
@@ -138,5 +178,8 @@ private:
 
     // 线程同步
     FCriticalSection CriticalSection;
+
+    // 暂停恢复事件
+    FEvent* PauseEvent;
 
 };
