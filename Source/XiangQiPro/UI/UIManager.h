@@ -45,9 +45,10 @@ public:
 	/*
 	* 添加UI到玩家屏幕
 	* @param InUI 要添加到玩家屏幕的UserWidget实例
+	* @param bHideLastOne 是否隐藏上一层UI
 	*/
 	UFUNCTION(BlueprintCallable, Category = "UIManager")
-	void AddUI(UUserWidget* InUI);
+	void AddUI(UUserWidget* InUI, bool bHideLastOne = true);
 	/*
 	* 从玩家屏幕移除指定的UI
 	* @param TargetUI 要从玩家屏幕移除的UserWidget实例

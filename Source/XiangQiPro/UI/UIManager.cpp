@@ -26,20 +26,23 @@ void UUIManager::Init(UUserWidget* InBasicUI, UUserWidget* InPauseUI)
 		BasicUI->AddToPlayerScreen();
 }
 
-void UUIManager::AddUI(UUserWidget* InUI)
+void UUIManager::AddUI(UUserWidget* InUI, bool bHideLastOne)
 {
 	if (!InUI)
 	{
 		return; // 空指针保护
 	}
 
-	if (!ui_stack.IsEmpty())
+	if (bHideLastOne)
 	{
-		SetUIVisibility(ui_stack.Top(), false); // 隐藏最上层UI
-	}
-	else
-	{
-		SetUIVisibility(BasicUI, false);		// 隐藏基本UI
+		if (!ui_stack.IsEmpty())
+		{
+			SetUIVisibility(ui_stack.Top(), false); // 隐藏最上层UI
+		}
+		else
+		{
+			SetUIVisibility(BasicUI, false);		// 隐藏基本UI
+		}
 	}
 	InUI->AddToPlayerScreen(); // 添加UI到玩家屏幕
 	ui_stack.Add(InUI);		   // 把UI加入栈
