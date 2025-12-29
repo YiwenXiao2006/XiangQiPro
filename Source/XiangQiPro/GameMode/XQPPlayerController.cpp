@@ -21,7 +21,7 @@ void AXQPPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	// °ó¶¨Esc°´¼ü
-	InputComponent->BindAction("Escape", IE_Pressed, this, &AXQPPlayerController::OnEscapePressed);
+	InputComponent->BindAction("Escape", IE_Pressed, this, &AXQPPlayerController::OnEscapePressed).bExecuteWhenPaused = true;
 }
 
 void AXQPPlayerController::OnEscapePressed()

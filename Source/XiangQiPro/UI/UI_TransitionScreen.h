@@ -9,6 +9,7 @@
 #include "UI_TransitionScreen.generated.h"
 
 DECLARE_DELEGATE(FOnFadeFinished);
+DECLARE_DYNAMIC_DELEGATE(FFadedFinishedDelegate);
 
 typedef UUI_TransitionScreen UI_TransitionScreen;
 
@@ -46,6 +47,8 @@ private:
 	FLinearColor FadeColor;
 
 	FOnFadeFinished Delegate = FOnFadeFinished();
+
+	FFadedFinishedDelegate Delegate_D = FFadedFinishedDelegate();
 
 public:
 
@@ -87,6 +90,9 @@ public:
 	* @param bInReverse 倒放恢复
 	*/
 	void Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FOnFadeFinished InDelegate, float InStayTime = 0, bool bInReverse = false);
+
+	UFUNCTION(BlueprintCallable)
+	void Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FFadedFinishedDelegate InDelegate, float InStayTime = 0, bool bInReverse = false);
 
 	/* 结束淡化停留回调 */
 	UFUNCTION()

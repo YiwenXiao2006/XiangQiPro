@@ -1,7 +1,6 @@
 ﻿// Copyright 2026 Ultimate Player All Rights Reserved.
 
 #include "TacticsLibrary2P.h"
-#include "../Util/ChessInfo.h"
 #include "../GameObject/ChessBoard2P.h"
 #include "../Chess/Chesses.h"
 

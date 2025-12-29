@@ -86,6 +86,18 @@ void UUI_TransitionScreen::Init(UUIManager* InUIManager, float FromAlpha, float 
 	bReverse = bInReverse;
 }
 
+void UUI_TransitionScreen::Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FFadedFinishedDelegate InDelegate, float InStayTime, bool bInReverse)
+{
+	UIManager = InUIManager;
+	FadeAlpha = FVector2D(FromAlpha, ToAlpha);
+	FadeTime = InFadeTime;
+	NewFadeTime = 0.f;
+	FadeColor = InFadeColor;
+	Delegate_D = InDelegate;
+	StayTime = InStayTime;
+	bReverse = bInReverse;
+}
+
 void UUI_TransitionScreen::EndStay()
 {
 	StayTime = 0; // «Â≥˝Õ£¡Ù ±º‰
@@ -100,6 +112,7 @@ void UUI_TransitionScreen::EndFade()
 		return;
 	}
 	Delegate.ExecuteIfBound();
+	Delegate_D.ExecuteIfBound();
 
 	if (IsValid(UIManager))
 	{

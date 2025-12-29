@@ -33,7 +33,7 @@ void AChess_Jiang::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessB
 void AChess_Jiang::Defeated()
 {
 	Super::Defeated();
-	GameState->GameOver(MyColor == EChessColor::BLACK ? EChessColor::RED : EChessColor::BLACK); // 通知游戏状态，游戏获胜
+	GameState->NotifyGameOver(MyColor == EChessColor::BLACK ? EChessColor::RED : EChessColor::BLACK); // 通知游戏状态，游戏获胜
 }
 
 void AChess_Jiang::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target)

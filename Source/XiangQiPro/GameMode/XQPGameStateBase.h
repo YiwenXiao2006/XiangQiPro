@@ -40,7 +40,7 @@ enum class EPlayerTag : uint8
  * 
  */
 UCLASS()
-class XIANGQIPRO_API AXQPGameStateBase : public AGameStateBase
+class XIANGQIPRO_API AXQPGameStateBase : public AGameStateBase, public IIF_GameState
 {
 	GENERATED_BODY()
 
@@ -93,6 +93,12 @@ public:
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	// 游戏暂停事件
+	virtual void GamePause(UObject* OwnerObject) override;
+
+	// 游戏恢复事件
+	virtual void GameResume(UObject* OwnerObject) override;
+
 	// 显示置棋位置标记
 	void ShowSettingPoint2P(TArray<FChessMove2P> Moves, TWeakObjectPtr<AChesses> Target);
 
@@ -139,6 +145,6 @@ public:
 	void SwitchBattleTurn();
 
 	// 游戏结束
-	void GameOver(EChessColor winner);
+	void NotifyGameOver(EChessColor winner);
 	
 };

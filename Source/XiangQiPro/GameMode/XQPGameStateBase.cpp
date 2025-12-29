@@ -1,4 +1,4 @@
-// Copyright 2026 Ultimate Player All Rights Reserved.
+ï»¿// Copyright 2026 Ultimate Player All Rights Reserved.
 
 #include "XQPGameStateBase.h"
 #include "Async/Async.h"
@@ -47,12 +47,12 @@ void AXQPGameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
     {
         if (AIAsync->IsRunning())
         {
-            AI2P->StopThinkingImmediately(); // Í£Ö¹AI¹¤×÷
-            AIAsync->StopAsyncWork(); // Í£Ö¹Òì²½ÈÎÎñ
+            AI2P->StopThinkingImmediately(); // åœæ­¢AIå·¥ä½œ
+            AIAsync->StopAsyncWork(); // åœæ­¢å¼‚æ­¥ä»»åŠ¡
         }
     }
 
-    // ÊÍ·ÅµôUObject¶ÔÏó
+    // é‡Šæ”¾æ‰UObjectå¯¹è±¡
     if (board2P.IsValid())
         board2P->RemoveFromRoot();
     board2P.Reset();
@@ -64,6 +64,32 @@ void AXQPGameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
     board2PActor.Reset();
 
     Super::EndPlay(EndPlayReason);
+}
+
+void AXQPGameStateBase::GamePause(UObject* OwnerObject)
+{
+    UGameplayStatics::SetGamePaused(this, true);
+    if (AIAsync)
+    {
+        if (AIAsync->IsRunning())
+        {
+            AIAsync->PauseAsyncWork(); // æš‚åœAI
+        }
+    }
+    IIF_GameState::GamePause(OwnerObject);
+}
+
+void AXQPGameStateBase::GameResume(UObject* OwnerObject)
+{
+    UGameplayStatics::SetGamePaused(this, false);
+    if (AIAsync)
+    {
+        if (AIAsync->IsPaused())
+        {
+            AIAsync->ResumeAsyncWork(); // æ¢å¤AI
+        }
+    }
+    IIF_GameState::GameResume(OwnerObject);
 }
 
 void AXQPGameStateBase::ShowSettingPoint2P(TArray<FChessMove2P> Moves, TWeakObjectPtr<AChesses> Target)
@@ -123,8 +149,8 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
             board2P->AddToRoot();
         }
 
-        board2P->InitializeBoard(board2PActor); // ³õÊ¼»¯ÆåÅÌ
-        board2PActor->GenerateChesses(board2P); // ÆåÅÌActorÉú³ÉËùÓĞÏóÆå²¢¶ÔÆä³õÊ¼»¯
+        board2P->InitializeBoard(board2PActor); // åˆå§‹åŒ–æ£‹ç›˜
+        board2PActor->GenerateChesses(board2P); // æ£‹ç›˜Actorç”Ÿæˆæ‰€æœ‰è±¡æ£‹å¹¶å¯¹å…¶åˆå§‹åŒ–
 
         if (!AI2P.IsValid())
         {
@@ -132,8 +158,8 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
             AI2P->AddToRoot();
         }
 
-        AI2P->SetDepth(4); // ËÑË÷Éî¶È
-        AI2P->SetBoard(board2P); // ÆåÅÌ×´Ì¬
+        AI2P->SetDepth(4); // æœç´¢æ·±åº¦
+        AI2P->SetBoard(board2P); // æ£‹ç›˜çŠ¶æ€
     }
     else
     {
@@ -145,13 +171,13 @@ void AXQPGameStateBase::ApplyMove2P(TWeakObjectPtr<AChesses> target, FChessMove2
 {
     if (HUD2P.IsValid())
     {
-        HUD2P->AddOperatingRecord(battleTurn, target, move); // ¼ÇÂ¼×ß×Ó
+        HUD2P->AddOperatingRecord(battleTurn, target, move); // è®°å½•èµ°å­
     }
     else
     {
         ULogger::LogWarning(TEXT("AXQPGameStateBase::ApplyMove2P"), TEXT("HUD2P is nullptr!"));
     }
-    SwitchBattleTurn(); // ÂÖ»»Ö´Æå
+    SwitchBattleTurn(); // è½®æ¢æ‰§æ£‹
     board2P->ApplyMove(target, move);
 }
 
@@ -163,39 +189,44 @@ void AXQPGameStateBase::OnFinishMove2P()
         return;
     }
 
-    switch (battleTurn) // ±íÊ¾µ±Ç°¸ÃË­ÁË
+    switch (battleTurn) // è¡¨ç¤ºå½“å‰è¯¥è°äº†
     {
     case EPlayerTag::P1:
-        HUD2P->SetAITurn(false); // ¸üĞÂAI»ØºÏ½áÊø
+        HUD2P->SetAITurn(false); // æ›´æ–°AIå›åˆç»“æŸ
         board2P->SetSideToMove(EChessColor::RED);
         break;
     case EPlayerTag::AI:
         board2P->SetSideToMove(EChessColor::BLACK);
-        RunAI2P(); // ÂÖµ½AI
+        RunAI2P(); // è½®åˆ°AI
         break;
     case EPlayerTag::P2:
         board2P->SetSideToMove(EChessColor::BLACK);
         break;
     }
-    UpdateScore(); // ¸üĞÂµÃ·Ö
+    UpdateScore(); // æ›´æ–°å¾—åˆ†
 }
 
 void AXQPGameStateBase::RunAI2P()
 {
     HUD2P->SetAITurn(true);
-    AI2P->SetBoard(board2P); // ÆåÅÌ×´Ì¬
+    AI2P->SetBoard(board2P); // æ£‹ç›˜çŠ¶æ€
 
-     AIAsync = UAsyncWorker::CreateAndStartWorker(
-         [this](std::atomic<bool>& bShouldStop)
+    AIAsync = UAsyncWorker::CreateAndStartWorker(
+         [this](UAsyncWorker* WorkerInstance)
          {
-             // »ñÈ¡×î¼ÑÒÆ¶¯·½Ê½ºÍÒªÒÆ¶¯µÄÆå×Ó 
+             // è·å–æœ€ä½³ç§»åŠ¨æ–¹å¼å’Œè¦ç§»åŠ¨çš„æ£‹å­ 
              AIMovedChess = AI2P->GetBestMove(AIMove2P);
+
+             while (WorkerInstance->IsPaused())
+             {
+                 FPlatformProcess::Sleep(0.1f);
+             }
          },
          [this](EAsyncWorkerState State)
          {
-             if (State != EAsyncWorkerState::Cancelled) // ÈÎÎñÕı³£Ö´ĞĞÍê³É
+             if (State != EAsyncWorkerState::Cancelled) // ä»»åŠ¡æ­£å¸¸æ‰§è¡Œå®Œæˆ
              {
-                 // Ó¦ÓÃÆå×ÓµÄÒÆ¶¯
+                 // åº”ç”¨æ£‹å­çš„ç§»åŠ¨
                  ApplyMove2P(AIMovedChess, AIMove2P);
                  ULogger::Log(TEXT("AXQPGameStateBase::RunAI2P: AI FINISH"));
              }
@@ -229,7 +260,7 @@ void AXQPGameStateBase::SwitchBattleTurn()
     }
 }
 
-void AXQPGameStateBase::GameOver(EChessColor winner)
+void AXQPGameStateBase::NotifyGameOver(EChessColor winner)
 {
     bGameOver = true;
     HUD2P->ShowGameOver(winner);
@@ -237,7 +268,7 @@ void AXQPGameStateBase::GameOver(EChessColor winner)
     TArray<AActor*> AllActors;
     TArray<UUserWidget*> AllWidgets;
 
-    // »ñÈ¡ËùÓĞ¼Ì³Ğ½Ó¿ÚµÄ¶ÔÏó
+    // è·å–æ‰€æœ‰ç»§æ‰¿æ¥å£çš„å¯¹è±¡
     UGameplayStatics::GetAllActorsWithInterface(this, UIF_GameState::StaticClass(), AllActors);
     UWidgetBlueprintLibrary::GetAllWidgetsWithInterface(this, AllWidgets, UIF_GameState::StaticClass(), false);
 
