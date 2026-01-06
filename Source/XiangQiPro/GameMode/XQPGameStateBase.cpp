@@ -20,8 +20,8 @@
 
 void AXQPGameStateBase::UpdateScore()
 {
-    score1 = AI2P->Evaluate(EChessColor::RED);
-    score2 = AI2P->Evaluate(EChessColor::BLACK);
+    score1 = AI2P->Evaluate(EChessColor::REDCHESS);
+    score2 = AI2P->Evaluate(EChessColor::BLACKCHESS);
     if (HUD2P.IsValid())
     {
         HUD2P->UpdateScore(score1, score2);
@@ -193,14 +193,14 @@ void AXQPGameStateBase::OnFinishMove2P()
     {
     case EPlayerTag::P1:
         HUD2P->SetAITurn(false); // 更新AI回合结束
-        board2P->SetSideToMove(EChessColor::RED);
+        board2P->SetSideToMove(EChessColor::REDCHESS);
         break;
     case EPlayerTag::AI:
-        board2P->SetSideToMove(EChessColor::BLACK);
+        board2P->SetSideToMove(EChessColor::BLACKCHESS);
         RunAI2P(); // 轮到AI
         break;
     case EPlayerTag::P2:
-        board2P->SetSideToMove(EChessColor::BLACK);
+        board2P->SetSideToMove(EChessColor::BLACKCHESS);
         break;
     }
     UpdateScore(); // 更新得分
@@ -265,26 +265,5 @@ void AXQPGameStateBase::NotifyGameOver(EChessColor winner)
     bGameOver = true;
     HUD2P->ShowGameOver(winner);
 
-    TArray<AActor*> AllActors;
-    TArray<UUserWidget*> AllWidgets;
-
-    // 获取所有继承接口的对象
-    UGameplayStatics::GetAllActorsWithInterface(this, UIF_GameState::StaticClass(), AllActors);
-    UWidgetBlueprintLibrary::GetAllWidgetsWithInterface(this, AllWidgets, UIF_GameState::StaticClass(), false);
-
-    TArray<UObject*> AllObject(AllActors);
-    AllObject.Append(AllWidgets);
-
-    for (UObject* object : AllObject)
-    {
-        IIF_GameState* IF = Cast<IIF_GameState>(object);
-        if (!IF)
-        {
-            // Directly call the functions in the blueprint
-            IF->Execute_GameOver(object);
-            continue;
-        }
-
-        IF->GameOver(object);
-    }
+    EXEC_GAMEOVER(); // 调用游戏介绍事件
 }

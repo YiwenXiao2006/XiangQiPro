@@ -46,11 +46,11 @@ void AChesses::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard
 	{
 		if (GameState->GetBattleType() == EBattleType::P2 || GameState->GetBattleType() == EBattleType::P2_AI)
 		{
-			if (color == EChessColor::RED)
+			if (color == EChessColor::REDCHESS)
 			{
 				ChessMask->SetRelativeRotation(FQuat::MakeFromEuler(FVector(0, -90, 90)));
 			}
-			else if (color == EChessColor::BLACK)
+			else if (color == EChessColor::BLACKCHESS)
 			{
 				ChessMask->SetRelativeRotation(FQuat::MakeFromEuler(FVector(0, -90, -90)));
 			}
@@ -107,7 +107,7 @@ void AChesses::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard
 void AChesses::BeginPlay()
 {
 	Super::BeginPlay();
-	if (MyColor == EChessColor::BLACK && GameState->GetBattleType() == EBattleType::P2_AI)
+	if (MyColor == EChessColor::BLACKCHESS && GameState->GetBattleType() == EBattleType::P2_AI)
 	{
 		bSelectable = false; // 棋子属于AI，不可被选中
 	}

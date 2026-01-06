@@ -11,16 +11,16 @@ AChess_Jiang::AChess_Jiang() : Super()
 void AChess_Jiang::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard2P> board2P)
 {
 	Super::Init(color, pos, board2P);
-	if (color == EChessColor::RED)
+	if (color == EChessColor::REDCHESS)
 	{
 		ChessMask->SetDecalMaterial(OM::GetObject<UMaterialInterface>(PATH_MI_CHESSMASK_RAD_JIANG));
 	}
-	else if (color == EChessColor::BLACK)
+	else if (color == EChessColor::BLACKCHESS)
 	{
 		ChessMask->SetDecalMaterial(OM::GetObject<UMaterialInterface>(PATH_MI_CHESSMASK_BLACK_JIANG));
 	}
 
-	if (color == EChessColor::RED)
+	if (color == EChessColor::REDCHESS)
 	{
 		MyName = UTF8_TO_TCHAR("帥");
 	}
@@ -33,7 +33,7 @@ void AChess_Jiang::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessB
 void AChess_Jiang::Defeated()
 {
 	Super::Defeated();
-	GameState->NotifyGameOver(MyColor == EChessColor::BLACK ? EChessColor::RED : EChessColor::BLACK); // 通知游戏状态，游戏获胜
+	GameState->NotifyGameOver(MyColor == EChessColor::BLACKCHESS ? EChessColor::REDCHESS : EChessColor::BLACKCHESS); // 通知游戏状态，游戏获胜
 }
 
 void AChess_Jiang::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target)

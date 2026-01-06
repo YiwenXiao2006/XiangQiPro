@@ -22,7 +22,7 @@ private:
 
 	UUserWidget* BasicUI;
 
-	UUserWidget* PauseUI;
+	TWeakObjectPtr<UUserWidget> PauseUI;
 
 	TArray<UUserWidget*> ui_stack;
 

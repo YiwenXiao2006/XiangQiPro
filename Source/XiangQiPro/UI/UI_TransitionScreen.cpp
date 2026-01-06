@@ -59,6 +59,8 @@ void UUI_TransitionScreen::NativeTick(const FGeometry& MyGeometry, float InDelta
 		}
 	}
 
+	OnFadingDelegate.ExecuteIfBound(NewFadeTime / FadeTime); // 正在淡化回调，传入淡化进度百分比
+
 	Image_Background->SetColorAndOpacity(FLinearColor(FadeColor.R, FadeColor.G, FadeColor.B,
 		(FadeAlpha.Y - FadeAlpha.X) * (NewFadeTime / FadeTime) + FadeAlpha.X));
 }
@@ -86,16 +88,21 @@ void UUI_TransitionScreen::Init(UUIManager* InUIManager, float FromAlpha, float 
 	bReverse = bInReverse;
 }
 
-void UUI_TransitionScreen::Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FFadedFinishedDelegate InDelegate, float InStayTime, bool bInReverse)
+void UUI_TransitionScreen::Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FOnFadeFinishedDynamic InDelegate, float InStayTime, bool bInReverse)
 {
 	UIManager = InUIManager;
 	FadeAlpha = FVector2D(FromAlpha, ToAlpha);
 	FadeTime = InFadeTime;
 	NewFadeTime = 0.f;
 	FadeColor = InFadeColor;
-	Delegate_D = InDelegate;
+	Delegate_DYNAMIC = InDelegate;
 	StayTime = InStayTime;
 	bReverse = bInReverse;
+}
+
+void UUI_TransitionScreen::SetOnFadingDelegate(FOnFadingDelegate InDelegate)
+{
+	OnFadingDelegate = InDelegate;
 }
 
 void UUI_TransitionScreen::EndStay()
@@ -112,7 +119,7 @@ void UUI_TransitionScreen::EndFade()
 		return;
 	}
 	Delegate.ExecuteIfBound();
-	Delegate_D.ExecuteIfBound();
+	Delegate_DYNAMIC.ExecuteIfBound();
 
 	if (IsValid(UIManager))
 	{

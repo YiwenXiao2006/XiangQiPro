@@ -59,6 +59,10 @@ protected:
 
 	void InitAudio();
 
+	void OnViewportResized(FViewport* Viewport, uint32 Param);
+
+	void UpdateFilmbackAspectRatio();
+
 	// 更新相机聚焦
 	UFUNCTION(BlueprintCallable, Category = "Camera")
 	void UpdateCameraFocus();
@@ -106,6 +110,10 @@ private:
 	// 基础相机角度（基于初始位置计算）
 	float BaseHorizontalAngle = 0.0f;
 	float BaseVerticalAngle = 0.0f;
+
+	// 基准裁剪比例（16:9）
+	float BaseFilmbackWidth = 32.f;
+	float BaseFilmbackHeight = 18.f;
 
 	// 是否已启用鼠标输入
 	bool bMouseInputEnabled = false;

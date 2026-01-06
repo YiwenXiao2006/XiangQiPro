@@ -9,7 +9,8 @@
 #include "UI_TransitionScreen.generated.h"
 
 DECLARE_DELEGATE(FOnFadeFinished);
-DECLARE_DYNAMIC_DELEGATE(FFadedFinishedDelegate);
+DECLARE_DYNAMIC_DELEGATE(FOnFadeFinishedDynamic);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnFadingDelegate, float, value);
 
 typedef UUI_TransitionScreen UI_TransitionScreen;
 
@@ -48,7 +49,9 @@ private:
 
 	FOnFadeFinished Delegate = FOnFadeFinished();
 
-	FFadedFinishedDelegate Delegate_D = FFadedFinishedDelegate();
+	FOnFadeFinishedDynamic Delegate_DYNAMIC = FOnFadeFinishedDynamic();
+
+	FOnFadingDelegate OnFadingDelegate = FOnFadingDelegate();
 
 public:
 
@@ -92,7 +95,10 @@ public:
 	void Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FOnFadeFinished InDelegate, float InStayTime = 0, bool bInReverse = false);
 
 	UFUNCTION(BlueprintCallable)
-	void Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FFadedFinishedDelegate InDelegate, float InStayTime = 0, bool bInReverse = false);
+	void Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FOnFadeFinishedDynamic InDelegate, float InStayTime = 0, bool bInReverse = false);
+
+	UFUNCTION(BlueprintCallable)
+	void SetOnFadingDelegate(FOnFadingDelegate InDelegate);
 
 	/* 结束淡化停留回调 */
 	UFUNCTION()

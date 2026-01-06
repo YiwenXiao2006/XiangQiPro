@@ -8,6 +8,8 @@
 
 typedef UUI_Main_Base UI_Main_Base;
 
+class ACameraMainActor;
+
 /**
  * 主场景基本UI
  */
@@ -15,5 +17,14 @@ UCLASS()
 class XIANGQIPRO_API UUI_Main_Base : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<ACameraMainActor> MainCamera;
+
+public:
+
+	void Init(TObjectPtr<ACameraMainActor> InCamera);
 	
 };

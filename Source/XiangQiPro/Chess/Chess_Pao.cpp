@@ -11,11 +11,11 @@ AChess_Pao::AChess_Pao()
 void AChess_Pao::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard2P> board2P)
 {
 	Super::Init(color, pos, board2P);
-	if (color == EChessColor::RED)
+	if (color == EChessColor::REDCHESS)
 	{
 		ChessMask->SetDecalMaterial(OM::GetObject<UMaterialInterface>(PATH_MI_CHESSMASK_RAD_PAO));
 	}
-	else if (color == EChessColor::BLACK)
+	else if (color == EChessColor::BLACKCHESS)
 	{
 		ChessMask->SetDecalMaterial(OM::GetObject<UMaterialInterface>(PATH_MI_CHESSMASK_BLACK_PAO));
 	}

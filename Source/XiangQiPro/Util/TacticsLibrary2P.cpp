@@ -1,5 +1,6 @@
 ﻿// Copyright 2026 Ultimate Player All Rights Reserved.
 
+
 #include "TacticsLibrary2P.h"
 #include "../GameObject/ChessBoard2P.h"
 #include "../Chess/Chesses.h"
@@ -142,7 +143,7 @@ bool UTacticsLibrary2P::DetectFork(const FChessMove2P& move, EChessColor color, 
     board2P->MakeTestMove(move);
 
     // 检查移动后的棋子是否能同时攻击多个重要棋子
-    EChessColor opponentColor = (color == EChessColor::BLACK) ? EChessColor::RED : EChessColor::BLACK;
+    EChessColor opponentColor = (color == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
 
     TArray<TPair<EChessType, Position>> threatenedPieces;
     int32 totalThreatValue = 0;
@@ -192,7 +193,7 @@ bool UTacticsLibrary2P::DetectPin(const FChessMove2P& move, EChessColor color, i
 {
     if (!board2P.IsValid()) return false;
 
-    EChessColor opponentColor = (color == EChessColor::BLACK) ? EChessColor::RED : EChessColor::BLACK;
+    EChessColor opponentColor = (color == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
 
     // 检查这个走法是否创造了牵制
     // 牵制：移动棋子后，让对方的某个棋子无法移动（因为移动会暴露更重要的棋子）
@@ -282,7 +283,7 @@ bool UTacticsLibrary2P::DiscoveredAttack(const FChessMove2P& move, EChessColor c
 
     // 模拟走法前，检查移动的棋子后面是否有己方棋子
     bool hasAttackBehind = false;
-    EChessColor opponentColor = (color == EChessColor::BLACK) ? EChessColor::RED : EChessColor::BLACK;
+    EChessColor opponentColor = (color == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
 
     // 检查直线方向
     int32 directions[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
@@ -393,7 +394,7 @@ bool UTacticsLibrary2P::Skewer(const FChessMove2P& move, EChessColor color, int3
         return false;
     }
 
-    EChessColor opponentColor = (color == EChessColor::BLACK) ? EChessColor::RED : EChessColor::BLACK;
+    EChessColor opponentColor = (color == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
 
     // 检查目标棋子后面是否有更重要的棋子
     bool hasValuableBehind = false;
@@ -450,7 +451,7 @@ bool UTacticsLibrary2P::DoubleCheck(const FChessMove2P& move, EChessColor color,
     TWeakObjectPtr<AChesses> capturedChess = board2P->GetChess(move.to.X, move.to.Y);
     board2P->MakeTestMove(move);
 
-    EChessColor opponentColor = (color == EChessColor::BLACK) ? EChessColor::RED : EChessColor::BLACK;
+    EChessColor opponentColor = (color == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
 
     // 找到对方将/帅的位置
     int32 kingX = -1, kingY = -1;
@@ -539,7 +540,7 @@ bool UTacticsLibrary2P::Sacrifice(const FChessMove2P& move, EChessColor color, i
     board2P->MakeTestMove(move);
 
     // 评估弃子后的局面优势
-    EChessColor opponentColor = (color == EChessColor::BLACK) ? EChessColor::RED : EChessColor::BLACK;
+    EChessColor opponentColor = (color == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
 
     int32 positionalAdvantage = 0;
 
@@ -583,7 +584,7 @@ bool UTacticsLibrary2P::Sacrifice(const FChessMove2P& move, EChessColor color, i
 
     // 检查重要位置的控制
     TArray<Position> keyPositions;
-    if (color == EChessColor::BLACK)
+    if (color == EChessColor::BLACKCHESS)
     {
         // 黑方关心的关键位置：中心、对方半场等
         keyPositions.Add(Position(4, 4)); // 中心
@@ -637,7 +638,7 @@ bool UTacticsLibrary2P::DefensiveTactic(const FChessMove2P& move, EChessColor co
     TWeakObjectPtr<AChesses> capturedChess = board2P->GetChess(move.to.X, move.to.Y);
     board2P->MakeTestMove(move);
 
-    EChessColor opponentColor = (color == EChessColor::BLACK) ? EChessColor::RED : EChessColor::BLACK;
+    EChessColor opponentColor = (color == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
 
     // 检查走法后是否解除了威胁
     bool removesThreat = false;
@@ -715,8 +716,8 @@ bool UTacticsLibrary2P::PositionalTactic(const FChessMove2P& move, EChessColor c
         {
             positionalScore += 15;
         }
-        if ((color == EChessColor::BLACK && move.to.X >= 5) ||
-            (color == EChessColor::RED && move.to.X <= 4)) // 对方半场
+        if ((color == EChessColor::BLACKCHESS && move.to.X >= 5) ||
+            (color == EChessColor::REDCHESS && move.to.X <= 4)) // 对方半场
         {
             positionalScore += 20;
         }
@@ -729,8 +730,8 @@ bool UTacticsLibrary2P::PositionalTactic(const FChessMove2P& move, EChessColor c
             positionalScore += 25;
         }
         // 车在对方将门有奖励
-        if ((color == EChessColor::BLACK && move.to.X == 8 && (move.to.Y == 3 || move.to.Y == 5)) ||
-            (color == EChessColor::RED && move.to.X == 1 && (move.to.Y == 3 || move.to.Y == 5)))
+        if ((color == EChessColor::BLACKCHESS && move.to.X == 8 && (move.to.Y == 3 || move.to.Y == 5)) ||
+            (color == EChessColor::REDCHESS && move.to.X == 1 && (move.to.Y == 3 || move.to.Y == 5)))
         {
             positionalScore += 30;
         }
@@ -742,8 +743,8 @@ bool UTacticsLibrary2P::PositionalTactic(const FChessMove2P& move, EChessColor c
         {
             positionalScore += 15;
         }
-        if ((color == EChessColor::BLACK && move.to.X == 7) ||
-            (color == EChessColor::RED && move.to.X == 2)) // 兵林
+        if ((color == EChessColor::BLACKCHESS && move.to.X == 7) ||
+            (color == EChessColor::REDCHESS && move.to.X == 2)) // 兵林
         {
             positionalScore += 20;
         }
@@ -751,8 +752,8 @@ bool UTacticsLibrary2P::PositionalTactic(const FChessMove2P& move, EChessColor c
 
     case EChessType::BING:
         // 兵过河、占据中心有奖励
-        if ((color == EChessColor::BLACK && move.to.X <= 4) ||
-            (color == EChessColor::RED && move.to.X >= 5)) // 过河
+        if ((color == EChessColor::BLACKCHESS && move.to.X <= 4) ||
+            (color == EChessColor::REDCHESS && move.to.X >= 5)) // 过河
         {
             positionalScore += 20;
         }
@@ -768,7 +769,7 @@ bool UTacticsLibrary2P::PositionalTactic(const FChessMove2P& move, EChessColor c
 
     // 控制关键点的奖励
     TArray<Position> keyPoints;
-    if (color == EChessColor::BLACK)
+    if (color == EChessColor::BLACKCHESS)
     {
         keyPoints.Add(Position(4, 4)); // 中心
         keyPoints.Add(Position(5, 4)); // 河界

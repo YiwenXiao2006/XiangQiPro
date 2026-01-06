@@ -1,4 +1,4 @@
-// Copyright 2026 Ultimate Player All Rights Reserved.
+ï»¿// Copyright 2026 Ultimate Player All Rights Reserved.
 
 #include "CameraMainActor.h"
 #include "CineCameraComponent.h"
@@ -16,7 +16,7 @@ ACameraMainActor::ACameraMainActor()
 	// Set this actor to call Tick() every frame
 	PrimaryActorTick.bCanEverTick = true;
 
-	// ³¡¾°¸ù×é¼ş
+	// åœºæ™¯æ ¹ç»„ä»¶
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	RootComponent = SceneRoot;
 
@@ -24,16 +24,16 @@ ACameraMainActor::ACameraMainActor()
 	CineCameraComponent = CreateDefaultSubobject<UCineCameraComponent>(TEXT("CineCamera"));
 	CineCameraComponent->SetupAttachment(SceneRoot);
 
-	// ´´½¨ÒôÆµ×é¼ş
+	// åˆ›å»ºéŸ³é¢‘ç»„ä»¶
 	MainAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("MainAudio"));
 	MainAudio->SetupAttachment(CineCameraComponent);
 
-	// Ä¬ÈÏÖµ
+	// é»˜è®¤å€¼
 	FocusTarget = nullptr;
 	CameraDistance = 800.0f;
 	CameraHeightOffset = 150.0f;
 
-	// ³õÊ¼»¯Êó±êÏà¹Ø±äÁ¿
+	// åˆå§‹åŒ–é¼ æ ‡ç›¸å…³å˜é‡
 	MouseSensitivity = 0.1f;
 	MaxHorizontalOffset = 5.0f;
 	MaxVerticalOffset = 3.0f;
@@ -43,10 +43,10 @@ ACameraMainActor::ACameraMainActor()
 	TargetMouseX = 0.0f;
 	TargetMouseY = 0.0f;
 	BaseHorizontalAngle = 0.0f;
-	BaseVerticalAngle = -15.0f; // Ä¬ÈÏ¸©½Ç
+	BaseVerticalAngle = -15.0f; // é»˜è®¤ä¿¯è§’
 	bMouseInputEnabled = false;
 
-	// CineCamera²ÎÊıÉèÖÃ
+	// CineCameraå‚æ•°è®¾ç½®
 	SetupCineCameraParameters();
 }
 
@@ -54,15 +54,24 @@ ACameraMainActor::ACameraMainActor()
 void ACameraMainActor::BeginPlay()
 {
 	Super::BeginPlay();
+	// ç›‘å¬çª—å£å¤§å°å˜åŒ–
+	if (GEngine && GEngine->GameViewport && GEngine->GameViewport->Viewport)
+	{
+		GEngine->GameViewport->Viewport->ViewportResizedEvent.AddUObject(
+			this, &ACameraMainActor::OnViewportResized);
+	}
+
+	// åˆå§‹åŒ–æ—¶æ›´æ–°ä¸€æ¬¡è£å‰ªæ¯”ä¾‹
+	UpdateFilmbackAspectRatio();
 
 	InitUI();
 	InitAudio();
 
-	// ¼ÆËã»ù´¡½Ç¶È£¨»ùÓÚµ±Ç°Ïà»úÎ»ÖÃºÍ³¯Ïò£©
+	// è®¡ç®—åŸºç¡€è§’åº¦ï¼ˆåŸºäºå½“å‰ç›¸æœºä½ç½®å’Œæœå‘ï¼‰
 	CalculateBaseAngles();
 
 	UpdateCameraFocus();
-	SetupMouseInput(); // ÉèÖÃÊó±êÊäÈë
+	SetupMouseInput(); // è®¾ç½®é¼ æ ‡è¾“å…¥
 }
 
 void ACameraMainActor::InitUI()
@@ -73,11 +82,11 @@ void ACameraMainActor::InitUI()
 		if (HUD)
 		{
 			UI_Main_Base* Base = CreateWidget<UI_Main_Base>(GetWorld(), HUD->Class_Main_Base);
+			Base->Init(this);
 
 			if (UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>())
 			{
-				ULogger::Log("111");
-				UIManager->Init(Base); // ³õÊ¼»¯ÓÃ»§½çÃæ¹ÜÀíÆ÷
+				UIManager->Init(Base); // åˆå§‹åŒ–ç”¨æˆ·ç•Œé¢ç®¡ç†å™¨
 			}
 		}
 		else
@@ -93,11 +102,63 @@ void ACameraMainActor::InitUI()
 
 void ACameraMainActor::InitAudio()
 {
-	MainAudio->SetSound(MainMusic); // ÉèÖÃÒôÆµ×ÊÔ´
-	MainAudio->Play(); // ¿ªÊ¼²¥·Å±³¾°ÒôÀÖ
+	MainAudio->SetSound(MainMusic); // è®¾ç½®éŸ³é¢‘èµ„æº
+	MainAudio->Play(); // å¼€å§‹æ’­æ”¾èƒŒæ™¯éŸ³ä¹
 }
 
-// ¼ÆËã»ù´¡½Ç¶È
+void ACameraMainActor::OnViewportResized(FViewport* Viewport, uint32 Param)
+{
+	UpdateFilmbackAspectRatio();
+}
+
+void ACameraMainActor::UpdateFilmbackAspectRatio()
+{
+	TWeakObjectPtr<ACameraMainActor> WeakThis(this);
+	if (!WeakThis.IsValid())
+	{
+		return;
+	}
+	if (!WeakThis->CineCameraComponent)
+	{
+		ULogger::LogError(TEXT("ACameraMainActor::UpdateFilmbackAspectRatio"), TEXT("CineCameraComponent is nullptr!"));
+		return;
+	}
+
+	// è·å–è§†å£å¤§å°
+	FVector2D ViewportSize = FVector2D();
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+
+	if (ViewportSize.X <= 0 || ViewportSize.Y <= 0)
+	{
+		return;
+	}
+
+	float AspectRatio = ViewportSize.X / ViewportSize.Y;
+	float BaseAspectRatio = BaseFilmbackWidth / BaseFilmbackHeight; // 16:9 = 1.777...
+
+	// æ ¹æ®å®½é«˜æ¯”è°ƒæ•´è£å‰ªæ¯”ä¾‹
+	if (AspectRatio > BaseAspectRatio)
+	{
+		// å®½å±ï¼šä¿æŒé«˜åº¦ä¸å˜ï¼Œå¢åŠ å®½åº¦
+		CineCameraComponent->Filmback.SensorWidth = BaseFilmbackHeight * AspectRatio;
+		CineCameraComponent->Filmback.SensorHeight = BaseFilmbackHeight;
+	}
+	else
+	{
+		// çª„å±ï¼šä¿æŒå®½åº¦ä¸å˜ï¼Œå‡å°‘é«˜åº¦
+		CineCameraComponent->Filmback.SensorWidth = BaseFilmbackWidth;
+		CineCameraComponent->Filmback.SensorHeight = BaseFilmbackWidth / AspectRatio;
+	}
+
+	// å¯é€‰ï¼šé™åˆ¶æœ€å¤§/æœ€å°è£å‰ªæ¯”ä¾‹
+	CineCameraComponent->Filmback.SensorWidth = FMath::Clamp(CineCameraComponent->Filmback.SensorWidth, 10.0f, 100.0f);
+	CineCameraComponent->Filmback.SensorHeight = FMath::Clamp(CineCameraComponent->Filmback.SensorHeight, 5.0f, 50.0f);
+}
+
+// è®¡ç®—åŸºç¡€è§’åº¦
 void ACameraMainActor::CalculateBaseAngles()
 {
 	if (FocusTarget)
@@ -105,10 +166,10 @@ void ACameraMainActor::CalculateBaseAngles()
 		FVector ToCamera = GetActorLocation() - FocusTarget->GetActorLocation();
 		ToCamera.Normalize();
 
-		// ¼ÆËãË®Æ½½Ç¶È£¨Yaw£©
+		// è®¡ç®—æ°´å¹³è§’åº¦ï¼ˆYawï¼‰
 		BaseHorizontalAngle = FMath::RadiansToDegrees(FMath::Atan2(ToCamera.Y, ToCamera.X));
 
-		// ¼ÆËã´¹Ö±½Ç¶È£¨Pitch£©
+		// è®¡ç®—å‚ç›´è§’åº¦ï¼ˆPitchï¼‰
 		FVector HorizontalProjection = FVector(ToCamera.X, ToCamera.Y, 0.0f);
 		HorizontalProjection.Normalize();
 		BaseVerticalAngle = FMath::RadiansToDegrees(FMath::Asin(ToCamera.Z));
@@ -119,7 +180,7 @@ void ACameraMainActor::UpdateCameraFocus()
 {
 	if (FocusTarget)
 	{
-		// ÖØĞÂ¼ÆËã»ù´¡½Ç¶È£¨ÒÔ·ÀÄ¿±êÎ»ÖÃ±ä»¯£©
+		// é‡æ–°è®¡ç®—åŸºç¡€è§’åº¦ï¼ˆä»¥é˜²ç›®æ ‡ä½ç½®å˜åŒ–ï¼‰
 		CalculateBaseAngles();
 
 		CameraDistance = FVector::Distance(GetActorLocation(), FocusTarget->GetActorLocation());
@@ -128,7 +189,7 @@ void ACameraMainActor::UpdateCameraFocus()
 
 	EnableForPlayer(0);
 
-	// È·±£Êó±êÊäÈëÆôÓÃ
+	// ç¡®ä¿é¼ æ ‡è¾“å…¥å¯ç”¨
 	if (!bMouseInputEnabled)
 	{
 		SetupMouseInput();
@@ -145,10 +206,10 @@ void ACameraMainActor::Tick(float DeltaTime)
 		HandleMouseMovement(DeltaTime);
 	}
 
-	// ¸üĞÂÏà»úÎ»ÖÃÒÔ±£³Ö¾Û½¹Ä¿±ê
+	// æ›´æ–°ç›¸æœºä½ç½®ä»¥ä¿æŒèšç„¦ç›®æ ‡
 	if (FocusTarget)
 	{
-		// ¼ÆËã»ùÓÚÊó±êÆ«ÒÆµÄ×îÖÕ½Ç¶È
+		// è®¡ç®—åŸºäºé¼ æ ‡åç§»çš„æœ€ç»ˆè§’åº¦
 		float FinalHorizontalAngle = BaseHorizontalAngle + FMath::Clamp(
 			(CurrentMouseX - 0.5f) * 2.0f * MaxHorizontalOffset,
 			-MaxHorizontalOffset,
@@ -161,7 +222,7 @@ void ACameraMainActor::Tick(float DeltaTime)
 			MaxVerticalOffset
 		);
 
-		// Çò×ø±ê¼ÆËãÏà»úÎ»ÖÃ
+		// çƒåæ ‡è®¡ç®—ç›¸æœºä½ç½®
 		FVector TargetLocation = FocusTarget->GetActorLocation();
 		float Theta = FMath::DegreesToRadians(FinalHorizontalAngle);
 		float Phi = FMath::DegreesToRadians(FinalVerticalAngle);
@@ -174,109 +235,114 @@ void ACameraMainActor::Tick(float DeltaTime)
 		FVector NewCameraLocation = TargetLocation + Offset;
 		SetActorLocation(NewCameraLocation);
 
-		// È·±£Ïà»úÊ¼ÖÕ¿´ÏòÄ¿±ê
+		// ç¡®ä¿ç›¸æœºå§‹ç»ˆçœ‹å‘ç›®æ ‡
 		FVector LookDirection = (TargetLocation - NewCameraLocation).GetSafeNormal();
 		FRotator NewRotation = LookDirection.Rotation();
 		NewRotation.Yaw += RotationZOffset;
 		SetActorRotation(NewRotation);
 
-		// ¸üĞÂ¶Ô½¹¾àÀë
+		// æ›´æ–°å¯¹ç„¦è·ç¦»
 		float CurrentFocusDistance = FVector::Distance(NewCameraLocation, TargetLocation);
 		CineCameraComponent->FocusSettings.ManualFocusDistance = CurrentFocusDistance;
 	}
 }
 
-// ÎªÍæ¼ÒÆôÓÃÕâ¸öÏà»ú
+// ä¸ºç©å®¶å¯ç”¨è¿™ä¸ªç›¸æœº
 void ACameraMainActor::EnableForPlayer(int32 PlayerIndex)
 {
-	// »ñÈ¡Ö¸¶¨Ë÷ÒıµÄÍæ¼Ò¿ØÖÆÆ÷
+	// è·å–æŒ‡å®šç´¢å¼•çš„ç©å®¶æ§åˆ¶å™¨
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, PlayerIndex);
 	if (PlayerController && CineCameraComponent)
 	{
-		// ½«Ïà»úÉèÖÃÎªÊÓÍ¼Ä¿±ê
+		// å°†ç›¸æœºè®¾ç½®ä¸ºè§†å›¾ç›®æ ‡
 		PlayerController->SetViewTargetWithBlend(this, 0);
 
-		// ½ûÓÃ×Ô¶¯¹ÜÀí»î¶¯Ïà»úÄ¿±ê
+		// ç¦ç”¨è‡ªåŠ¨ç®¡ç†æ´»åŠ¨ç›¸æœºç›®æ ‡
 		PlayerController->bAutoManageActiveCameraTarget = false;
 	}
 }
 
-// ÉèÖÃCineCamera²ÎÊı
+// è®¾ç½®CineCameraå‚æ•°
 void ACameraMainActor::SetupCineCameraParameters()
 {
 	if (!CineCameraComponent) return;
 
-	// ÊÓÒ°ÉèÖÃ
+	// è§†é‡è®¾ç½®
 	CineCameraComponent->SetFieldOfView(60.0f);
 	CineCameraComponent->Filmback.SensorWidth = 36.0f;
 	CineCameraComponent->Filmback.SensorHeight = 24.0f;
 
-	// ¾µÍ·ÉèÖÃ
+	// é•œå¤´è®¾ç½®
 	CineCameraComponent->LensSettings.MinFocalLength = 20.0f;
 	CineCameraComponent->LensSettings.MaxFocalLength = 200.0f;
-	CineCameraComponent->LensSettings.MinFStop = 1.2f;  // ¹âÈ¦·¶Î§
+	CineCameraComponent->LensSettings.MinFStop = 1.2f;  // å…‰åœˆèŒƒå›´
 	CineCameraComponent->LensSettings.MaxFStop = 22.0f;
 
-	// µ±Ç°¾µÍ·ºÍ¹âÈ¦
-	CineCameraComponent->CurrentFocalLength = 30.0f; // 30mm¾µÍ·
-	CineCameraComponent->CurrentAperture = 2.8f;     // ¹âÈ¦f/2.8
+	// å½“å‰é•œå¤´å’Œå…‰åœˆ
+	CineCameraComponent->CurrentFocalLength = 30.0f; // 30mmé•œå¤´
+	CineCameraComponent->CurrentAperture = 2.8f;     // å…‰åœˆf/2.8
 
-	// ¶Ô½¹ÉèÖÃ£¨ÊÖ¶¯¶Ô½¹£©
+	// å¯¹ç„¦è®¾ç½®ï¼ˆæ‰‹åŠ¨å¯¹ç„¦ï¼‰
 	CineCameraComponent->FocusSettings.FocusMethod = ECameraFocusMethod::Manual;
 	CineCameraComponent->FocusSettings.ManualFocusDistance = 500.0f;
 
-	// ¹âÈ¦Ò¶Æ¬ÊıÁ¿ºÍĞÎ×´
+	// å…‰åœˆå¶ç‰‡æ•°é‡å’Œå½¢çŠ¶
 	CineCameraComponent->LensSettings.DiaphragmBladeCount = 9;
 }
 
-// ÉèÖÃĞÂµÄ¾Û½¹Ä¿±ê
+// è®¾ç½®æ–°çš„èšç„¦ç›®æ ‡
 void ACameraMainActor::SetFocusTarget(AActor* NewTarget)
 {
 	FocusTarget = NewTarget;
 
 	if (FocusTarget)
 	{
-		// ÖØĞÂ¼ÆËã»ù´¡½Ç¶È
+		// é‡æ–°è®¡ç®—åŸºç¡€è§’åº¦
 		CalculateBaseAngles();
 		UpdateCameraFocus();
 	}
 }
 
-// ÉèÖÃÊó±êÊäÈë
+// è®¾ç½®é¼ æ ‡è¾“å…¥
 void ACameraMainActor::SetupMouseInput()
 {
 	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
 	{
-		// ÆôÓÃÊó±êÊäÈë
+		// å¯ç”¨é¼ æ ‡è¾“å…¥
 		bMouseInputEnabled = true;
 
-		// ÏÔÊ¾Êó±ê¹â±ê
+		// æ˜¾ç¤ºé¼ æ ‡å…‰æ ‡
 		PlayerController->bShowMouseCursor = true;
 		PlayerController->bEnableClickEvents = true;
 		PlayerController->bEnableMouseOverEvents = true;
 	}
+
+	// åˆå§‹åŒ–æŒ‡é’ˆä½ç½®
+	HandleMouseMovement(0);
+	CurrentMouseX = TargetMouseX;
+	CurrentMouseY = TargetMouseY;
 }
 
-// ´¦ÀíÊó±êÒÆ¶¯
+// å¤„ç†é¼ æ ‡ç§»åŠ¨
 void ACameraMainActor::HandleMouseMovement(float DeltaTime)
 {
 	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
 	{
-		// »ñÈ¡Êó±êÎ»ÖÃ
+		// è·å–é¼ æ ‡ä½ç½®
 		float MouseX, MouseY;
 		PlayerController->GetMousePosition(MouseX, MouseY);
 
-		// »ñÈ¡ÊÓ¿Ú´óĞ¡
+		// è·å–è§†å£å¤§å°
 		int32 ViewportSizeX, ViewportSizeY;
 		PlayerController->GetViewportSize(ViewportSizeX, ViewportSizeY);
 
 		if (ViewportSizeX > 0 && ViewportSizeY > 0)
 		{
-			// ½«Êó±êÎ»ÖÃ¹éÒ»»¯µ½ [0, 1] ·¶Î§
+			// å°†é¼ æ ‡ä½ç½®å½’ä¸€åŒ–åˆ° [0, 1] èŒƒå›´
 			TargetMouseX = FMath::Clamp(MouseX / ViewportSizeX, 0.0f, 1.0f);
 			TargetMouseY = FMath::Clamp(MouseY / ViewportSizeY, 0.0f, 1.0f);
 
-			// Æ½»¬²åÖµµ±Ç°Öµµ½Ä¿±êÖµ
+			// å¹³æ»‘æ’å€¼å½“å‰å€¼åˆ°ç›®æ ‡å€¼
 			CurrentMouseX = FMath::FInterpTo(CurrentMouseX, TargetMouseX, DeltaTime, 5.0f);
 			CurrentMouseY = FMath::FInterpTo(CurrentMouseY, TargetMouseY, DeltaTime, 5.0f);
 		}

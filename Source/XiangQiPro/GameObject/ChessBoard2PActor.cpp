@@ -60,8 +60,8 @@ void AChessBoard2PActor::GenerateChesses(TWeakObjectPtr<UChessBoard2P> board2P)
     AChess_Jv::StaticClass(), AChess_Ma::StaticClass(), AChess_Xiang::StaticClass(), AChess_Shi::StaticClass(), AChess_Jiang::StaticClass(), AChess_Shi::StaticClass(), AChess_Xiang::StaticClass(), AChess_Ma::StaticClass(), AChess_Jv::StaticClass(),
     AChess_Pao::StaticClass(), AChess_Pao::StaticClass(), AChess_Bing::StaticClass(), AChess_Bing::StaticClass(), AChess_Bing::StaticClass(), AChess_Bing::StaticClass(), AChess_Bing::StaticClass() };
 
-#define RED EChessColor::RED
-#define BLACK EChessColor::BLACK
+#define RED EChessColor::REDCHESS
+#define BLACK EChessColor::BLACKCHESS
 
     TArray<EChessColor> Colors = { RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, RED, 
     BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK };

@@ -78,66 +78,21 @@ void UUIManager::FinishUI()
 {
 	if (ui_stack.IsEmpty())
 	{
-		if (PauseUI) // 仅当暂停界面存在时才允许隐藏基础UI
+		if (PauseUI.IsValid()) // 仅当暂停界面存在时才允许隐藏基础UI
 		{
 			SetUIVisibility(BasicUI, false); // 隐藏基础UI
-			AddUI(PauseUI); // 添加暂停界面
+			AddUI(PauseUI.Get()); // 添加暂停界面
 
-			// 调用暂停事件
-			TArray<AActor*> AllActors;
-			TArray<UUserWidget*> AllWidgets;
-
-			// 获取所有继承接口的对象
-			UGameplayStatics::GetAllActorsWithInterface(this, UIF_GameState::StaticClass(), AllActors);
-			UWidgetBlueprintLibrary::GetAllWidgetsWithInterface(this, AllWidgets, UIF_GameState::StaticClass(), false);
-
-			TArray<UObject*> AllObject(AllActors);
-			AllObject.Append(AllWidgets);
-
-			for (UObject* object : AllObject)
-			{
-				IIF_GameState* IF = Cast<IIF_GameState>(object);
-				if (!IF)
-				{
-					// Directly call the functions in the blueprint
-					IF->Execute_GamePause(object);
-					continue;
-				}
-
-				IF->GamePause(object);
-			}
+			EXEC_GAMEPAUSE(); // 调用暂停事件
 		}
 	}
 	else
 	{
 		if (UUserWidget* pop_ui = ui_stack.Pop())
 		{
-			// 调用恢复游戏事件
 			if (pop_ui == PauseUI)
 			{
-				// 调用暂停事件
-				TArray<AActor*> AllActors;
-				TArray<UUserWidget*> AllWidgets;
-
-				// 获取所有继承接口的对象
-				UGameplayStatics::GetAllActorsWithInterface(this, UIF_GameState::StaticClass(), AllActors);
-				UWidgetBlueprintLibrary::GetAllWidgetsWithInterface(this, AllWidgets, UIF_GameState::StaticClass(), false);
-
-				TArray<UObject*> AllObject(AllActors);
-				AllObject.Append(AllWidgets);
-
-				for (UObject* object : AllObject)
-				{
-					IIF_GameState* IF = Cast<IIF_GameState>(object);
-					if (!IF)
-					{
-						// Directly call the functions in the blueprint
-						IF->Execute_GameResume(object);
-						continue;
-					}
-
-					IF->GameResume(object);
-				}
+				EXEC_GAMERESUME(); // 调用恢复游戏事件
 			}
 
 			pop_ui->RemoveFromParent(); // 移除顶层UI

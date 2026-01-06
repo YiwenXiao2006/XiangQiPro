@@ -23,9 +23,9 @@ enum class EChessType : uint8
 UENUM(BlueprintType)
 enum class EChessColor : uint8
 {
-    RED = 0 UMETA(DisplayName = "红方"),
-    BLACK = 1 UMETA(DisplayName = "黑方"),
-    GREEN = 2 UMETA(DisplayName = "绿方")
+    REDCHESS = 0 UMETA(DisplayName = "红方"),
+    BLACKCHESS = 1 UMETA(DisplayName = "黑方"),
+    GREENCHESS = 2 UMETA(DisplayName = "绿方")
 };
 
 /**

@@ -153,7 +153,7 @@ bool UChessBoard2P::IsValidPosition(int32 x, int32 y) const
 
 bool UChessBoard2P::IsInPalace(int32 x, int32 y, EChessColor color) const
 {
-    if (color == EChessColor::RED) 
+    if (color == EChessColor::REDCHESS) 
     {
         return x >= 0 && x <= 2 && y >= 3 && y <= 5;
     }
@@ -305,7 +305,7 @@ bool UChessBoard2P::AreKingsFacingEachOther() const
             TWeakObjectPtr<AChesses> chess = GetChess(i, j);
             if (chess.IsValid() && chess->GetType() == EChessType::JIANG)
             {
-                if (chess->GetColor() == EChessColor::BLACK)
+                if (chess->GetColor() == EChessColor::BLACKCHESS)
                 {
                     blackKingX = i;
                     blackKingY = j;
@@ -356,7 +356,7 @@ int32 UChessBoard2P::CountPiecesBetweenKings() const
             TWeakObjectPtr<AChesses> chess = GetChess(i, j);
             if (chess.IsValid() && chess->GetType() == EChessType::JIANG)
             {
-                if (chess->GetColor() == EChessColor::BLACK)
+                if (chess->GetColor() == EChessColor::BLACKCHESS)
                 {
                     blackKingX = i;
                     blackKingY = j;
@@ -392,7 +392,7 @@ int32 UChessBoard2P::CountPiecesBetweenKings() const
 void UChessBoard2P::GenerateKingDirectAttackMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const
 {
     // 查找对方将/帅的位置
-    EChessColor opponentColor = (color == EChessColor::BLACK) ? EChessColor::RED : EChessColor::BLACK;
+    EChessColor opponentColor = (color == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
     int32 opponentKingX = -1, opponentKingY = -1;
 
     for (int32 i = 0; i < 10; i++)
@@ -472,7 +472,7 @@ void UChessBoard2P::GenerateXiangMoves(int32 x, int32 y, EChessColor color, TArr
         if (IsValidPosition(newX, newY))
         {
             // 检查是否过河
-            if ((color == EChessColor::BLACK && newX >= 5) || (color == EChessColor::RED && newX <= 4))
+            if ((color == EChessColor::BLACKCHESS && newX >= 5) || (color == EChessColor::REDCHESS && newX <= 4))
             {
                 // 检查象眼是否被塞
                 int32 eyeX = x + directions[i][0] / 2;
@@ -613,7 +613,7 @@ void UChessBoard2P::GenerateBingMoves(int32 x, int32 y, EChessColor color, TArra
     // 兵/卒的移动方向
     TArray<TPair<int32, int32>> directions;
 
-    if (color == EChessColor::BLACK) 
+    if (color == EChessColor::BLACKCHESS) 
     {
         directions.Add({ -1, 0 });  // 黑方向下移动
         if (x <= 4)  // 过河后可以左右移动
@@ -677,7 +677,7 @@ bool UChessBoard2P::IsKingInCheck(EChessColor color)
         return true;
     }
 
-    EChessColor opponentColor = (color == EChessColor::RED) ? EChessColor::BLACK : EChessColor::RED;
+    EChessColor opponentColor = (color == EChessColor::REDCHESS) ? EChessColor::BLACKCHESS : EChessColor::REDCHESS;
 
     // 检查每个对手棋子是否能攻击到将/帅
     for (int32 i = 0; i < 10; i++)
@@ -751,7 +751,7 @@ bool UChessBoard2P::CanJiangAttack(int32 fromX, int32 fromY, int32 toX, int32 to
 
     // 特殊规则：将帅对脸情况下的攻击
     // 查找对方将的位置
-    EChessColor opponentColor = (color == EChessColor::BLACK) ? EChessColor::RED : EChessColor::BLACK;
+    EChessColor opponentColor = (color == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
     int32 opponentKingX = -1, opponentKingY = -1;
 
     for (int32 i = 0; i < 10; i++)
@@ -808,7 +808,7 @@ bool UChessBoard2P::CanXiangAttack(int32 fromX, int32 fromY, int32 toX, int32 to
         return false;
 
     // 不能过河
-    if ((color == EChessColor::BLACK && toX > 4) || (color == EChessColor::RED && toX < 5))
+    if ((color == EChessColor::BLACKCHESS && toX > 4) || (color == EChessColor::REDCHESS && toX < 5))
         return false;
 
     // 检查象眼是否被塞住
@@ -894,7 +894,7 @@ bool UChessBoard2P::CanBingAttack(int32 fromX, int32 fromY, int32 toX, int32 toY
     int32 dx = toX - fromX;
     int32 dy = toY - fromY;
 
-    if (color == EChessColor::BLACK)
+    if (color == EChessColor::BLACKCHESS)
     {
         // 黑兵：向下移动，或过河后左右移动
         if (dx == -1 && dy == 0) return true; // 向下

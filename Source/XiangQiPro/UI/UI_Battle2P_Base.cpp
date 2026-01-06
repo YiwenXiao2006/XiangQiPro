@@ -109,7 +109,7 @@ FString UUI_Battle2P_Base::GetMoveNotation(TWeakObjectPtr<AChesses> targetChess,
     columnMapBlack.Add(0, TEXT("1"));
 
     // 选择行号映射
-    TMap<int32, FString> columnMap = (targetChess->GetColor() == EChessColor::RED) ? columnMapRed : columnMapBlack;
+    TMap<int32, FString> columnMap = (targetChess->GetColor() == EChessColor::REDCHESS) ? columnMapRed : columnMapBlack;
 
     // 获取起始位置和目标位置
     FString fromColumn = columnMap.Contains(move.from.Y) ? columnMap[move.from.Y] : TEXT("?");
@@ -124,7 +124,7 @@ FString UUI_Battle2P_Base::GetMoveNotation(TWeakObjectPtr<AChesses> targetChess,
 
     // 对于红方，向上移动是"进"，向下是"退"
     // 对于黑方，向下移动是"进"，向上是"退"（因为黑方在棋盘上方）
-    if (targetChess->GetColor() == EChessColor::RED)
+    if (targetChess->GetColor() == EChessColor::REDCHESS)
     {
         if (deltaX > 0)
         {
@@ -226,7 +226,7 @@ FString UUI_Battle2P_Base::GetEnhancedMoveNotation(TWeakObjectPtr<AChesses> targ
     if (sameTypeCount > 1)
     {
         FString positionMarker;
-        if (chessColor == EChessColor::RED)
+        if (chessColor == EChessColor::REDCHESS)
         {
             // 红方：前面的棋子用"前"，后面的用"后"
             if (currentIndex == 1)

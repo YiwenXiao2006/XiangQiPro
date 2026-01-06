@@ -11,16 +11,16 @@ AChess_Bing::AChess_Bing()
 void AChess_Bing::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard2P> board2P)
 {
 	Super::Init(color, pos, board2P);
-	if (color == EChessColor::RED)
+	if (color == EChessColor::REDCHESS)
 	{
 		ChessMask->SetDecalMaterial(OM::GetObject<UMaterialInterface>(PATH_MI_CHESSMASK_RAD_BING));
 	}
-	else if (color == EChessColor::BLACK)
+	else if (color == EChessColor::BLACKCHESS)
 	{
 		ChessMask->SetDecalMaterial(OM::GetObject<UMaterialInterface>(PATH_MI_CHESSMASK_BLACK_BING));
 	}
 
-	if (color == EChessColor::BLACK)
+	if (color == EChessColor::BLACKCHESS)
 	{
 		MyName = UTF8_TO_TCHAR("卒");
 	}

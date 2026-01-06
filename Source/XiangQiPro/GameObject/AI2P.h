@@ -65,7 +65,7 @@ public:
     void StopThinkingImmediately();
 
     // 评估函数
-    int32 Evaluate(EChessColor color = EChessColor::BLACK);
+    int32 Evaluate(EChessColor color = EChessColor::BLACKCHESS);
 
     // 位置价值评估
     void InitializePositionScores(int32 positionScores[2][10][9]);
