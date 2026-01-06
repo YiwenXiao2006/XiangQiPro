@@ -38,10 +38,10 @@ ACameraMainActor::ACameraMainActor()
 	MaxHorizontalOffset = 5.0f;
 	MaxVerticalOffset = 3.0f;
 
-	CurrentMouseX = 0.0f;
-	CurrentMouseY = 0.0f;
-	TargetMouseX = 0.0f;
-	TargetMouseY = 0.0f;
+	CurrentMouseX = 0.5f;
+	CurrentMouseY = 0.5f;
+	TargetMouseX = 0.5f;
+	TargetMouseY = 0.5f;
 	BaseHorizontalAngle = 0.0f;
 	BaseVerticalAngle = -15.0f; // 默认俯角
 	bMouseInputEnabled = false;
@@ -67,11 +67,11 @@ void ACameraMainActor::BeginPlay()
 	InitUI();
 	InitAudio();
 
-	// 计算基础角度（基于当前相机位置和朝向）
-	CalculateBaseAngles();
-
 	UpdateCameraFocus();
 	SetupMouseInput(); // 设置鼠标输入
+
+	// 计算基础角度（基于当前相机位置和朝向）
+	CalculateBaseAngles();
 }
 
 void ACameraMainActor::InitUI()
@@ -316,11 +316,6 @@ void ACameraMainActor::SetupMouseInput()
 		PlayerController->bEnableClickEvents = true;
 		PlayerController->bEnableMouseOverEvents = true;
 	}
-
-	// 初始化指针位置
-	HandleMouseMovement(0);
-	CurrentMouseX = TargetMouseX;
-	CurrentMouseY = TargetMouseY;
 }
 
 // 处理鼠标移动
@@ -338,9 +333,13 @@ void ACameraMainActor::HandleMouseMovement(float DeltaTime)
 
 		if (ViewportSizeX > 0 && ViewportSizeY > 0)
 		{
-			// 将鼠标位置归一化到 [0, 1] 范围
-			TargetMouseX = FMath::Clamp(MouseX / ViewportSizeX, 0.0f, 1.0f);
-			TargetMouseY = FMath::Clamp(MouseY / ViewportSizeY, 0.0f, 1.0f);
+			// 仅在鼠标在窗口内时调整目标位置
+			if ((MouseX <= ViewportSizeX && MouseX > 0) && (MouseY <= ViewportSizeY && MouseY > 0))
+			{
+				// 将鼠标位置归一化到 [0, 1] 范围
+				TargetMouseX = FMath::Clamp(MouseX / ViewportSizeX, 0.0f, 1.0f);
+				TargetMouseY = FMath::Clamp(MouseY / ViewportSizeY, 0.0f, 1.0f);
+			}
 
 			// 平滑插值当前值到目标值
 			CurrentMouseX = FMath::FInterpTo(CurrentMouseX, TargetMouseX, DeltaTime, 5.0f);
