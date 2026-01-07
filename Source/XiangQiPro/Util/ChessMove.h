@@ -24,6 +24,11 @@ struct FChessMove2P
     {
         return score < other.score;
     }
+
+    bool operator==(const FChessMove2P& other) const
+    {
+        return from == other.from && to == other.to && score == other.score;
+    }
 };
 
 UCLASS()

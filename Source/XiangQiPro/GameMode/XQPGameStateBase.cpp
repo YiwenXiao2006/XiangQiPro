@@ -20,8 +20,8 @@
 
 void AXQPGameStateBase::UpdateScore()
 {
-    score1 = AI2P->Evaluate(EChessColor::REDCHESS);
-    score2 = AI2P->Evaluate(EChessColor::BLACKCHESS);
+    //score1 = AI2P->Evaluate(EChessColor::REDCHESS);
+    //score2 = AI2P->Evaluate(EChessColor::BLACKCHESS);
     if (HUD2P.IsValid())
     {
         HUD2P->UpdateScore(score1, score2);
@@ -157,9 +157,6 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
             AI2P = NewObject<UAI2P>(this);
             AI2P->AddToRoot();
         }
-
-        AI2P->SetDepth(4); // 搜索深度
-        AI2P->SetBoard(board2P); // 棋盘状态
     }
     else
     {
@@ -215,7 +212,7 @@ void AXQPGameStateBase::RunAI2P()
          [this](UAsyncWorker* WorkerInstance)
          {
              // 获取最佳移动方式和要移动的棋子 
-             AIMovedChess = AI2P->GetBestMove(AIMove2P);
+             AIMove2P = AI2P->GetBestMove(EChessColor::BLACKCHESS, EAI2PDifficulty::Hard, 12000);
 
              while (WorkerInstance->IsPaused())
              {
@@ -227,6 +224,7 @@ void AXQPGameStateBase::RunAI2P()
              if (State != EAsyncWorkerState::Cancelled) // 任务正常执行完成
              {
                  // 应用棋子的移动
+                 AIMovedChess = board2P->GetChess(AIMove2P.from.X, AIMove2P.from.Y);
                  ApplyMove2P(AIMovedChess, AIMove2P);
                  ULogger::Log(TEXT("AXQPGameStateBase::RunAI2P: AI FINISH"));
              }
