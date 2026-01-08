@@ -57,6 +57,8 @@ public:
     // 设置棋子
     void SetChess(int32 x, int32 y, TWeakObjectPtr<AChesses> Chess);
 
+    void DebugCheckBoardState() const;
+
     // 移动棋子,仅AI计算使用,你不应该调用这个函数
     void MakeTestMove(const FChessMove2P& move);
 

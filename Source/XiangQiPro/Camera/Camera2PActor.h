@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Interface/IF_GameState.h"
+#include "XiangQiPro/Interface/IF_GameState.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
@@ -74,7 +74,7 @@ public:
     float ZoomInterpSpeed = 5.0f;
 
     // 鼠标滚轮缩放灵敏度
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Touch Control")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
     float MouseWheelZoomSensitivity = 50.0f;
 
     // 触摸控制参数

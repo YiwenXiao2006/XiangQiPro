@@ -46,10 +46,6 @@ class XIANGQIPRO_API AXQPGameStateBase : public AGameStateBase, public IIF_GameS
 
 private:
 
-	TWeakObjectPtr<UAI2P> AI2P;
-
-	TWeakObjectPtr<UChessBoard2P> board2P;
-
 	TWeakObjectPtr<AChessBoard2PActor> board2PActor;
 
 	EBattleType battleType;
@@ -86,6 +82,12 @@ private:
 	TWeakObjectPtr<AChesses> AIMovedChess;
 
 public:
+
+	UPROPERTY(BlueprintReadOnly)
+	TWeakObjectPtr<UAI2P> AI2P;
+
+	UPROPERTY(BlueprintReadOnly)
+	TWeakObjectPtr<UChessBoard2P> board2P;
 
 	AXQPGameStateBase();
 

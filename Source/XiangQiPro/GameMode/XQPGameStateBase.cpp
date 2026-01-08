@@ -3,25 +3,25 @@
 #include "XQPGameStateBase.h"
 #include "Async/Async.h"
 
-#include "../Chess/Chesses.h"
-#include "../GameObject/AI2P.h"
-#include "../GameObject/ChessBoard2P.h"
-#include "../GameObject/ChessBoard2PActor.h"
+#include "XiangQiPro/Chess/Chesses.h"
+#include "XiangQiPro/GameObject/AI2P.h"
+#include "XiangQiPro/GameObject/ChessBoard2P.h"
+#include "XiangQiPro/GameObject/ChessBoard2PActor.h"
 
-#include "../UI/UI_Battle2P_Base.h"
+#include "XiangQiPro/UI/UI_Battle2P_Base.h"
 
-#include "../Util/Logger.h"
-#include "../Util/ChessMove.h"
-#include "../Util/ChessInfo.h"
-#include "../Util/AsyncWorker.h"
+#include "XiangQiPro/Util/Logger.h"
+#include "XiangQiPro/Util/ChessMove.h"
+#include "XiangQiPro/Util/ChessInfo.h"
+#include "XiangQiPro/Util/AsyncWorker.h"
 
 #include <Kismet/GameplayStatics.h>
 #include <Blueprint/WidgetBlueprintLibrary.h>
 
 void AXQPGameStateBase::UpdateScore()
 {
-    //score1 = AI2P->Evaluate(EChessColor::REDCHESS);
-    //score2 = AI2P->Evaluate(EChessColor::BLACKCHESS);
+    score1 = AI2P->Evaluate(EChessColor::REDCHESS);
+    score2 = AI2P->Evaluate(EChessColor::BLACKCHESS);
     if (HUD2P.IsValid())
     {
         HUD2P->UpdateScore(score1, score2);
@@ -174,7 +174,6 @@ void AXQPGameStateBase::ApplyMove2P(TWeakObjectPtr<AChesses> target, FChessMove2
     {
         ULogger::LogWarning(TEXT("AXQPGameStateBase::ApplyMove2P"), TEXT("HUD2P is nullptr!"));
     }
-    SwitchBattleTurn(); // 轮换执棋
     board2P->ApplyMove(target, move);
 }
 
@@ -185,6 +184,7 @@ void AXQPGameStateBase::OnFinishMove2P()
         ULogger::Log(TEXT("AXQPGameStateBase::OnFinishMove2P: GameOver"));
         return;
     }
+    SwitchBattleTurn(); // 轮换执棋
 
     switch (battleTurn) // 表示当前该谁了
     {

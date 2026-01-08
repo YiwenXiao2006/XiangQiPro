@@ -95,7 +95,7 @@ public:
 	void Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FOnFadeFinished InDelegate, float InStayTime = 0, bool bInReverse = false);
 
 	UFUNCTION(BlueprintCallable)
-	void Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FOnFadeFinishedDynamic InDelegate, float InStayTime = 0, bool bInReverse = false);
+	UUI_TransitionScreen* Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FOnFadeFinishedDynamic InDelegate, float InStayTime = 0, bool bInReverse = false);
 
 	UFUNCTION(BlueprintCallable)
 	void SetOnFadingDelegate(FOnFadingDelegate InDelegate);

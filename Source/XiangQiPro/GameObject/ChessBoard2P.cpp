@@ -130,6 +130,28 @@ void UChessBoard2P::ApplyMove(TWeakObjectPtr<AChesses> target, FChessMove2P move
     target->ApplyMove(move);
 }
 
+// 在UChessBoard2P类中添加
+void UChessBoard2P::DebugCheckBoardState() const
+{
+    FString boardState;
+    for (int32 y = 9; y >= 0; y--) {
+        for (int32 x = 0; x < 9; x++) {
+            auto chess = GetChess(x, y);
+            if (chess.IsValid()) {
+                FString typeStr = UEnum::GetValueAsString(chess->GetType());
+                boardState += typeStr.Left(1); // 取首字母
+            }
+            else {
+                boardState += ".";
+            }
+            boardState += " ";
+        }
+        boardState += "\n";
+    }
+    ULogger::Log("Current Board State:");
+    ULogger::Log(boardState);
+}
+
 void UChessBoard2P::MakeTestMove(const FChessMove2P& move)
 {
     TWeakObjectPtr<AChesses> chess = GetChess(move.from.X, move.from.Y);

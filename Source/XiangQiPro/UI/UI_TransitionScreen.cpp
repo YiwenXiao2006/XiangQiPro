@@ -88,7 +88,7 @@ void UUI_TransitionScreen::Init(UUIManager* InUIManager, float FromAlpha, float 
 	bReverse = bInReverse;
 }
 
-void UUI_TransitionScreen::Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FOnFadeFinishedDynamic InDelegate, float InStayTime, bool bInReverse)
+UUI_TransitionScreen* UUI_TransitionScreen::Init(UUIManager* InUIManager, float FromAlpha, float ToAlpha, float InFadeTime, FLinearColor InFadeColor, FOnFadeFinishedDynamic InDelegate, float InStayTime, bool bInReverse)
 {
 	UIManager = InUIManager;
 	FadeAlpha = FVector2D(FromAlpha, ToAlpha);
@@ -98,6 +98,7 @@ void UUI_TransitionScreen::Init(UUIManager* InUIManager, float FromAlpha, float 
 	Delegate_DYNAMIC = InDelegate;
 	StayTime = InStayTime;
 	bReverse = bInReverse;
+	return this;
 }
 
 void UUI_TransitionScreen::SetOnFadingDelegate(FOnFadingDelegate InDelegate)

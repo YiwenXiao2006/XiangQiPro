@@ -2,6 +2,7 @@
 
 
 #include "UIManager.h"
+#include <XiangQiPro/Util/Logger.h>
 #include <Kismet/GameplayStatics.h>
 #include <Blueprint/WidgetBlueprintLibrary.h>
 
@@ -82,7 +83,7 @@ void UUIManager::FinishUI()
 		{
 			SetUIVisibility(BasicUI, false); // 隐藏基础UI
 			AddUI(PauseUI.Get()); // 添加暂停界面
-
+			ULogger::Log(TEXT("OnGamePause"));
 			EXEC_GAMEPAUSE(); // 调用暂停事件
 		}
 	}

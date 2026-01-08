@@ -15,9 +15,15 @@ struct FChessMove2P
     Position from;
     Position to;
     int32 score;  // 用于评估走法的得分
+    bool bIsValid = true;
 
     FChessMove2P(Position f = Position(), Position t = Position(), int32 s = 0) : from(f), to(t), score(s)
     {
+    }
+
+    bool IsValid() const
+    {
+        return bIsValid;
     }
 
     bool operator<(const FChessMove2P& other) const

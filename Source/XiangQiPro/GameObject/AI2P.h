@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "../Util/ChessInfo.h"
-#include "../Util/ChessMove.h"
-#include "../Util/Clock.h"
+#include "XiangQiPro/Util/ChessInfo.h"
+#include "XiangQiPro/Util/ChessMove.h"
+#include "XiangQiPro/Util/Clock.h"
 
 #include "CoreMinimal.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -114,6 +114,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Chess AI")
     FChessMove2P GetBestMove(EChessColor InAiColor, EAI2PDifficulty InDifficulty, int32 InMaxTime = 10000);
 
+    // 获取玩家得分
+    int32 Evaluate(EChessColor color);
+
     // 立刻停止搜索
     UFUNCTION(BlueprintCallable, Category = "Chess AI")
     void StopThinkingImmediately();
@@ -129,6 +132,10 @@ private:
     int32 MaxTime = 10000;
 
     FClock Clock;
+
+    EChessGamePhase GamePhase = EChessGamePhase::Opening;
+
+    FChessMove2P OnlyOneMove = FChessMove2P();
 
     // 弱引用棋盘对象
     TWeakObjectPtr<UChessBoard2P> board2P;
@@ -155,8 +162,6 @@ private:
     FTacticEvalResult RecognizeShuangCheCuo(EChessColor AiColor);
     // 识别兵线推进战术
     FTacticEvalResult RecognizeBingXianTuiJin(EChessColor AiColor);
-    // 判断走法是否为战术铺垫/执行
-    bool IsTacticMove(const FChessMove2P& Move, EChessColor AiColor, EChessTactic& OutTacticType);
 
     // === 防守核心函数 ===
     // 预判对方是否有致命进攻（直接威胁将/帅）
@@ -183,8 +188,23 @@ private:
     int32 EvaluateAttackSynergy(const FChessMove2P& Move, EChessColor AiColor);
     // 判断是否控制关键点位
     bool IsControlKeyPoint(int32 X, int32 Y, EKeyChessPoint PointType, EChessColor Color);
-    // 识别对方防守弱点（返回弱点位置和分值）
-    FIntPoint FindOpponentDefenseWeakness(EChessColor AiColor);
+
+    // === 评估核心函数 ===
+
+    // 开局专项评估
+    int32 EvaluateOpeningFeatures(EChessColor AiColor);
+    // 中后期专项评估
+    int32 EvaluateMidEndgameFeatures(EChessColor AiColor);
+    // 快速棋子出动评估
+    int32 EvaluatePieceDevelopmentQuick(EChessColor Color);
+    // 评估中路保护（开局阶段特别重要）
+    int32 EvaluateCenterProtection(EChessColor AiColor);
+    // 评估中路控制权
+    int32 EvaluateCenterControl(EChessColor AiColor);
+    // 评估兵种组合配合
+    int32 EvaluatePieceCombination(int32 X, int32 Y, EChessColor Color);
+    // 评估线路控制协同
+    int32 EvaluateLineControlCooperation(int32 X, int32 Y, EChessColor Color);
 
     // 判断棋子是否有根（有己方保护）
     bool IsPieceRooted(int32 X, int32 Y, EChessColor Color);
@@ -194,6 +214,15 @@ private:
     bool IsPieceIsolated(int32 X, int32 Y, EChessColor Color);
     // 检查核心棋子是否被攻击
     bool IsKeyPieceUnderAttack(EChessColor Color);
+    // 检查是否是马的好位置
+    bool IsGoodHorsePosition(int32 X, int32 Y, EChessColor Color);
+    // 检查是否是炮的威胁位置
+    bool IsThreateningPaoPosition(int32 X, int32 Y, EChessColor Color);
+    // 检查面对面将军是否有风险
+    bool IsRiskyFaceToFaceCheck(const FChessMove2P& Move, EChessColor Color);
+
+    TWeakObjectPtr<AChesses> FindAttacker(FIntPoint Position, EChessColor AttackerColor);
+
 
     // Zobrist哈希值生成（用于棋盘局面唯一标识）
     uint64 GenerateZobristKey();
@@ -261,7 +290,7 @@ private:
 
     // 防守权重
     static const int32 BONUS_BLOCK_LETHAL_ATTACK = 1200;  // 拦截致命进攻奖励（最高优先级）
-    static const int32 BONUS_FILL_DEFENSE_WEAKNESS = 600; // 补位防守漏洞奖励
+    static const int32 BONUS_FILL_DEFENSE_WEAKNESS = 500; // 补位防守漏洞奖励
     static const int32 PENALTY_DEFENSE_WEAK = -800;       // 防守弱点惩罚
     static const int32 BONUS_ACTIVE_DEFENSE = 200;        // 主动防守（卡位）奖励
 
@@ -269,8 +298,8 @@ private:
     static const int32 BONUS_ATTACK_SYNERGY = 1000;       // 进攻协同奖励
     static const int32 BONUS_CONTROL_KEY_POINT = 700;     // 控关键点位奖励
     static const int32 BONUS_ATTACK_WEAKNESS = 800;       // 攻击对方弱点奖励
-    static const int32 BONUS_CHECK = 1800;                // 将军奖励
-    static const int32 BONUS_SAFE_CAPTURE = 300;          // 安全吃子奖励（进一步降低）
+    static const int32 BONUS_CHECK = 1850;                // 将军奖励
+    static const int32 BONUS_SAFE_CAPTURE = 400;          // 安全吃子奖励（进一步降低）
 
     // 战术奖励权重（核心，高于普通攻防）
     static const int32 BONUS_TACTIC_EXECUTE = 2000;       // 执行战术奖励

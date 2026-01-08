@@ -2,7 +2,8 @@
 
 
 #include "XQPPlayerController.h"
-#include "../UI/UIManager.h"
+#include "XiangQiPro/Util/Logger.h"
+#include "XiangQiPro/UI/UIManager.h"
 
 void AXQPPlayerController::BeginPlay()
 {
@@ -21,11 +22,12 @@ void AXQPPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	// °ó¶¨Esc°´¼ü
-	InputComponent->BindAction("Escape", IE_Pressed, this, &AXQPPlayerController::OnEscapePressed).bExecuteWhenPaused = true;
+	InputComponent->BindAction(TEXT("Escape"), IE_Pressed, this, &AXQPPlayerController::OnEscapePressed).bExecuteWhenPaused = true;
 }
 
 void AXQPPlayerController::OnEscapePressed()
 {
+	ULogger::Log(TEXT("AXQPPlayerController::OnEscapePressed"));
 	if (UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>())
 	{
 		UIManager->FinishUI();
