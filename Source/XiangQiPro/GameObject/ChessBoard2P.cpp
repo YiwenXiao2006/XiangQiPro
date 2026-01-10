@@ -1,4 +1,4 @@
-// Copyright 2026 Ultimate Player All Rights Reserved.
+ï»¿// Copyright 2026 Ultimate Player All Rights Reserved.
 
 #include "ChessBoard2P.h"
 #include "ChessBoard2PActor.h"
@@ -18,7 +18,7 @@ void UChessBoard2P::InitializeBoard(TWeakObjectPtr<AChessBoard2PActor> ChessBoar
         return;
     }
 
-    // Çå¿ÕÆåÅÌ
+    // æ¸…ç©ºæ£‹ç›˜
     for (int32 i = 0; i < 10; i++)
     {
         TArray<TWeakObjectPtr<AChesses>> ChessList = {};
@@ -38,11 +38,11 @@ void UChessBoard2P::InitializeBoard(TWeakObjectPtr<AChessBoard2PActor> ChessBoar
         SettingPoints.Add(PointList);
     }
 
-    // ´ÓActor´¦»ñÈ¡±ß½ç×ø±ê
+    // ä»Actorå¤„è·å–è¾¹ç•Œåæ ‡
     FVector BorderLoc1 = ChessBoard2PActor->BorderLoc1;
     FVector BorderLoc2 = ChessBoard2PActor->BorderLoc2;
     
-    // ¼ÆËã¼ä¸ô³¤¶È
+    // è®¡ç®—é—´éš”é•¿åº¦
     float LengthX = (BorderLoc2.X - BorderLoc1.X) / 9.f;
     float LengthY = (BorderLoc2.Y - BorderLoc1.Y) / 8.f;
 
@@ -119,10 +119,10 @@ void UChessBoard2P::ApplyMove(TWeakObjectPtr<AChesses> target, FChessMove2P move
         return;
     }
 
-    TWeakObjectPtr<AChesses> CaptureChess = GetChess(move.to.X, move.to.Y); // ³¢ÊÔ»ñÈ¡Ô­ÓĞÎ»ÖÃµÄÆå×Ó
-    if (CaptureChess.IsValid()) // ´æÔÚÆå×Ó
+    TWeakObjectPtr<AChesses> CaptureChess = GetChess(move.to.X, move.to.Y); // å°è¯•è·å–åŸæœ‰ä½ç½®çš„æ£‹å­
+    if (CaptureChess.IsValid()) // å­˜åœ¨æ£‹å­
     {
-        CaptureChess->Defeated(); // Æå×Ó±»³Ôµô
+        CaptureChess->Defeated(); // æ£‹å­è¢«åƒæ‰
     }
 
     SetChess(move.to.X, move.to.Y, target);
@@ -130,19 +130,44 @@ void UChessBoard2P::ApplyMove(TWeakObjectPtr<AChesses> target, FChessMove2P move
     target->ApplyMove(move);
 }
 
-// ÔÚUChessBoard2PÀàÖĞÌí¼Ó
+// åœ¨UChessBoard2Pç±»ä¸­æ·»åŠ 
 void UChessBoard2P::DebugCheckBoardState() const
 {
-    FString boardState;
+    FString boardState = "===================\n";
     for (int32 y = 9; y >= 0; y--) {
         for (int32 x = 0; x < 9; x++) {
-            auto chess = GetChess(x, y);
+            auto chess = GetChess(y, x);
             if (chess.IsValid()) {
-                FString typeStr = UEnum::GetValueAsString(chess->GetType());
-                boardState += typeStr.Left(1); // È¡Ê××ÖÄ¸
+                switch (chess->GetType())
+                {
+                case EChessType::BING:
+                    boardState += UTF8_TO_TCHAR("å…µ");
+                    break;
+                case EChessType::JIANG:
+                    boardState += UTF8_TO_TCHAR("å°†");
+                    break;
+                case EChessType::SHI:
+                    boardState += UTF8_TO_TCHAR("å£«");
+                    break;
+                case EChessType::XIANG:
+                    boardState += UTF8_TO_TCHAR("è±¡");
+                    break;
+                case EChessType::MA:
+                    boardState += UTF8_TO_TCHAR("é©¬");
+                    break;
+                case EChessType::JV:
+                    boardState += UTF8_TO_TCHAR("è½¦");
+                    break;
+                case EChessType::PAO:
+                    boardState += UTF8_TO_TCHAR("ç‚®");
+                    break;
+                default:
+                    boardState += UTF8_TO_TCHAR("ï¼Ÿ");
+                    break;
+                }
             }
             else {
-                boardState += ".";
+                boardState += UTF8_TO_TCHAR("ã€‚");
             }
             boardState += " ";
         }
@@ -189,7 +214,7 @@ int32 UChessBoard2P::CountPiecesBetween(int32 fromX, int32 fromY, int32 toX, int
 {
     int32 count = 0;
 
-    if (fromX == toX) // Í¬Ò»ĞĞ
+    if (fromX == toX) // åŒä¸€è¡Œ
     {
         int32 minY = FMath::Min(fromY, toY);
         int32 maxY = FMath::Max(fromY, toY);
@@ -202,7 +227,7 @@ int32 UChessBoard2P::CountPiecesBetween(int32 fromX, int32 fromY, int32 toX, int
             }
         }
     }
-    else if (fromY == toY) // Í¬Ò»ÁĞ
+    else if (fromY == toY) // åŒä¸€åˆ—
     {
         int32 minX = FMath::Min(fromX, toX);
         int32 maxX = FMath::Max(fromX, toX);
@@ -215,7 +240,7 @@ int32 UChessBoard2P::CountPiecesBetween(int32 fromX, int32 fromY, int32 toX, int
             }
         }
     }
-    // Èç¹û²»ÊÇÖ±Ïß£¬·µ»Ø-1±íÊ¾ÎŞĞ§
+    // å¦‚æœä¸æ˜¯ç›´çº¿ï¼Œè¿”å›-1è¡¨ç¤ºæ— æ•ˆ
     else
     {
         return -1;
@@ -291,7 +316,7 @@ TArray<FChessMove2P> UChessBoard2P::GenerateMovesForChess(int32 x, int32 y, TWea
 
 void UChessBoard2P::GenerateJiangMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const
 {
-    // ½«/Ë§µÄÒÆ¶¯·½Ïò£ºÉÏ¡¢ÏÂ¡¢×ó¡¢ÓÒ
+    // å°†/å¸…çš„ç§»åŠ¨æ–¹å‘ï¼šä¸Šã€ä¸‹ã€å·¦ã€å³
     int32 directions[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
 
     for (int32 i = 0; i < 4; i++)
@@ -299,7 +324,7 @@ void UChessBoard2P::GenerateJiangMoves(int32 x, int32 y, EChessColor color, TArr
         int32 newX = x + directions[i][0];
         int32 newY = y + directions[i][1];
 
-        // ¼ì²éÊÇ·ñÔÚ¾Å¹¬¸ñÄÚ
+        // æ£€æŸ¥æ˜¯å¦åœ¨ä¹å®«æ ¼å†…
         if (IsInPalace(newX, newY, color))
         {
             TWeakObjectPtr<AChesses> target = GetChess(newX, newY);
@@ -310,13 +335,13 @@ void UChessBoard2P::GenerateJiangMoves(int32 x, int32 y, EChessColor color, TArr
         }
     }
 
-    // Ìí¼Ó½«Ë§Ö±½Ó¹¥»÷µÄ×ß·¨
+    // æ·»åŠ å°†å¸…ç›´æ¥æ”»å‡»çš„èµ°æ³•
     GenerateKingDirectAttackMoves(x, y, color, moves);
 }
 
 bool UChessBoard2P::AreKingsFacingEachOther() const
 {
-    // ²éÕÒºÚ½«ºÍºìË§µÄÎ»ÖÃ
+    // æŸ¥æ‰¾é»‘å°†å’Œçº¢å¸…çš„ä½ç½®
     int32 blackKingX = -1, blackKingY = -1;
     int32 redKingX = -1, redKingY = -1;
 
@@ -341,15 +366,15 @@ bool UChessBoard2P::AreKingsFacingEachOther() const
         }
     }
 
-    // Èç¹ûÃ»ÕÒµ½½«»òË§£¬·µ»Øfalse
+    // å¦‚æœæ²¡æ‰¾åˆ°å°†æˆ–å¸…ï¼Œè¿”å›false
     if (blackKingX == -1 || redKingX == -1)
         return false;
 
-    // ½«Ë§±ØĞëÔÚÍ¬Ò»ÁĞ£¨y×ø±êÏàÍ¬£©
+    // å°†å¸…å¿…é¡»åœ¨åŒä¸€åˆ—ï¼ˆyåæ ‡ç›¸åŒï¼‰
     if (blackKingY != redKingY)
         return false;
 
-    // ¼ì²éÖĞ¼äÊÇ·ñÓĞÆå×Ó×èµ²
+    // æ£€æŸ¥ä¸­é—´æ˜¯å¦æœ‰æ£‹å­é˜»æŒ¡
     int32 minX = FMath::Min(blackKingX, redKingX);
     int32 maxX = FMath::Max(blackKingX, redKingX);
 
@@ -358,16 +383,16 @@ bool UChessBoard2P::AreKingsFacingEachOther() const
         TWeakObjectPtr<AChesses> chess = GetChess(x, blackKingY);
         if (chess.IsValid() && chess->GetType() != EChessType::EMPTY)
         {
-            return false; // ÖĞ¼äÓĞÆå×Ó×èµ²
+            return false; // ä¸­é—´æœ‰æ£‹å­é˜»æŒ¡
         }
     }
 
-    return true; // ½«Ë§Ãæ¶ÔÃæÇÒÖĞ¼äÎŞ×èµ²
+    return true; // å°†å¸…é¢å¯¹é¢ä¸”ä¸­é—´æ— é˜»æŒ¡
 }
 
 int32 UChessBoard2P::CountPiecesBetweenKings() const
 {
-    // ²éÕÒºÚ½«ºÍºìË§µÄÎ»ÖÃ
+    // æŸ¥æ‰¾é»‘å°†å’Œçº¢å¸…çš„ä½ç½®
     int32 blackKingX = -1, blackKingY = -1;
     int32 redKingX = -1, redKingY = -1;
 
@@ -413,7 +438,7 @@ int32 UChessBoard2P::CountPiecesBetweenKings() const
 
 void UChessBoard2P::GenerateKingDirectAttackMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const
 {
-    // ²éÕÒ¶Ô·½½«/Ë§µÄÎ»ÖÃ
+    // æŸ¥æ‰¾å¯¹æ–¹å°†/å¸…çš„ä½ç½®
     EChessColor opponentColor = (color == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
     int32 opponentKingX = -1, opponentKingY = -1;
 
@@ -434,7 +459,7 @@ void UChessBoard2P::GenerateKingDirectAttackMoves(int32 x, int32 y, EChessColor 
 
     if (opponentKingX == -1) return;
 
-    // ¼ì²éÊÇ·ñÔÚÍ¬Ò»ÁĞÇÒÖĞ¼äÎŞÆå×Ó
+    // æ£€æŸ¥æ˜¯å¦åœ¨åŒä¸€åˆ—ä¸”ä¸­é—´æ— æ£‹å­
     if (y == opponentKingY)
     {
         int32 minX = FMath::Min(x, opponentKingX);
@@ -451,7 +476,7 @@ void UChessBoard2P::GenerateKingDirectAttackMoves(int32 x, int32 y, EChessColor 
             }
         }
 
-        // Èç¹ûÖĞ¼äÃ»ÓĞÆå×Ó£¬¿ÉÒÔ³Ôµô¶Ô·½½«/Ë§
+        // å¦‚æœä¸­é—´æ²¡æœ‰æ£‹å­ï¼Œå¯ä»¥åƒæ‰å¯¹æ–¹å°†/å¸…
         if (!hasPieceBetween)
         {
             moves.Add(FChessMove2P(Position(x, y), Position(opponentKingX, opponentKingY)));
@@ -461,7 +486,7 @@ void UChessBoard2P::GenerateKingDirectAttackMoves(int32 x, int32 y, EChessColor 
 
 void UChessBoard2P::GenerateShiMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const
 {
-    // Ê¿/ÊËµÄÒÆ¶¯·½Ïò£ºËÄ¸öĞ±·½Ïò
+    // å£«/ä»•çš„ç§»åŠ¨æ–¹å‘ï¼šå››ä¸ªæ–œæ–¹å‘
     int32 directions[4][2] = { {-1, -1}, {-1, 1}, {1, -1}, {1, 1} };
 
     for (int32 i = 0; i < 4; i++) 
@@ -469,7 +494,7 @@ void UChessBoard2P::GenerateShiMoves(int32 x, int32 y, EChessColor color, TArray
         int32 newX = x + directions[i][0];
         int32 newY = y + directions[i][1];
 
-        // ¼ì²éÊÇ·ñÔÚ¾Å¹¬¸ñÄÚ
+        // æ£€æŸ¥æ˜¯å¦åœ¨ä¹å®«æ ¼å†…
         if (IsInPalace(newX, newY, color)) 
         {
             TWeakObjectPtr<AChesses> target = GetChess(newX, newY);
@@ -483,7 +508,7 @@ void UChessBoard2P::GenerateShiMoves(int32 x, int32 y, EChessColor color, TArray
 
 void UChessBoard2P::GenerateXiangMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const
 {
-    // Ïó/ÏàµÄÒÆ¶¯·½Ïò£ºËÄ¸öĞ±·½Ïò£¨×ßÌï×Ö£©
+    // è±¡/ç›¸çš„ç§»åŠ¨æ–¹å‘ï¼šå››ä¸ªæ–œæ–¹å‘ï¼ˆèµ°ç”°å­—ï¼‰
     int32 directions[4][2] = { {-2, -2}, {-2, 2}, {2, -2}, {2, 2} };
 
     for (int32 i = 0; i < 4; i++) 
@@ -493,10 +518,10 @@ void UChessBoard2P::GenerateXiangMoves(int32 x, int32 y, EChessColor color, TArr
 
         if (IsValidPosition(newX, newY))
         {
-            // ¼ì²éÊÇ·ñ¹ıºÓ
+            // æ£€æŸ¥æ˜¯å¦è¿‡æ²³
             if ((color == EChessColor::BLACKCHESS && newX >= 5) || (color == EChessColor::REDCHESS && newX <= 4))
             {
-                // ¼ì²éÏóÑÛÊÇ·ñ±»Èû
+                // æ£€æŸ¥è±¡çœ¼æ˜¯å¦è¢«å¡
                 int32 eyeX = x + directions[i][0] / 2;
                 int32 eyeY = y + directions[i][1] / 2;
 
@@ -515,10 +540,10 @@ void UChessBoard2P::GenerateXiangMoves(int32 x, int32 y, EChessColor color, TArr
 
 void UChessBoard2P::GenerateMaMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const
 {
-    // Âí/‚ØµÄÒÆ¶¯·½Ïò£º°Ë¸ö·½Ïò£¨×ßÈÕ×Ö£©
+    // é©¬/å‚Œçš„ç§»åŠ¨æ–¹å‘ï¼šå…«ä¸ªæ–¹å‘ï¼ˆèµ°æ—¥å­—ï¼‰
     int32 directions[8][2] = { {-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
                            {1, -2}, {1, 2}, {2, -1}, {2, 1} };
-    // ÂíÍÈÎ»ÖÃ
+    // é©¬è…¿ä½ç½®
     int32 horseLegs[8][2] = { {-1, 0}, {-1, 0}, {0, -1}, {0, 1},
                           {0, -1}, {0, 1}, {1, 0}, {1, 0} };
 
@@ -529,7 +554,7 @@ void UChessBoard2P::GenerateMaMoves(int32 x, int32 y, EChessColor color, TArray<
 
         if (IsValidPosition(newX, newY)) 
         {
-            // ¼ì²éÂíÍÈÊÇ·ñ±»°í
+            // æ£€æŸ¥é©¬è…¿æ˜¯å¦è¢«ç»Š
             int32 legX = x + horseLegs[i][0];
             int32 legY = y + horseLegs[i][1];
 
@@ -547,7 +572,7 @@ void UChessBoard2P::GenerateMaMoves(int32 x, int32 y, EChessColor color, TArray<
 
 void UChessBoard2P::GenerateJvMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const
 {
-    // ³µ/‚eµÄÒÆ¶¯·½Ïò£ºÉÏ¡¢ÏÂ¡¢×ó¡¢ÓÒ
+    // è½¦/ä¿¥çš„ç§»åŠ¨æ–¹å‘ï¼šä¸Šã€ä¸‹ã€å·¦ã€å³
     int32 directions[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
 
     for (int32 i = 0; i < 4; i++) 
@@ -584,7 +609,7 @@ void UChessBoard2P::GenerateJvMoves(int32 x, int32 y, EChessColor color, TArray<
 
 void UChessBoard2P::GeneratePaoMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const
 {
-    // ÅÚ/³hµÄÒÆ¶¯·½Ïò£ºÉÏ¡¢ÏÂ¡¢×ó¡¢ÓÒ
+    // ç‚®/ç ²çš„ç§»åŠ¨æ–¹å‘ï¼šä¸Šã€ä¸‹ã€å·¦ã€å³
     int32 directions[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
 
     for (int32 i = 0; i < 4; i++) 
@@ -632,13 +657,13 @@ void UChessBoard2P::GeneratePaoMoves(int32 x, int32 y, EChessColor color, TArray
 
 void UChessBoard2P::GenerateBingMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const
 {
-    // ±ø/×äµÄÒÆ¶¯·½Ïò
+    // å…µ/å’çš„ç§»åŠ¨æ–¹å‘
     TArray<TPair<int32, int32>> directions;
 
     if (color == EChessColor::BLACKCHESS) 
     {
-        directions.Add({ -1, 0 });  // ºÚ·½ÏòÏÂÒÆ¶¯
-        if (x <= 4)  // ¹ıºÓºó¿ÉÒÔ×óÓÒÒÆ¶¯
+        directions.Add({ -1, 0 });  // é»‘æ–¹å‘ä¸‹ç§»åŠ¨
+        if (x <= 4)  // è¿‡æ²³åå¯ä»¥å·¦å³ç§»åŠ¨
         {
             directions.Add({ 0, -1 });
             directions.Add({ 0, 1 });
@@ -646,8 +671,8 @@ void UChessBoard2P::GenerateBingMoves(int32 x, int32 y, EChessColor color, TArra
     }
     else 
     {
-        directions.Add({ 1, 0 });  // ºì·½ÏòÉÏÒÆ¶¯
-        if (x >= 5) // ¹ıºÓºó¿ÉÒÔ×óÓÒÒÆ¶¯
+        directions.Add({ 1, 0 });  // çº¢æ–¹å‘ä¸Šç§»åŠ¨
+        if (x >= 5) // è¿‡æ²³åå¯ä»¥å·¦å³ç§»åŠ¨
         {
             directions.Add({ 0, -1 });
             directions.Add({ 0, 1 });
@@ -672,9 +697,9 @@ void UChessBoard2P::GenerateBingMoves(int32 x, int32 y, EChessColor color, TArra
 
 bool UChessBoard2P::IsKingInCheck(EChessColor color)
 {
-    if (!IsValidPosition(0, 0)) return false; // ¼òµ¥¼ì²éÆåÅÌÊÇ·ñÓĞĞ§
+    if (!IsValidPosition(0, 0)) return false; // ç®€å•æ£€æŸ¥æ£‹ç›˜æ˜¯å¦æœ‰æ•ˆ
 
-    // ÕÒµ½½«/Ë§µÄÎ»ÖÃ
+    // æ‰¾åˆ°å°†/å¸…çš„ä½ç½®
     int32 kingX = -1, kingY = -1;
 
     for (int32 i = 0; i < 10; i++)
@@ -694,14 +719,14 @@ bool UChessBoard2P::IsKingInCheck(EChessColor color)
 
     if (kingX == -1 || kingY == -1)
     {
-        // ½«/Ë§²»´æÔÚ£¬ÕâÍ¨³£ÒâÎ¶×ÅÒÑ¾­±»½«ËÀ
+        // å°†/å¸…ä¸å­˜åœ¨ï¼Œè¿™é€šå¸¸æ„å‘³ç€å·²ç»è¢«å°†æ­»
         //ULogger::LogWarning(TEXT("UChessBoard2P::IsKingInCheck: King not found! Possibly checkmate."));
         return true;
     }
 
     EChessColor opponentColor = (color == EChessColor::REDCHESS) ? EChessColor::BLACKCHESS : EChessColor::REDCHESS;
 
-    // ¼ì²éÃ¿¸ö¶ÔÊÖÆå×ÓÊÇ·ñÄÜ¹¥»÷µ½½«/Ë§
+    // æ£€æŸ¥æ¯ä¸ªå¯¹æ‰‹æ£‹å­æ˜¯å¦èƒ½æ”»å‡»åˆ°å°†/å¸…
     for (int32 i = 0; i < 10; i++)
     {
         for (int32 j = 0; j < 9; j++)
@@ -710,7 +735,7 @@ bool UChessBoard2P::IsKingInCheck(EChessColor color)
             if (!chess.IsValid() || chess->GetColor() != opponentColor)
                 continue;
 
-            // ¼ì²éÕâ¸öÆå×ÓÊÇ·ñÄÜ¹¥»÷µ½½«/Ë§
+            // æ£€æŸ¥è¿™ä¸ªæ£‹å­æ˜¯å¦èƒ½æ”»å‡»åˆ°å°†/å¸…
             if (CanAttackPosition(i, j, kingX, kingY, opponentColor))
             {
                 return true;
@@ -721,7 +746,7 @@ bool UChessBoard2P::IsKingInCheck(EChessColor color)
     return false;
 }
 
-// ¼ì²éÖ¸¶¨Î»ÖÃµÄÆå×ÓÊÇ·ñÄÜ¹¥»÷Ä¿±êÎ»ÖÃ
+// æ£€æŸ¥æŒ‡å®šä½ç½®çš„æ£‹å­æ˜¯å¦èƒ½æ”»å‡»ç›®æ ‡ä½ç½®
 bool UChessBoard2P::CanAttackPosition(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor attackerColor) const
 {
     TWeakObjectPtr<AChesses> attacker = GetChess(fromX, fromY);
@@ -729,7 +754,7 @@ bool UChessBoard2P::CanAttackPosition(int32 fromX, int32 fromY, int32 toX, int32
 
     EChessType type = attacker->GetType();
 
-    // ¸ù¾İÆå×ÓÀàĞÍ¼ì²é¹¥»÷ÄÜÁ¦
+    // æ ¹æ®æ£‹å­ç±»å‹æ£€æŸ¥æ”»å‡»èƒ½åŠ›
     switch (type)
     {
     case EChessType::JIANG:
@@ -758,21 +783,21 @@ bool UChessBoard2P::CanAttackPosition(int32 fromX, int32 fromY, int32 toX, int32
     }
 }
 
-// ½«/Ë§µÄ¹¥»÷ÅĞ¶Ï
+// å°†/å¸…çš„æ”»å‡»åˆ¤æ–­
 bool UChessBoard2P::CanJiangAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
 {
-    // Ê×ÏÈ¼ì²é³£¹æµÄÒ»²½ÒÆ¶¯¹¥»÷
+    // é¦–å…ˆæ£€æŸ¥å¸¸è§„çš„ä¸€æ­¥ç§»åŠ¨æ”»å‡»
     if (FMath::Abs(fromX - toX) + FMath::Abs(fromY - toY) == 1)
     {
-        // Ä¿±êÎ»ÖÃ±ØĞëÔÚ¹¬µîÄÚ
+        // ç›®æ ‡ä½ç½®å¿…é¡»åœ¨å®«æ®¿å†…
         if (IsInPalace(toX, toY, color))
         {
             return true;
         }
     }
 
-    // ÌØÊâ¹æÔò£º½«Ë§¶ÔÁ³Çé¿öÏÂµÄ¹¥»÷
-    // ²éÕÒ¶Ô·½½«µÄÎ»ÖÃ
+    // ç‰¹æ®Šè§„åˆ™ï¼šå°†å¸…å¯¹è„¸æƒ…å†µä¸‹çš„æ”»å‡»
+    // æŸ¥æ‰¾å¯¹æ–¹å°†çš„ä½ç½®
     EChessColor opponentColor = (color == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
     int32 opponentKingX = -1, opponentKingY = -1;
 
@@ -791,13 +816,13 @@ bool UChessBoard2P::CanJiangAttack(int32 fromX, int32 fromY, int32 toX, int32 to
         if (opponentKingX != -1) break;
     }
 
-    // Èç¹ûÄ¿±êÎ»ÖÃ¾ÍÊÇ¶Ô·½½«µÄÎ»ÖÃ£¬ÇÒÔÚÍ¬Ò»ÁĞ£¬ÖĞ¼äÃ»ÓĞÆå×Ó£¬Ôò¿ÉÒÔ¹¥»÷
+    // å¦‚æœç›®æ ‡ä½ç½®å°±æ˜¯å¯¹æ–¹å°†çš„ä½ç½®ï¼Œä¸”åœ¨åŒä¸€åˆ—ï¼Œä¸­é—´æ²¡æœ‰æ£‹å­ï¼Œåˆ™å¯ä»¥æ”»å‡»
     if (opponentKingX != -1 && toX == opponentKingX && toY == opponentKingY)
     {
-        // ±ØĞëÔÚÍ¬Ò»ÁĞ
+        // å¿…é¡»åœ¨åŒä¸€åˆ—
         if (fromY == toY)
         {
-            // ÖĞ¼äÃ»ÓĞÆå×Ó£¬¿ÉÒÔ¹¥»÷
+            // ä¸­é—´æ²¡æœ‰æ£‹å­ï¼Œå¯ä»¥æ”»å‡»
             if (CountPiecesBetweenKings() == 0)
             {
                 return true;
@@ -808,32 +833,32 @@ bool UChessBoard2P::CanJiangAttack(int32 fromX, int32 fromY, int32 toX, int32 to
     return false;
 }
 
-// Ê¿µÄ¹¥»÷ÅĞ¶Ï
+// å£«çš„æ”»å‡»åˆ¤æ–­
 bool UChessBoard2P::CanShiAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
 {
-    // Ê¿×ßĞ±ÏßÒ»¸ñ
+    // å£«èµ°æ–œçº¿ä¸€æ ¼
     if (FMath::Abs(fromX - toX) != 1 || FMath::Abs(fromY - toY) != 1)
         return false;
 
-    // ±ØĞëÔÚ¾Å¹¬ÄÚ
+    // å¿…é¡»åœ¨ä¹å®«å†…
     if (!IsInPalace(toX, toY, color))
         return false;
 
     return true;
 }
 
-// ÏóµÄ¹¥»÷ÅĞ¶Ï
+// è±¡çš„æ”»å‡»åˆ¤æ–­
 bool UChessBoard2P::CanXiangAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
 {
-    // Ïó×ßÌï×Ö
+    // è±¡èµ°ç”°å­—
     if (FMath::Abs(fromX - toX) != 2 || FMath::Abs(fromY - toY) != 2)
         return false;
 
-    // ²»ÄÜ¹ıºÓ
+    // ä¸èƒ½è¿‡æ²³
     if ((color == EChessColor::BLACKCHESS && toX > 4) || (color == EChessColor::REDCHESS && toX < 5))
         return false;
 
-    // ¼ì²éÏóÑÛÊÇ·ñ±»Èû×¡
+    // æ£€æŸ¥è±¡çœ¼æ˜¯å¦è¢«å¡ä½
     int32 eyeX = (fromX + toX) / 2;
     int32 eyeY = (fromY + toY) / 2;
 
@@ -843,27 +868,27 @@ bool UChessBoard2P::CanXiangAttack(int32 fromX, int32 fromY, int32 toX, int32 to
     return true;
 }
 
-// ÂíµÄ¹¥»÷ÅĞ¶Ï
+// é©¬çš„æ”»å‡»åˆ¤æ–­
 bool UChessBoard2P::CanMaAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
 {
     int32 dx = FMath::Abs(fromX - toX);
     int32 dy = FMath::Abs(fromY - toY);
 
-    // Âí×ßÈÕ×Ö
+    // é©¬èµ°æ—¥å­—
     if (!((dx == 1 && dy == 2) || (dx == 2 && dy == 1)))
         return false;
 
-    // ¼ì²éÂíÍÈÊÇ·ñ±»°í
+    // æ£€æŸ¥é©¬è…¿æ˜¯å¦è¢«ç»Š
     int32 legX, legY;
     if (dx == 1)
     {
-        // Êú×Å×ßÈÕ×Ö
+        // ç«–ç€èµ°æ—¥å­—
         legX = fromX;
         legY = (fromY + toY) / 2;
     }
     else
     {
-        // ºá×Å×ßÈÕ×Ö
+        // æ¨ªç€èµ°æ—¥å­—
         legX = (fromX + toX) / 2;
         legY = fromY;
     }
@@ -874,24 +899,24 @@ bool UChessBoard2P::CanMaAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, 
     return true;
 }
 
-// ³µµÄ¹¥»÷ÅĞ¶Ï
+// è½¦çš„æ”»å‡»åˆ¤æ–­
 bool UChessBoard2P::CanJvAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
 {
-    // ³µ×ßÖ±Ïß
+    // è½¦èµ°ç›´çº¿
     if (fromX != toX && fromY != toY)
         return false;
 
-    // ¼ì²éÂ·¾¶ÉÏÊÇ·ñÓĞÆäËûÆå×Ó
+    // æ£€æŸ¥è·¯å¾„ä¸Šæ˜¯å¦æœ‰å…¶ä»–æ£‹å­
     if (CountPiecesBetween(fromX, fromY, toX, toY) > 0)
         return false;
 
     return true;
 }
 
-// ÅÚµÄ¹¥»÷ÅĞ¶Ï
+// ç‚®çš„æ”»å‡»åˆ¤æ–­
 bool UChessBoard2P::CanPaoAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
 {
-    // ÅÚ×ßÖ±Ïß
+    // ç‚®èµ°ç›´çº¿
     if (fromX != toX && fromY != toY)
         return false;
 
@@ -900,17 +925,17 @@ bool UChessBoard2P::CanPaoAttack(int32 fromX, int32 fromY, int32 toX, int32 toY,
 
     if (target.IsValid())
     {
-        // ³Ô×ÓĞèÒªÇ¡ºÃÓĞÒ»¸öÆå×Ó×÷ÎªÅÚ¼Ü
+        // åƒå­éœ€è¦æ°å¥½æœ‰ä¸€ä¸ªæ£‹å­ä½œä¸ºç‚®æ¶
         return piecesBetween == 1;
     }
     else
     {
-        // ÒÆ¶¯²»ÄÜÓĞÆå×Ó×èµ²
+        // ç§»åŠ¨ä¸èƒ½æœ‰æ£‹å­é˜»æŒ¡
         return piecesBetween == 0;
     }
 }
 
-// ±øµÄ¹¥»÷ÅĞ¶Ï
+// å…µçš„æ”»å‡»åˆ¤æ–­
 bool UChessBoard2P::CanBingAttack(int32 fromX, int32 fromY, int32 toX, int32 toY, EChessColor color) const
 {
     int32 dx = toX - fromX;
@@ -918,21 +943,21 @@ bool UChessBoard2P::CanBingAttack(int32 fromX, int32 fromY, int32 toX, int32 toY
 
     if (color == EChessColor::BLACKCHESS)
     {
-        // ºÚ±ø£ºÏòÏÂÒÆ¶¯£¬»ò¹ıºÓºó×óÓÒÒÆ¶¯
-        if (dx == -1 && dy == 0) return true; // ÏòÏÂ
+        // é»‘å…µï¼šå‘ä¸‹ç§»åŠ¨ï¼Œæˆ–è¿‡æ²³åå·¦å³ç§»åŠ¨
+        if (dx == -1 && dy == 0) return true; // å‘ä¸‹
         if (fromX <= 4)
         {
-            // ¹ıºÓºó¿ÉÒÔ×óÓÒÒÆ¶¯
+            // è¿‡æ²³åå¯ä»¥å·¦å³ç§»åŠ¨
             if (dx == 0 && (dy == 1 || dy == -1)) return true;
         }
     }
     else
     {
-        // ºì±ø£ºÏòÉÏÒÆ¶¯£¬»ò¹ıºÓºó×óÓÒÒÆ¶¯
-        if (dx == 1 && dy == 0) return true; // ÏòÉÏ
+        // çº¢å…µï¼šå‘ä¸Šç§»åŠ¨ï¼Œæˆ–è¿‡æ²³åå·¦å³ç§»åŠ¨
+        if (dx == 1 && dy == 0) return true; // å‘ä¸Š
         if (fromX >= 5)
         {
-            // ¹ıºÓºó¿ÉÒÔ×óÓÒÒÆ¶¯
+            // è¿‡æ²³åå¯ä»¥å·¦å³ç§»åŠ¨
             if (dx == 0 && (dy == 1 || dy == -1)) return true;
         }
     }

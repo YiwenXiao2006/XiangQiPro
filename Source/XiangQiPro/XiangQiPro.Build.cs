@@ -15,9 +15,13 @@ public class XiangQiPro : ModuleRules
 			"InputCore", 
 			"EnhancedInput",
             "Niagara",
-            "MoviePlayer", });
+            "MoviePlayer",
+            "Json",           // 添加 JSON 支持
+            "JsonUtilities"   // 添加 JSON 工具支持
+             });
 
-		PrivateDependencyModuleNames.AddRange(new string[] {
+
+        PrivateDependencyModuleNames.AddRange(new string[] {
             "CinematicCamera" 
         });
 

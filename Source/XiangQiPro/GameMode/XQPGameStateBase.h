@@ -10,6 +10,7 @@
 #include "XQPGameStateBase.generated.h"
 
 class UAI2P;
+class UChessMLModule;
 class UAsyncWorker;
 class UChessBoard2P;
 class UUI_Battle2P_Base;
@@ -88,6 +89,12 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<UChessBoard2P> board2P;
+
+	UPROPERTY(BlueprintReadOnly)
+	TWeakObjectPtr<UChessMLModule> MLModule;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool bEnableMachineLearning = false;
 
 	AXQPGameStateBase();
 

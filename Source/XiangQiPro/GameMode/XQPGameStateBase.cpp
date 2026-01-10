@@ -3,8 +3,9 @@
 #include "XQPGameStateBase.h"
 #include "Async/Async.h"
 
+#include "XiangQiPro/AI/AI2P.h"
+#include "XiangQiPro/AI/ChessMLModule.h"
 #include "XiangQiPro/Chess/Chesses.h"
-#include "XiangQiPro/GameObject/AI2P.h"
 #include "XiangQiPro/GameObject/ChessBoard2P.h"
 #include "XiangQiPro/GameObject/ChessBoard2PActor.h"
 
@@ -55,11 +56,15 @@ void AXQPGameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
     // 释放掉UObject对象
     if (board2P.IsValid())
         board2P->RemoveFromRoot();
-    board2P.Reset();
+    board2P = nullptr;
 
     if (AI2P.IsValid())
         AI2P->RemoveFromRoot();
-    AI2P.Reset();
+    AI2P = nullptr;
+
+    if (MLModule.IsValid())
+        MLModule->RemoveFromRoot();
+    AI2P = nullptr;
 
     board2PActor.Reset();
 
@@ -145,7 +150,7 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
     {
         if (!board2P.IsValid())
         {
-            board2P = NewObject<UChessBoard2P>(this);
+            board2P = GetGameInstance()->GetSubsystem<UChessBoard2P>();
             board2P->AddToRoot();
         }
 
@@ -154,8 +159,15 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
 
         if (!AI2P.IsValid())
         {
-            AI2P = NewObject<UAI2P>(this);
+            AI2P = GetGameInstance()->GetSubsystem<UAI2P>();
             AI2P->AddToRoot();
+        }
+
+        if (!MLModule.IsValid())
+        {
+            MLModule = NewObject<UChessMLModule>(this);
+            MLModule->AddToRoot();
+            MLModule->Initialize();
         }
     }
     else
@@ -206,13 +218,12 @@ void AXQPGameStateBase::OnFinishMove2P()
 void AXQPGameStateBase::RunAI2P()
 {
     HUD2P->SetAITurn(true);
-    AI2P->SetBoard(board2P); // 棋盘状态
 
     AIAsync = UAsyncWorker::CreateAndStartWorker(
          [this](UAsyncWorker* WorkerInstance)
          {
              // 获取最佳移动方式和要移动的棋子 
-             AIMove2P = AI2P->GetBestMove(EChessColor::BLACKCHESS, EAI2PDifficulty::Hard, 12000);
+             AIMove2P = AI2P->GetBestMove(board2P, EChessColor::BLACKCHESS, EAI2PDifficulty::Hard, 12000, bEnableMachineLearning, MLModule.Get());
 
              while (WorkerInstance->IsPaused())
              {
@@ -226,6 +237,7 @@ void AXQPGameStateBase::RunAI2P()
                  // 应用棋子的移动
                  AIMovedChess = board2P->GetChess(AIMove2P.from.X, AIMove2P.from.Y);
                  ApplyMove2P(AIMovedChess, AIMove2P);
+                 //board2P->DebugCheckBoardState();
                  ULogger::Log(TEXT("AXQPGameStateBase::RunAI2P: AI FINISH"));
              }
              else

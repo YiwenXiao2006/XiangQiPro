@@ -21,7 +21,7 @@ typedef UChessBoard2P ChessBoard2P;
  * 
  */
 UCLASS()
-class XIANGQIPRO_API UChessBoard2P : public UObject
+class XIANGQIPRO_API UChessBoard2P : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 

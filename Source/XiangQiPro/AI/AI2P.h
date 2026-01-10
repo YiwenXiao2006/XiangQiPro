@@ -35,7 +35,10 @@ struct FTranspositionEntry
     ETranspositionFlag Flag; // 条目类型
     FChessMove2P BestMove;   // 该局面的最优走法
 
-    FTranspositionEntry() : ZobristKey(0), Depth(-1), Value(0), Flag(ETranspositionFlag::Exact) {}
+    FTranspositionEntry() : ZobristKey(0), Depth(-1), Value(0), Flag(ETranspositionFlag::Exact) 
+    {
+        BestMove.bIsValid = false;
+    }
 };
 
 // 走法评分（用于排序）
@@ -97,8 +100,10 @@ struct FTacticEvalResult
     FTacticEvalResult() : TacticType(EChessTactic::None), FeasibilityScore(0) {}
 };
 
+class UChessMLModule;
+
 UCLASS()
-class XIANGQIPRO_API UAI2P : public UObject
+class XIANGQIPRO_API UAI2P : public UGameInstanceSubsystem
 {
     GENERATED_BODY()
 
@@ -111,8 +116,7 @@ public:
     UAI2P();
 
     // 核心：获取AI最优走法
-    UFUNCTION(BlueprintCallable, Category = "Chess AI")
-    FChessMove2P GetBestMove(EChessColor InAiColor, EAI2PDifficulty InDifficulty, int32 InMaxTime = 10000);
+    FChessMove2P GetBestMove(TWeakObjectPtr<UChessBoard2P> InBoard2P, EChessColor InAiColor, EAI2PDifficulty InDifficulty, int32 InMaxTime = 10000, bool bEnableMachineLearning = false, UChessMLModule* MLModule = nullptr);
 
     // 获取玩家得分
     int32 Evaluate(EChessColor color);
@@ -134,6 +138,8 @@ private:
     FClock Clock;
 
     EChessGamePhase GamePhase = EChessGamePhase::Opening;
+
+    EChessColor GlobalAIColor = EChessColor::BLACKCHESS;
 
     FChessMove2P OnlyOneMove = FChessMove2P();
 
@@ -260,6 +266,9 @@ private:
     // 缓存将/帅位置
     bool GetKingPosition(EChessColor Color, int32& OutX, int32& OutY);
 
+    // 更新置换表
+    void UpdateTranspositionTable(int32 Depth, int32 BestValue, FChessMove2P BestMove, int32 Alpha, int32 Beta);
+
     // 清空置换表
     void ClearTranspositionTable() { TranspositionTable.Empty(); }
 
@@ -268,15 +277,25 @@ private:
         switch (Difficulty)
         {
         case EAI2PDifficulty::Easy:
-            return 4;
+            return 3;
         case EAI2PDifficulty::Normal:
-            return 6;
+            return 5;
         case EAI2PDifficulty::Hard:
-            return 8;
+            return 7;
         default:
             return 4;
         }
     }
+
+    FString MoveToString(const FChessMove2P& Move) const;
+
+    FChessMove2P StringToMove(const FString& MoveString) const;
+
+    TArray<FString> GetValidMovesAsStrings(EChessColor Color) const;
+
+    FString GetCurrentBoardFEN() const;
+
+    FString GetPieceFENChar(EChessType PieceType, EChessColor Color) const;
 
     // === 调整：权重常量（强化防守/进攻组织）===
     static const int32 VALUE_JIANG = 10000;    // 将/帅
