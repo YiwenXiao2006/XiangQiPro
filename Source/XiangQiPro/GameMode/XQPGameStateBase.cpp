@@ -237,7 +237,7 @@ void AXQPGameStateBase::RunAI2P()
                  // 应用棋子的移动
                  AIMovedChess = board2P->GetChess(AIMove2P.from.X, AIMove2P.from.Y);
                  ApplyMove2P(AIMovedChess, AIMove2P);
-                 //board2P->DebugCheckBoardState();
+                 board2P->DebugCheckBoardState();
                  ULogger::Log(TEXT("AXQPGameStateBase::RunAI2P: AI FINISH"));
              }
              else

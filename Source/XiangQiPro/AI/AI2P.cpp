@@ -750,9 +750,9 @@ int32 UAI2P::EvaluateDefenseWeakness(EChessColor AiColor)
         {
             // 根据位置重要性差异化扣分
             if (Point.X == KingX && (Point.Y == KingY - 1 || Point.Y == KingY + 1))
-                WeaknessScore -= 300; // 将门正前方/后方无保护
+                WeaknessScore -= 400; // 将门正前方/后方无保护
             else if (Point.X == KingX && Point.Y == KingY)
-                WeaknessScore -= 500; // 将帅本身无保护
+                WeaknessScore -= 600; // 将帅本身无保护
             else
                 WeaknessScore -= 200; // 两侧无保护
         }
@@ -856,24 +856,21 @@ int32 UAI2P::EvaluateDoublePaoThreat(EChessColor AiColor)
         }
     }
 
-    if (OpponentCannons.Num() < 2) return 0; // 没有双炮威胁
-
-    // 检查每个炮与将帅的关系
+    // 单个炮威胁评估
     for (const FIntPoint& Cannon : OpponentCannons) {
-        // 检查是否在同一条线上
         bool sameLine = (Cannon.X == KingX) || (Cannon.Y == KingY);
         if (!sameLine) continue;
 
         // 检查中间棋子数量
         int32 pieceCount = 0;
-        if (Cannon.X == KingX) { // 同一横线
+        if (Cannon.X == KingX) {
             int32 startY = FMath::Min(Cannon.Y, KingY) + 1;
             int32 endY = FMath::Max(Cannon.Y, KingY) - 1;
             for (int32 y = startY; y <= endY; y++) {
                 if (board2P->GetChess(KingX, y).IsValid()) pieceCount++;
             }
         }
-        else { // 同一竖线
+        else {
             int32 startX = FMath::Min(Cannon.X, KingX) + 1;
             int32 endX = FMath::Max(Cannon.X, KingX) - 1;
             for (int32 x = startX; x <= endX; x++) {
@@ -881,37 +878,36 @@ int32 UAI2P::EvaluateDoublePaoThreat(EChessColor AiColor)
             }
         }
 
-        // 如果中间有1个棋子，这是炮的理想位置
+        // 炮威胁惩罚大幅提升
         if (pieceCount == 1) {
-            ThreatScore -= 800; // 单个炮威胁
+            ThreatScore -= 1200; // 从800提升到1200
+        }
+        else if (pieceCount == 0) {
+            ThreatScore -= 500; // 从300提升到500
         }
     }
 
-    // 检查双炮配合威胁
+    // 双炮协同威胁评估（严重威胁）
     if (OpponentCannons.Num() >= 2) {
-        // 检查是否有两个炮在同一条线上指向将帅
         for (int32 i = 0; i < OpponentCannons.Num(); i++) {
             for (int32 j = i + 1; j < OpponentCannons.Num(); j++) {
                 FIntPoint cannon1 = OpponentCannons[i];
                 FIntPoint cannon2 = OpponentCannons[j];
 
-                // 检查是否在同一条线上且都指向将帅
                 bool bothThreatenKing = false;
                 if (cannon1.X == KingX && cannon2.X == KingX) {
-                    // 两个炮在同一横线上威胁将帅
                     bothThreatenKing = true;
                 }
                 else if (cannon1.Y == KingY && cannon2.Y == KingY) {
-                    // 两个炮在同一竖线上威胁将帅
                     bothThreatenKing = true;
                 }
 
                 if (bothThreatenKing) {
-                    ThreatScore -= 2000; // 双炮协同威胁，严重扣分
+                    ThreatScore -= 3000; // 从2000提升到3000
 
-                    // 如果是立即的双炮杀，返回极低分数
+                    // 立即双炮杀检测
                     if (IsImmediateDoublePaoMate(AiColor)) {
-                        return -10000; // 立即输棋的威胁
+                        return -10000; // 极低分数
                     }
                 }
             }
@@ -1285,7 +1281,20 @@ int32 UAI2P::EvaluateAttackSynergy(const FChessMove2P& Move, EChessColor AiColor
         SynergyScore += EvaluateDoublePaoThreat(AiColor);
         if (MovedType == EChessType::MA)
         {
-            SynergyScore += IsGoodHorsePosition(Move.to.X, Move.to.Y, AiColor) ? 150 : 0;
+            int32 GoodHorseValue = 0;
+            switch (AIDifficulty)
+            {
+            case EAI2PDifficulty::Easy:
+                GoodHorseValue = 120;
+                break;
+            case EAI2PDifficulty::Normal:
+                GoodHorseValue = 200;
+                break;
+            case EAI2PDifficulty::Hard:
+                GoodHorseValue = 300;
+                break;
+            }
+            SynergyScore += IsGoodHorsePosition(Move.to.X, Move.to.Y, AiColor) ? GoodHorseValue : 0;
         }
     }
     else
@@ -1551,23 +1560,15 @@ int32 UAI2P::EvaluateCenterProtection(EChessColor AiColor)
         if (chess.IsValid() && chess->GetColor() == AiColor && chess->GetType() == EChessType::BING)
         {
             // 中路兵的基础保护奖励
-            protectionScore += 100;
 
             // 检查是否有保护
             if (IsPieceRooted(x, centerY, AiColor))
             {
-                protectionScore += 150; // 有保护的中路兵
+                protectionScore += 1000; // 有保护的中路兵
             }
             else
             {
-                protectionScore -= 200; // 无保护的中路兵容易被吃
-            }
-
-            // 检查是否过河
-            bool isCrossed = (AiColor == EChessColor::REDCHESS) ? (x < 5) : (x > 4);
-            if (isCrossed)
-            {
-                protectionScore += 80; // 过河兵更有价值
+                protectionScore -= 1000; // 无保护的中路兵容易被吃
             }
         }
     }
@@ -2486,61 +2487,6 @@ void UAI2P::SortMoves(TArray<FChessMove2P>& Moves, EChessColor Color)
 
     EChessColor OppColor = (Color == EChessColor::REDCHESS) ? EChessColor::BLACKCHESS : EChessColor::REDCHESS;
 
-    // ===== 分离「吃将走法」「普通走法」=====
-    TArray<FChessMove2P> ValidMoves;
-    for (const FChessMove2P& Move : Moves)
-    {
-        // 1. 识别「直接吃将」的走法
-        TWeakObjectPtr<AChesses> TargetChess = board2P->GetChess(Move.to.X, Move.to.Y);
-        if (TargetChess.IsValid() && TargetChess->GetType() == EChessType::JIANG)
-        {
-            if (Color == GlobalAIColor && TargetChess->GetColor() != Color) // 执棋方验证
-            {
-                Moves.Empty();
-                Moves.Add(Move);
-
-                if (!OnlyOneMove.IsValid()) // 保存这个绝杀结果
-                {
-                    OnlyOneMove = Move;
-                    StopThinkingImmediately(); // 可以停止了
-                    ULogger::Log("Kill!");
-                }
-
-                return;
-            }
-        }
-
-        if (!IsInCheckAfterMove(Move, Color))
-        {
-            ValidMoves.Add(Move);
-        }
-    }
-    Moves = ValidMoves;
-    TArray<FChessMove2P> CheckCanCaptureGeneralMoves; // 将军且下一步能吃将的走法
-    TArray<FChessMove2P> NormalMoves; // 普通走法
-
-    for (const FChessMove2P& Move : Moves)
-    {
-        // 2. 识别「将军且下一步能吃将」的走法
-        if (IsInCheckAfterMove(Move, OppColor)) // 走该步后对方被将军
-        {
-            if (IsRiskyFaceToFaceCheck(Move, Color)) // 会被反吃的无意义走法
-            {
-                continue;
-            }
-
-            // 判断我方下一步是否能吃将且不被反吃不自将
-            if (!IsInCheckAfterMove(Move, Color) && IsCaptureSafe(Move, Color))
-            {
-                CheckCanCaptureGeneralMoves.Add(Move);
-                continue;
-            }
-        }
-
-        // 3. 其他为普通走法
-        NormalMoves.Add(Move);
-    }
-
     // 按难度调整随机阈值
     int32 RANDOM_THRESHOLD = 0;
     int32 RANDOM_TWEAK_RANGE = 0;
@@ -2562,7 +2508,7 @@ void UAI2P::SortMoves(TArray<FChessMove2P>& Moves, EChessColor Color)
 
     // ===== 重新排序：将军且能吃将 > 普通走法 =====
     // 1. 先加将军且能吃将的走法
-    TArray<FChessMove2P> SortedMoves = CheckCanCaptureGeneralMoves;
+    TArray<FChessMove2P> SortedMoves;
     // 2. 普通走法按原有评分排序后追加
     TArray<FMoveScore> MoveScores;
 
@@ -2576,7 +2522,7 @@ void UAI2P::SortMoves(TArray<FChessMove2P>& Moves, EChessColor Color)
         for (int32 j = 0; j < 9; j++) 
         {
             TWeakObjectPtr<AChesses> Chess = board2P->GetChess(i, j);
-            if (!Chess.IsValid() || Chess->GetColor() != Color) continue;
+            if (!Chess.IsValid()/* || Chess->GetColor() != Color*/) continue;
 
             // 检查这个棋子是否被对方攻击
             bool IsUnderAttack = false;
@@ -2611,7 +2557,7 @@ void UAI2P::SortMoves(TArray<FChessMove2P>& Moves, EChessColor Color)
         }
     }
 
-    for (const FChessMove2P& Move : NormalMoves)
+    for (const FChessMove2P& Move : Moves)
     {
         int32 Score = 0;
 
@@ -2619,6 +2565,36 @@ void UAI2P::SortMoves(TArray<FChessMove2P>& Moves, EChessColor Color)
         int32 MyValue = 0;
 
         int32 ProtectionScore = 0;
+
+        TWeakObjectPtr<AChesses> TargetChess = board2P->GetChess(Move.to.X, Move.to.Y);
+        if (TargetChess.IsValid() && TargetChess->GetType() == EChessType::JIANG)
+        {
+            if (Color == GlobalAIColor && TargetChess->GetColor() != Color) // 执棋方验证
+            {
+                Score = -PENALTY_IN_CHECK; // 这是一个绝杀的步骤
+                MoveScores.Add(FMoveScore(Move, Score));
+                continue;
+            }
+        }
+
+
+        if (IsRiskyFaceToFaceCheck(Move, Color)) // 会被反吃的无意义走法
+        {
+            Score = 0;
+            MoveScores.Add(FMoveScore(Move, Score));
+            continue;
+        }
+
+        if (IsInCheckAfterMove(Move, OppColor)) // 走该步后对方被将军
+        {
+            // 判断我方下一步是否能吃将且不被反吃不自将
+            if (!IsInCheckAfterMove(Move, Color) && IsCaptureSafe(Move, Color))
+            {
+                Score = 2000;
+                MoveScores.Add(FMoveScore(Move, Score));
+                continue;
+            }
+        }
 
         // 检查这个走法是否能保护被攻击的棋子
         for (int32 k = 0; k < AttackedPieces.Num(); k++) 
@@ -2633,7 +2609,7 @@ void UAI2P::SortMoves(TArray<FChessMove2P>& Moves, EChessColor Color)
                 // 躲避攻击：根据威胁等级给予奖励
                 if (ThreatLevel > 0)  // 吃亏的交换，躲避很重要
                 {
-                    ProtectionScore += (700 + ThreatLevel * 10);
+                    ProtectionScore += (900 + ThreatLevel * 10);
                 }
                 else  // 划算的交换，可以酌情考虑
                 {
@@ -2657,7 +2633,7 @@ void UAI2P::SortMoves(TArray<FChessMove2P>& Moves, EChessColor Color)
 
                 if (!StillUnderAttack) 
                 {
-                    ProtectionScore += 700; // 成功躲避到安全位置
+                    ProtectionScore += 900; // 成功躲避到安全位置
                 }
 
                 board2P->UndoTestMove(Move, Captured);
@@ -2744,6 +2720,8 @@ void UAI2P::SortMoves(TArray<FChessMove2P>& Moves, EChessColor Color)
                 int32 TargetValue = GetPieceBaseValue(Target->GetType(), GamePhase, Color);
                 if (TargetValue < MyValue / 4)
                 {
+                    Score = 0;
+                    MoveScores.Add(FMoveScore(Move, Score));
                     continue; // 价值不大，不考虑了
                 }
                 Score += TargetValue / 10; // 按价值比例加分
@@ -2758,6 +2736,8 @@ void UAI2P::SortMoves(TArray<FChessMove2P>& Moves, EChessColor Color)
                 // 吃不到子还会被吃，垃圾走法，直接不考虑
                 if (!Target.IsValid())
                 {
+                    Score = 0;
+                    MoveScores.Add(FMoveScore(Move, Score));
                     continue;
                 }
 
@@ -3005,7 +2985,7 @@ FChessMove2P UAI2P::GetBestMove(TWeakObjectPtr<UChessBoard2P> InBoard2P, EChessC
     board2P = InBoard2P;
     if (!board2P.IsValid()) return FChessMove2P();
 
-    //board2P->DebugCheckBoardState();
+    board2P->DebugCheckBoardState();
 
     int32 Depth = GetSearchDepth(AIDifficulty);
 

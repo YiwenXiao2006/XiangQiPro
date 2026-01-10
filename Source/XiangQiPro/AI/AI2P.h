@@ -281,7 +281,7 @@ private:
         case EAI2PDifficulty::Normal:
             return 5;
         case EAI2PDifficulty::Hard:
-            return 7;
+            return 4;
         default:
             return 4;
         }
