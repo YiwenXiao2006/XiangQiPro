@@ -1330,6 +1330,10 @@ int32 UAI2P::EvaluateAttackSynergy(FChessMove2P Move, EChessColor AiColor)
                 GoodHorseValue = 300;
                 break;
             }
+            if (GamePhase == EChessGamePhase::Opening)
+            {
+                GoodHorseValue += 200;
+            }
             SynergyScore += IsGoodHorsePosition(Move.to.X, Move.to.Y, AiColor) ? GoodHorseValue : 0;
         }
     }
