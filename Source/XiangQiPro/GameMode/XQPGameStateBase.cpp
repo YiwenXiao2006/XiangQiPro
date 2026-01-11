@@ -223,7 +223,7 @@ void AXQPGameStateBase::RunAI2P()
          [this](UAsyncWorker* WorkerInstance)
          {
              // 获取最佳移动方式和要移动的棋子 
-             AIMove2P = AI2P->GetBestMove(board2P, EChessColor::BLACKCHESS, EAI2PDifficulty::Hard, 12000, bEnableMachineLearning, MLModule.Get());
+             AIMove2P = AI2P->GetBestMove(board2P, EChessColor::BLACKCHESS, AIDifficulty, 12000, bEnableMachineLearning, MLModule.Get());
 
              while (WorkerInstance->IsPaused())
              {

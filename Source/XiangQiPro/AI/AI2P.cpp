@@ -2231,53 +2231,6 @@ bool UAI2P::IsInCheck(EChessColor Color)
     return false;
 }
 
-// 优化后的IsBlockingAttack（减少重复计算）
-bool UAI2P::IsBlockingAttack(const FChessMove2P& move, EChessColor color)
-{
-    if (!board2P.IsValid()) return false;
-
-    // 缓存将/帅位置（避免重复遍历）
-    int32 KingX, KingY;
-    if (!GetKingPosition(color, KingX, KingY)) return false;
-
-    EChessColor OpponentColor = (color == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
-
-    // 第一步：计算走法前是否被攻击（仅生成一次对方走法）
-    bool canAttackKingBeforeMove = false;
-    TArray<FChessMove2P> OpponentMoves = board2P->GenerateAllMoves(OpponentColor);
-    for (const FChessMove2P& OppMove : OpponentMoves)
-    {
-        if (OppMove.to.X == KingX && OppMove.to.Y == KingY)
-        {
-            canAttackKingBeforeMove = true;
-            break;
-        }
-    }
-    if (!canAttackKingBeforeMove) return false; // 走法前未被攻击，无需判断
-
-    // 模拟走法
-    TWeakObjectPtr<AChesses> CapturedChess = board2P->GetChess(move.to.X, move.to.Y);
-    board2P->MakeTestMove(move);
-
-    // 计算走法后是否被攻击（复用OpponentColor，无需重复遍历将/帅）
-    bool canAttackKingAfterMove = false;
-    TArray<FChessMove2P> NewOpponentMoves = board2P->GenerateAllMoves(OpponentColor);
-    for (const FChessMove2P& OppMove : NewOpponentMoves)
-    {
-        if (OppMove.to.X == KingX && OppMove.to.Y == KingY)
-        {
-            canAttackKingAfterMove = true;
-            break;
-        }
-    }
-
-    // 撤销走法
-    board2P->UndoTestMove(move, CapturedChess);
-
-    // 走法前被攻击、走法后未被攻击 → 阻挡成功
-    return !canAttackKingAfterMove;
-}
-
 // 获取游戏阶段
 EChessGamePhase UAI2P::GetGamePhase()
 {
@@ -3440,7 +3393,7 @@ void UAI2P::StopThinkingImmediately()
 }
 
 // 辅助函数：将走法转换为字符串
-FString UAI2P::MoveToString(const FChessMove2P& Move) const
+FString UAI2P::MoveToString(FChessMove2P Move) const
 {
     // 将坐标转换为字符串，如 "a0a1"
     FString FromX = FString::Printf(TEXT("%c"), 'a' + Move.from.Y);
@@ -3452,7 +3405,7 @@ FString UAI2P::MoveToString(const FChessMove2P& Move) const
 }
 
 // 辅助函数：将字符串转换为走法
-FChessMove2P UAI2P::StringToMove(const FString& MoveString) const
+FChessMove2P UAI2P::StringToMove(FString MoveString) const
 {
     FChessMove2P Move;
     Move.bIsValid = false;

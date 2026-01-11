@@ -128,9 +128,6 @@ public:
     // 设置棋盘引用
     void SetBoard(TWeakObjectPtr<UChessBoard2P> newBoard);
 
-    // 检查走法是否阻挡了对方的攻击（优化后）
-    bool IsBlockingAttack(const FChessMove2P& move, EChessColor color);
-
 private:
 
     int32 MaxTime = 10000;
@@ -288,7 +285,7 @@ private:
         case EAI2PDifficulty::Easy:
             return 3;
         case EAI2PDifficulty::Normal:
-            return 5;
+            return 4;
         case EAI2PDifficulty::Hard:
             return 4;
         default:
@@ -296,9 +293,9 @@ private:
         }
     }
 
-    FString MoveToString(const FChessMove2P& Move) const;
+    FString MoveToString(FChessMove2P Move) const;
 
-    FChessMove2P StringToMove(const FString& MoveString) const;
+    FChessMove2P StringToMove(FString MoveString) const;
 
     TArray<FString> GetValidMovesAsStrings(EChessColor Color) const;
 

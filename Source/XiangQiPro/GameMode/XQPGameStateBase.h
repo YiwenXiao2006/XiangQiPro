@@ -18,6 +18,7 @@ class AChessBoard2PActor;
 class AChesses;
 
 enum class EChessColor : uint8;
+enum class EAI2PDifficulty : uint8;
 
 typedef AXQPGameStateBase GS;
 
@@ -83,6 +84,9 @@ private:
 	TWeakObjectPtr<AChesses> AIMovedChess;
 
 public:
+
+	UPROPERTY(EditAnywhere)
+	EAI2PDifficulty AIDifficulty;
 
 	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<UAI2P> AI2P;
