@@ -177,7 +177,7 @@ void UChessBoard2P::DebugCheckBoardState() const
     ULogger::Log(boardState);
 }
 
-void UChessBoard2P::MakeTestMove(const FChessMove2P& move)
+void UChessBoard2P::MakeTestMove(FChessMove2P move)
 {
     TWeakObjectPtr<AChesses> chess = GetChess(move.from.X, move.from.Y);
 
@@ -185,7 +185,7 @@ void UChessBoard2P::MakeTestMove(const FChessMove2P& move)
     SetChess(move.from.X, move.from.Y, nullptr);
 }
 
-void UChessBoard2P::UndoTestMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> capturedPiece)
+void UChessBoard2P::UndoTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> capturedPiece)
 {
     TWeakObjectPtr<AChesses> chess = GetChess(move.to.X, move.to.Y);
 

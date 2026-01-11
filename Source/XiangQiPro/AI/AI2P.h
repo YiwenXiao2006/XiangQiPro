@@ -150,10 +150,10 @@ private:
     TMap<uint64, FTranspositionEntry> TranspositionTable;
 
     // 检查走法是否会导致棋子被无谓吃掉
-    bool IsMoveSuicidal(const FChessMove2P& Move, EChessColor AiColor);
+    bool IsMoveSuicidal(FChessMove2P Move, EChessColor AiColor);
 
     // 过滤车/炮的无效移动（自将、攻击有根且无收益、超出棋盘等）
-    TArray<FChessMove2P> FilterInvalidMoves(const TArray<FChessMove2P>& RawMoves, EChessColor AiColor, EChessType PieceType);
+    TArray<FChessMove2P> FilterInvalidMoves(TArray<FChessMove2P> RawMoves, EChessColor AiColor, EChessType PieceType);
 
     // === 战术核心函数声明 ===
     // 评估当前局面最优战术（返回可行性最高的战术）
@@ -181,17 +181,19 @@ private:
     // 检查是否立即的双炮杀
     bool IsImmediateDoublePaoMate(EChessColor AiColor);
     // 是否还能逃脱双炮
-    bool CanKingEscapeDoublePao(EChessColor AiColor, const FChessMove2P& opponentMove);
+    bool CanKingEscapeDoublePao(EChessColor AiColor, FChessMove2P opponentMove);
     // 检查走法是否能防御双炮
-    bool CanDefendAgainstDoublePao(const FChessMove2P& Move, EChessColor AiColor);
+    bool CanDefendAgainstDoublePao(FChessMove2P Move, EChessColor AiColor);
     // 检查是否阻挡炮线
-    bool BlocksPaoLine(const FChessMove2P& Move, EChessColor AiColor);
+    bool BlocksPaoLine(FChessMove2P Move, EChessColor AiColor);
+    // 检查是否阻挡车线
+    bool BlocksCheLine(FChessMove2P Move, EChessColor Color, TWeakObjectPtr<AChesses> Attacker);
     // 判断走法是否为有效防守（拦截致命进攻/补位弱点）
-    bool IsEffectiveDefenseMove(const FChessMove2P& Move, EChessColor AiColor);
+    bool IsEffectiveDefenseMove(FChessMove2P Move, EChessColor AiColor);
 
     // === 进攻核心函数 ===
     // 评估走法的进攻协同性（多棋子配合度）
-    int32 EvaluateAttackSynergy(const FChessMove2P& Move, EChessColor AiColor);
+    int32 EvaluateAttackSynergy(FChessMove2P Move, EChessColor AiColor);
     // 判断是否控制关键点位
     bool IsControlKeyPoint(int32 X, int32 Y, EKeyChessPoint PointType, EChessColor Color);
 
@@ -211,39 +213,46 @@ private:
     int32 EvaluatePieceCombination(int32 X, int32 Y, EChessColor Color);
     // 评估线路控制协同
     int32 EvaluateLineControlCooperation(int32 X, int32 Y, EChessColor Color);
+    // 评估将帅移动到指定位置后的安全程度
+    int32 EvaluateKingSafety(int32 TargetX, int32 TargetY, EChessColor Color);
 
     // 判断棋子是否有根（有己方保护）
-    bool IsPieceRooted(int32 X, int32 Y, EChessColor Color);
+    inline bool IsPieceRooted(int32 X, int32 Y, EChessColor Color);
+    inline bool IsPieceRooted(TWeakObjectPtr<AChesses> TargetChess, EChessColor Color);
     // 评估吃子后的安全性（是否会被反吃）
-    bool IsCaptureSafe(const FChessMove2P& Move, EChessColor AttackerColor);
+    inline bool IsCaptureSafe(FChessMove2P Move, EChessColor AttackerColor);
     // 判断棋子是否孤军深入（无支援）
-    bool IsPieceIsolated(int32 X, int32 Y, EChessColor Color);
+    inline bool IsPieceIsolated(int32 X, int32 Y, EChessColor Color);
     // 检查核心棋子是否被攻击
-    bool IsKeyPieceUnderAttack(EChessColor Color);
+    inline bool IsKeyPieceUnderAttack(EChessColor Color);
     // 检查是否是马的好位置
-    bool IsGoodHorsePosition(int32 X, int32 Y, EChessColor Color);
+    inline bool IsGoodHorsePosition(int32 X, int32 Y, EChessColor Color);
     // 检查是否是炮的威胁位置
-    bool IsThreateningPaoPosition(int32 X, int32 Y, EChessColor Color);
+    inline bool IsThreateningPaoPosition(int32 X, int32 Y, EChessColor Color);
     // 检查面对面将军是否有风险
-    bool IsRiskyFaceToFaceCheck(const FChessMove2P& Move, EChessColor Color);
+    inline bool IsRiskyFaceToFaceCheck(FChessMove2P Move, EChessColor Color);
 
+    // 找出攻击该位置的敌方棋子
     TWeakObjectPtr<AChesses> FindAttacker(FIntPoint Position, EChessColor AttackerColor);
 
 
     // Zobrist哈希值生成（用于棋盘局面唯一标识）
-    uint64 GenerateZobristKey();
+    inline uint64 GenerateZobristKey();
 
     // α-β剪枝搜索核心函数
-    int32 AlphaBetaSearch(int32 Depth, int32 Alpha, int32 Beta, EChessColor CurrentColor, bool IsMaximizingPlayer);
+    inline int32 AlphaBetaSearch(int32 Depth, int32 Alpha, int32 Beta, EChessColor CurrentColor, bool IsMaximizingPlayer);
 
     // 迭代加深搜索
     int32 IterativeDeepeningSearch(int32 MaxDepth, EChessColor AiColor);
 
     // 评估函数（优化：新增安全性/策略维度）
-    int32 EvaluateBoard(EChessColor AiColor);
+    inline int32 EvaluateBoard(EChessColor AiColor);
+
+    // 被将军时的走法排序
+    inline TArray<FChessMove2P> SortMovesWhenInCheck(TArray<FChessMove2P> Moves, EChessColor Color);
 
     // 走法排序（重构：优先安全/有收益走法）
-    void SortMoves(TArray<FChessMove2P>& Moves, EChessColor Color);
+    inline TArray<FChessMove2P> SortMoves(TArray<FChessMove2P> Moves, EChessColor Color);
 
     // 获取游戏阶段
     EChessGamePhase GetGamePhase();
@@ -253,15 +262,15 @@ private:
 
     // 获取棋子位置价值
     int32 GetPiecePositionValue(EChessType PieceType, EChessColor Color, int32 X, int32 Y);
-
-    // 校验走棋后是否自将
-    bool IsInCheckAfterMove(const FChessMove2P& Move, EChessColor SelfColor);
+    
+    // 校验走棋后是否被将军
+    inline bool IsInCheckAfterMove(FChessMove2P Move, EChessColor SelfColor);
 
     // 校验下一步是否能吃掉对方将
     bool CanCaptureGeneralInNextStep(EChessColor SelfColor);
 
     // 检查是否将军
-    bool IsInCheck(EChessColor Color);
+    inline bool IsInCheck(EChessColor Color);
 
     // 缓存将/帅位置
     bool GetKingPosition(EChessColor Color, int32& OutX, int32& OutY);
