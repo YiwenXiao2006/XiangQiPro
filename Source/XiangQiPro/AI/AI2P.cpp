@@ -15,7 +15,7 @@ void UAI2P::SetBoard(TWeakObjectPtr<UChessBoard2P> AIMove2P)
     LocalAllChess = AIMove2P->AllChess;
 }
 
-bool UAI2P::IsMoveSuicidal(FChessMove2P Move, EChessColor AiColor)
+bool UAI2P::IsMoveSuicidal(const FChessMove2P& Move, EChessColor AiColor)
 {
     TWeakObjectPtr<AChesses> MovedChess = GetChess(Move.from.X, Move.from.Y);
     if (!MovedChess.IsValid()) return false;
@@ -52,7 +52,7 @@ bool UAI2P::IsMoveSuicidal(FChessMove2P Move, EChessColor AiColor)
 }
 
 // 过滤车/炮的无效移动（自将、攻击有根且无收益、超出棋盘等）
-TArray<FChessMove2P> UAI2P::FilterInvalidMoves(TArray<FChessMove2P> RawMoves, EChessColor AiColor, EChessType PieceType)
+TArray<FChessMove2P> UAI2P::FilterInvalidMoves(const TArray<FChessMove2P>& RawMoves, EChessColor AiColor, EChessType PieceType)
 {
     TArray<FChessMove2P> ValidMoves;
     EChessColor OpponentColor = (AiColor == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
@@ -932,7 +932,7 @@ bool UAI2P::IsImmediateDoublePaoMate(EChessColor AiColor)
     return false;
 }
 
-bool UAI2P::CanKingEscapeDoublePao(EChessColor AiColor, FChessMove2P opponentMove)
+bool UAI2P::CanKingEscapeDoublePao(EChessColor AiColor, const FChessMove2P& opponentMove)
 {
     EChessColor OpponentColor = (AiColor == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
 
@@ -1140,7 +1140,7 @@ bool UAI2P::CanKingEscapeDoublePao(EChessColor AiColor, FChessMove2P opponentMov
 }
 
 // 检查走法是否能防御双炮
-bool UAI2P::CanDefendAgainstDoublePao(FChessMove2P Move, EChessColor AiColor)
+bool UAI2P::CanDefendAgainstDoublePao(const FChessMove2P& Move, EChessColor AiColor)
 {
     EChessColor OpponentColor = (AiColor == EChessColor::BLACKCHESS) ? EChessColor::REDCHESS : EChessColor::BLACKCHESS;
 
@@ -1159,7 +1159,7 @@ bool UAI2P::CanDefendAgainstDoublePao(FChessMove2P Move, EChessColor AiColor)
 }
 
 // 检查是否阻挡炮线
-bool UAI2P::BlocksPaoLine(FChessMove2P Move, EChessColor AiColor)
+bool UAI2P::BlocksPaoLine(const FChessMove2P& Move, EChessColor AiColor)
 {
     int32 KingX, KingY;
     if (!GetKingPosition(AiColor, KingX, KingY)) return false;
@@ -1189,7 +1189,7 @@ bool UAI2P::BlocksPaoLine(FChessMove2P Move, EChessColor AiColor)
 }
 
 // 检查是否阻挡车线
-bool UAI2P::BlocksCheLine(FChessMove2P Move, EChessColor Color, TWeakObjectPtr<AChesses> Attacker)
+bool UAI2P::BlocksCheLine(const FChessMove2P& Move, EChessColor Color, TWeakObjectPtr<AChesses> Attacker)
 {
     if (!Attacker.IsValid() || Attacker->GetType() != EChessType::JV)
         return false;
@@ -1225,7 +1225,7 @@ bool UAI2P::BlocksCheLine(FChessMove2P Move, EChessColor Color, TWeakObjectPtr<A
 }
 
 // 判断走法是否为有效防守（拦截致命进攻/补位弱点）
-bool UAI2P::IsEffectiveDefenseMove(FChessMove2P Move, EChessColor AiColor)
+bool UAI2P::IsEffectiveDefenseMove(const FChessMove2P& Move, EChessColor AiColor)
 {
     // 优先级1：拦截致命进攻
     if (IsOpponentHasLethalAttack(AiColor))
@@ -1272,7 +1272,7 @@ bool UAI2P::IsEffectiveDefenseMove(FChessMove2P Move, EChessColor AiColor)
 }
 
 // 评估走法的进攻协同性（多棋子配合度）
-int32 UAI2P::EvaluateAttackSynergy(FChessMove2P Move, EChessColor AiColor)
+int32 UAI2P::EvaluateAttackSynergy(const FChessMove2P& Move, EChessColor AiColor)
 {
     // 模拟走法
     TWeakObjectPtr<AChesses> Moved = GetChess(Move.from.X, Move.from.Y);
@@ -1845,7 +1845,7 @@ bool UAI2P::IsPieceRooted(TWeakObjectPtr<AChesses> TargetChess, EChessColor Colo
 }
 
 // 评估吃子后的安全性（是否会被反吃）
-bool UAI2P::IsCaptureSafe(FChessMove2P Move, EChessColor AttackerColor)
+bool UAI2P::IsCaptureSafe(const FChessMove2P& Move, EChessColor AttackerColor)
 {
     EChessColor DefenderColor = (AttackerColor == EChessColor::BLACKCHESS) ?
         EChessColor::REDCHESS : EChessColor::BLACKCHESS;
@@ -2010,7 +2010,7 @@ bool UAI2P::IsThreateningPaoPosition(int32 X, int32 Y, EChessColor Color)
     return false;
 }
 
-bool UAI2P::IsRiskyFaceToFaceCheck(FChessMove2P Move, EChessColor Color)
+bool UAI2P::IsRiskyFaceToFaceCheck(const FChessMove2P& Move, EChessColor Color)
 {
     EChessColor OpponentColor = (Color == EChessColor::BLACKCHESS) ?
         EChessColor::REDCHESS : EChessColor::BLACKCHESS;
@@ -2098,7 +2098,7 @@ bool UAI2P::GetKingPosition(EChessColor Color, int32& OutX, int32& OutY)
     return false;
 }
 
-void UAI2P::UpdateTranspositionTable(int32 Depth, int32 BestValue, FChessMove2P BestMove, int32 Alpha, int32 Beta)
+void UAI2P::UpdateTranspositionTable(int32 Depth, int32 BestValue, const FChessMove2P& BestMove, int32 Alpha, int32 Beta)
 {
     uint64 ZobristKey = GenerateZobristKey();
     FTranspositionEntry NewEntry = FTranspositionEntry();
@@ -2115,7 +2115,7 @@ void UAI2P::UpdateTranspositionTable(int32 Depth, int32 BestValue, FChessMove2P 
 }
 
 // 校验：走指定棋步后，己方是否会被将军
-bool UAI2P::IsInCheckAfterMove(FChessMove2P Move, EChessColor SelfColor)
+bool UAI2P::IsInCheckAfterMove(const FChessMove2P& Move, EChessColor SelfColor)
 {
     // 1. 保存被吃棋子（用于回滚）
     TWeakObjectPtr<AChesses> MovedChess = GetChess(Move.from.X, Move.from.Y);
@@ -2538,7 +2538,7 @@ int32 UAI2P::EvaluateBoard(EChessColor AiColor)
 }
 
 // 被将军时的走法排序
-TArray<FChessMove2P> UAI2P::SortMovesWhenInCheck(TArray<FChessMove2P> Moves, EChessColor Color)
+TArray<FChessMove2P> UAI2P::SortMovesWhenInCheck(const TArray<FChessMove2P>& Moves, EChessColor Color)
 {
     if (Moves.Num() <= 1)
         return Moves;
@@ -2748,7 +2748,7 @@ TArray<FChessMove2P> UAI2P::SortMovesWhenInCheck(TArray<FChessMove2P> Moves, ECh
 }
 
 // 走法排序（优先搜索高价值走法，提升α-β剪枝效率）
-TArray<FChessMove2P> UAI2P::SortMoves(TArray<FChessMove2P> Moves, EChessColor Color)
+TArray<FChessMove2P> UAI2P::SortMoves(const TArray<FChessMove2P>& Moves, EChessColor Color)
 {
     if (Moves.Num() <= 1)
         return Moves;
@@ -3159,10 +3159,7 @@ TArray<FChessMove2P> UAI2P::SortMoves(TArray<FChessMove2P> Moves, EChessColor Co
     {
         SortedMoves.Add(MS.Move);
     }
-
-    // 重新传值
-    Moves = SortedMoves;
-    return Moves;
+    return SortedMoves;
 }
 
 // Zobrist哈希生成
@@ -3362,25 +3359,26 @@ FChessMove2P UAI2P::GetBestMove(TWeakObjectPtr<UChessBoard2P> InBoard2P, EChessC
 
     int32 Depth = GetSearchDepth(AIDifficulty);
 
+    FChessMove2P MLMove;
+    MLMove.bIsValid = false;
     // 如果启用机器学习，尝试使用机器学习预测
-    if (bEnableMachineLearning && MLModule && MLModule->IsTrained() ? true : MLModule->StartTraining())
+    if (bEnableMachineLearning && MLModule)
     {
-        FString BoardFen = GetCurrentBoardFEN();
-        TArray<FString> ValidMoves = GetValidMovesAsStrings(InAiColor);
-
-        FString MLMove = MLModule->PredictBestMove(BoardFen, ValidMoves);
-        if (!MLMove.IsEmpty())
+        if (MLModule->LoadModel(TEXT("ChineseChess")))
         {
-            // 将字符串走法转换为FChessMove2P
-            FChessMove2P Move = StringToMove(MLMove);
-            if (Move.IsValid())
-            {
-                // 保存这次决策作为训练数据
-                float Score = EvaluateBoard(InAiColor);
-                MLModule->SaveTrainingData(BoardFen, MLMove, Score, Depth);
+            FString BoardFen = GetCurrentBoardFEN();
+            TArray<FString> ValidMoves = GetValidMovesAsStrings(InAiColor);
 
-                ULogger::Log(FString::Printf(TEXT("Using ML prediction: %s"), *MLMove));
-                return Move;
+            FString MLMove_s = MLModule->PredictBestMove(BoardFen, ValidMoves);
+            if (!MLMove_s.IsEmpty())
+            {
+                // 将字符串走法转换为FChessMove2P
+                FChessMove2P Move = StringToMove(MLMove_s);
+                if (Move.IsValid())
+                {
+                    MLMove = StringToMove(MLMove_s);
+                    ULogger::Log(FString::Printf(TEXT("Using ML prediction: %s"), *MLMove_s));
+                }
             }
         }
     }
@@ -3389,15 +3387,9 @@ FChessMove2P UAI2P::GetBestMove(TWeakObjectPtr<UChessBoard2P> InBoard2P, EChessC
     AIDifficulty = InDifficulty;
     MaxTime = InMaxTime;
     GamePhase = GetGamePhase();
-    OnlyOneMove.bIsValid = false;
 
     // 执行迭代加深搜索
     IterativeDeepeningSearch(Depth, InAiColor);
-
-    if (OnlyOneMove.IsValid())
-    {
-        return OnlyOneMove;
-    }
 
     // 获取置换表Key
     uint64 OriginalKey = GenerateZobristKey();
@@ -3405,7 +3397,45 @@ FChessMove2P UAI2P::GetBestMove(TWeakObjectPtr<UChessBoard2P> InBoard2P, EChessC
     // 从置换表中获取最优走法
     if (TranspositionTable.Contains(OriginalKey))
     {
-        FChessMove2P BestMove = TranspositionTable[OriginalKey].BestMove;
+        FChessMove2P AIMove = TranspositionTable[OriginalKey].BestMove;
+        FChessMove2P BestMove;
+        if (!MLMove.IsValid())
+        {
+            ULogger::Log("GetBestMove", "Move use AIMove!");
+            BestMove = AIMove;
+        }
+        else if (AIMove == MLMove)
+        {
+            ULogger::Log(TEXT("GetBestMove"), TEXT("Move use MLMove!"));
+            BestMove = MLMove;
+        }
+        else
+        {
+            // 评估移动后的得分，看看哪个更好
+            TWeakObjectPtr<AChesses> Captured;
+            Captured = GetChess(AIMove.to.X, AIMove.to.Y);
+            MakeTestMove(AIMove);
+            int32 AIScore = EvaluateBoard(GlobalAIColor);
+            UndoTestMove(AIMove, Captured);
+
+            Captured = GetChess(MLMove.to.X, MLMove.to.Y);
+            MakeTestMove(MLMove);
+            int32 MLScore = EvaluateBoard(GlobalAIColor);
+            UndoTestMove(MLMove, Captured);
+
+            // 选择得分更高的作为最优数据
+            if (MLScore >= AIScore)
+            {
+                ULogger::Log(TEXT("GetBestMove"), TEXT("Move use MLMove!"));
+                BestMove = MLMove;
+            }
+            else
+            {
+                ULogger::Log("GetBestMove", "Move use AIMove!");
+                BestMove = AIMove;
+            }
+
+        }
 
         if (BestMove.IsValid())
         {
@@ -3417,7 +3447,6 @@ FChessMove2P UAI2P::GetBestMove(TWeakObjectPtr<UChessBoard2P> InBoard2P, EChessC
                 float Score = EvaluateBoard(InAiColor);
                 MLModule->SaveTrainingData(BoardFen, MoveString, Score, Depth);
             }
-            ULogger::Log("GetBestMove", "Move use transpositionTable!");
             return BestMove;
         }
 
@@ -3441,7 +3470,7 @@ void UAI2P::StopThinkingImmediately()
 }
 
 // 辅助函数：将走法转换为字符串
-FString UAI2P::MoveToString(FChessMove2P Move) const
+FString UAI2P::MoveToString(const FChessMove2P& Move) const
 {
     // 将坐标转换为字符串，如 "a0a1"
     FString FromX = FString::Printf(TEXT("%c"), 'a' + Move.from.Y);
@@ -3582,13 +3611,25 @@ FString UAI2P::GetPieceFENChar(EChessType PieceType, EChessColor Color) const
     return PieceChar;
 }
 
-void UAI2P::MakeTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> movedPiece)
+void UAI2P::MakeTestMove(const FChessMove2P& move)
+{
+    SetChess(move.to.X, move.to.Y, GetChess(move.from.X, move.from.Y));
+    SetChess(move.from.X, move.from.Y, nullptr);
+}
+
+void UAI2P::MakeTestMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> movedPiece)
 {
     SetChess(move.to.X, move.to.Y, movedPiece);
     SetChess(move.from.X, move.from.Y, nullptr);
 }
 
-void UAI2P::UndoTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> movedPiece, TWeakObjectPtr<AChesses> capturedPiece)
+void UAI2P::UndoTestMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> capturedPiece)
+{
+    SetChess(move.from.X, move.from.Y, GetChess(move.to.X, move.to.Y));
+    SetChess(move.to.X, move.to.Y, capturedPiece);
+}
+
+void UAI2P::UndoTestMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> movedPiece, TWeakObjectPtr<AChesses> capturedPiece)
 {
     SetChess(move.from.X, move.from.Y, movedPiece);
     SetChess(move.to.X, move.to.Y, capturedPiece);

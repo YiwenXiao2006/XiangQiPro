@@ -147,18 +147,16 @@ private:
 
     EChessColor GlobalAIColor = EChessColor::BLACKCHESS;
 
-    FChessMove2P OnlyOneMove = FChessMove2P();
-
     TArray<TArray<TWeakObjectPtr<AChesses>>> LocalAllChess;  // 10行9列的棋盘
 
     // 置换表（缓存棋盘局面）
     TMap<uint64, FTranspositionEntry> TranspositionTable;
 
     // 检查走法是否会导致棋子被无谓吃掉
-    inline bool IsMoveSuicidal(FChessMove2P Move, EChessColor AiColor);
+    inline bool IsMoveSuicidal(const FChessMove2P& Move, EChessColor AiColor);
 
     // 过滤车/炮的无效移动（自将、攻击有根且无收益、超出棋盘等）
-    inline TArray<FChessMove2P> FilterInvalidMoves(TArray<FChessMove2P> RawMoves, EChessColor AiColor, EChessType PieceType);
+    inline TArray<FChessMove2P> FilterInvalidMoves(const TArray<FChessMove2P>& RawMoves, EChessColor AiColor, EChessType PieceType);
 
     // === 战术核心函数声明 ===
     // 评估当前局面最优战术（返回可行性最高的战术）
@@ -186,19 +184,19 @@ private:
     // 检查是否立即的双炮杀
     inline bool IsImmediateDoublePaoMate(EChessColor AiColor);
     // 是否还能逃脱双炮
-    inline bool CanKingEscapeDoublePao(EChessColor AiColor, FChessMove2P opponentMove);
+    inline bool CanKingEscapeDoublePao(EChessColor AiColor, const FChessMove2P& opponentMove);
     // 检查走法是否能防御双炮
-    inline bool CanDefendAgainstDoublePao(FChessMove2P Move, EChessColor AiColor);
+    inline bool CanDefendAgainstDoublePao(const FChessMove2P& Move, EChessColor AiColor);
     // 检查是否阻挡炮线
-    inline bool BlocksPaoLine(FChessMove2P Move, EChessColor AiColor);
+    inline bool BlocksPaoLine(const FChessMove2P& Move, EChessColor AiColor);
     // 检查是否阻挡车线
-    inline bool BlocksCheLine(FChessMove2P Move, EChessColor Color, TWeakObjectPtr<AChesses> Attacker);
+    inline bool BlocksCheLine(const FChessMove2P& Move, EChessColor Color, TWeakObjectPtr<AChesses> Attacker);
     // 判断走法是否为有效防守（拦截致命进攻/补位弱点）
-    inline bool IsEffectiveDefenseMove(FChessMove2P Move, EChessColor AiColor);
+    inline bool IsEffectiveDefenseMove(const FChessMove2P& Move, EChessColor AiColor);
 
     // === 进攻核心函数 ===
     // 评估走法的进攻协同性（多棋子配合度）
-    inline int32 EvaluateAttackSynergy(FChessMove2P Move, EChessColor AiColor);
+    inline int32 EvaluateAttackSynergy(const FChessMove2P& Move, EChessColor AiColor);
     // 判断是否控制关键点位
     inline bool IsControlKeyPoint(int32 X, int32 Y, EKeyChessPoint PointType, EChessColor Color);
 
@@ -225,7 +223,7 @@ private:
     inline bool IsPieceRooted(int32 X, int32 Y, EChessColor Color);
     inline bool IsPieceRooted(TWeakObjectPtr<AChesses> TargetChess, EChessColor Color);
     // 评估吃子后的安全性（是否会被反吃）
-    inline bool IsCaptureSafe(FChessMove2P Move, EChessColor AttackerColor);
+    inline bool IsCaptureSafe(const FChessMove2P& Move, EChessColor AttackerColor);
     // 判断棋子是否孤军深入（无支援）
     inline bool IsPieceIsolated(int32 X, int32 Y, EChessColor Color);
     // 检查核心棋子是否被攻击
@@ -235,7 +233,7 @@ private:
     // 检查是否是炮的威胁位置
     inline bool IsThreateningPaoPosition(int32 X, int32 Y, EChessColor Color);
     // 检查面对面将军是否有风险
-    inline bool IsRiskyFaceToFaceCheck(FChessMove2P Move, EChessColor Color);
+    inline bool IsRiskyFaceToFaceCheck(const FChessMove2P& Move, EChessColor Color);
 
     // 找出攻击该位置的敌方棋子
     TWeakObjectPtr<AChesses> FindAttacker(FIntPoint Position, EChessColor AttackerColor);
@@ -253,10 +251,10 @@ private:
     inline int32 EvaluateBoard(EChessColor AiColor);
 
     // 被将军时的走法排序
-    inline TArray<FChessMove2P> SortMovesWhenInCheck(TArray<FChessMove2P> Moves, EChessColor Color);
+    inline TArray<FChessMove2P> SortMovesWhenInCheck(const TArray<FChessMove2P>& Moves, EChessColor Color);
 
     // 走法排序（重构：优先安全/有收益走法）
-    inline TArray<FChessMove2P> SortMoves(TArray<FChessMove2P> Moves, EChessColor Color);
+    inline TArray<FChessMove2P> SortMoves(const TArray<FChessMove2P>& Moves, EChessColor Color);
 
     // 获取游戏阶段
     inline EChessGamePhase GetGamePhase();
@@ -268,7 +266,7 @@ private:
     inline int32 GetPiecePositionValue(EChessType PieceType, EChessColor Color, int32 X, int32 Y);
     
     // 校验走棋后是否被将军
-    inline bool IsInCheckAfterMove(FChessMove2P Move, EChessColor SelfColor);
+    inline bool IsInCheckAfterMove(const FChessMove2P& Move, EChessColor SelfColor);
 
     // 校验下一步是否能吃掉对方将
     bool CanCaptureGeneralInNextStep(EChessColor SelfColor);
@@ -280,7 +278,7 @@ private:
     inline bool GetKingPosition(EChessColor Color, int32& OutX, int32& OutY);
 
     // 更新置换表
-    inline void UpdateTranspositionTable(int32 Depth, int32 BestValue, FChessMove2P BestMove, int32 Alpha, int32 Beta);
+    inline void UpdateTranspositionTable(int32 Depth, int32 BestValue, const FChessMove2P& BestMove, int32 Alpha, int32 Beta);
 
     // 清空置换表
     inline void ClearTranspositionTable() { TranspositionTable.Empty(); }
@@ -300,7 +298,7 @@ private:
         }
     }
 
-    inline FString MoveToString(FChessMove2P Move) const;
+    inline FString MoveToString(const FChessMove2P& Move) const;
 
     inline FChessMove2P StringToMove(FString MoveString) const;
 
@@ -313,10 +311,12 @@ private:
     private:
 
         // 移动棋子,仅AI计算使用
-        void MakeTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> movedPiece);
+        void MakeTestMove(const FChessMove2P& move);
+        void MakeTestMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> movedPiece);
 
         // 撤销移动,仅AI计算使用
-        void UndoTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> movedPiece, TWeakObjectPtr<AChesses> capturedPiece);
+        void UndoTestMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> capturedPiece);
+        void UndoTestMove(const FChessMove2P& move, TWeakObjectPtr<AChesses> movedPiece, TWeakObjectPtr<AChesses> capturedPiece);
 
         TWeakObjectPtr<AChesses> GetChess(int32 x, int32 y) const;
 

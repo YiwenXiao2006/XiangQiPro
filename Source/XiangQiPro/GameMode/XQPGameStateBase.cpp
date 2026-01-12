@@ -168,6 +168,10 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
             MLModule = NewObject<UChessMLModule>(this);
             MLModule->AddToRoot();
             MLModule->Initialize();
+            if (!MLModule->IsTrained())
+            {
+                MLModule->StartTraining();
+            }
         }
     }
     else

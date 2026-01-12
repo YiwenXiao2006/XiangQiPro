@@ -89,7 +89,7 @@ bool UChessMLModule::StartTraining(int32 Epochs)
         [this, Epochs](UAsyncWorker* WorkerInstance)
         {
             // 获取最佳移动方式和要移动的棋子
-            //ULogger::Log(FString::Printf(TEXT("开始训练，数据量: %d, 轮次: %d"), TrainingData.Num(), Epochs));
+            ULogger::Log(FString::Printf(TEXT("开始训练，数据量: %d, 轮次: %d"), TrainingData.Num(), Epochs));
 
             // 转换为特征向量
             UpdateFeatureCache();
@@ -112,6 +112,10 @@ bool UChessMLModule::StartTraining(int32 Epochs)
             TrainingResult.LastTrainingTime = FDateTime::Now();
 
             ULogger::Log(FString::Printf(TEXT("训练完成，总训练轮次: %d"), TrainingResult.EpochsTrained));
+        },
+        [this](EAsyncWorkerState State)
+        {
+            SaveModel(TEXT("ChineseChess"));
         }
     );
 
