@@ -149,8 +149,7 @@ private:
 
     FChessMove2P OnlyOneMove = FChessMove2P();
 
-    // 弱引用棋盘对象
-    TWeakObjectPtr<UChessBoard2P> board2P;
+    TArray<TArray<TWeakObjectPtr<AChesses>>> LocalAllChess;  // 10行9列的棋盘
 
     // 置换表（缓存棋盘局面）
     TMap<uint64, FTranspositionEntry> TranspositionTable;
@@ -305,17 +304,71 @@ private:
 
     inline FChessMove2P StringToMove(FString MoveString) const;
 
-    inline TArray<FString> GetValidMovesAsStrings(EChessColor Color) const;
+    inline TArray<FString> GetValidMovesAsStrings(EChessColor Color);
 
     inline FString GetCurrentBoardFEN() const;
 
     inline FString GetPieceFENChar(EChessType PieceType, EChessColor Color) const;
 
+    private:
+
+        // 移动棋子,仅AI计算使用
+        void MakeTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> movedPiece);
+
+        // 撤销移动,仅AI计算使用
+        void UndoTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> movedPiece, TWeakObjectPtr<AChesses> capturedPiece);
+
+        TWeakObjectPtr<AChesses> GetChess(int32 x, int32 y) const;
+
+        void SetChess(int32 x, int32 y, TWeakObjectPtr<AChesses> Chess);
+
+        // 检查位置是否在棋盘内
+        bool IsValidPosition(int32 x, int32 y) const;
+
+        // 检查位置是否在九宫格内
+        bool IsInPalace(int32 x, int32 y, EChessColor color) const;
+
+        // 生成所有合法走法
+        TArray<FChessMove2P> GenerateAllMoves(EChessColor color);
+
+        // 为特定棋子生成走法
+        TArray<FChessMove2P> GenerateMovesForChess(int32 x, int32 y, TWeakObjectPtr<AChesses> chess);
+
+        // 生成将/帅的走法
+        void GenerateJiangMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const;
+
+        // 检查将帅是否面对面且中间无棋子阻挡
+        bool AreKingsFacingEachOther() const;
+
+        // 获取将帅之间的棋子数量
+        int32 CountPiecesBetweenKings() const;
+
+        // 生成将帅直接攻击的走法
+        void GenerateKingDirectAttackMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const;
+
+        // 生成士/仕的走法
+        void GenerateShiMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const;
+
+        // 生成象/相的走法
+        void GenerateXiangMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const;
+
+        // 生成马/傌的走法
+        void GenerateMaMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const;
+
+        // 生成车/俥的走法
+        void GenerateJvMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const;
+
+        // 生成炮/砲的走法
+        void GeneratePaoMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const;
+
+        // 生成兵/卒的走法
+        void GenerateBingMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves) const;
+
     // === 调整：权重常量（强化防守/进攻组织）===
     static const int32 VALUE_JIANG = 10000;    // 将/帅
     static const int32 VALUE_CHE = 900;        // 车
     static const int32 VALUE_MA = 450;         // 马
-    static const int32 VALUE_PAO = 500;        // 炮
+    static const int32 VALUE_PAO = 550;        // 炮
     static const int32 VALUE_BING = 100;       // 兵（未过河）
     static const int32 VALUE_BING_CROSSED = 200; // 兵（过河）
     static const int32 VALUE_SHI = 200;        // 士

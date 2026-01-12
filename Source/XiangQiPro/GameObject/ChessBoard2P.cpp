@@ -63,7 +63,7 @@ void UChessBoard2P::InitializeBoard(TWeakObjectPtr<AChessBoard2PActor> ChessBoar
 
 void UChessBoard2P::ShowSettingPoint2P(TArray<FChessMove2P> Moves, TWeakObjectPtr<AChesses> Target)
 {
-    for (FChessMove2P move : Moves)
+    for (const FChessMove2P& move : Moves)
     {
         if (IsValidPosition(move.to.X, move.to.Y))
         {
@@ -177,19 +177,15 @@ void UChessBoard2P::DebugCheckBoardState() const
     ULogger::Log(boardState);
 }
 
-void UChessBoard2P::MakeTestMove(FChessMove2P move)
+void UChessBoard2P::MakeTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> movedPiece)
 {
-    TWeakObjectPtr<AChesses> chess = GetChess(move.from.X, move.from.Y);
-
-    SetChess(move.to.X, move.to.Y, chess);
+    SetChess(move.to.X, move.to.Y, movedPiece);
     SetChess(move.from.X, move.from.Y, nullptr);
 }
 
-void UChessBoard2P::UndoTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> capturedPiece)
+void UChessBoard2P::UndoTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> movedPiece, TWeakObjectPtr<AChesses> capturedPiece)
 {
-    TWeakObjectPtr<AChesses> chess = GetChess(move.to.X, move.to.Y);
-
-    SetChess(move.from.X, move.from.Y, chess);
+    SetChess(move.from.X, move.from.Y, movedPiece);
     SetChess(move.to.X, move.to.Y, capturedPiece);
 }
 

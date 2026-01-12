@@ -89,13 +89,13 @@ public:
 	EAI2PDifficulty AIDifficulty;
 
 	UPROPERTY(BlueprintReadOnly)
-	TWeakObjectPtr<UAI2P> AI2P;
+	TObjectPtr<UAI2P> AI2P;
 
 	UPROPERTY(BlueprintReadOnly)
-	TWeakObjectPtr<UChessBoard2P> board2P;
+	TObjectPtr<UChessBoard2P> board2P;
 
 	UPROPERTY(BlueprintReadOnly)
-	TWeakObjectPtr<UChessMLModule> MLModule;
+	TObjectPtr<UChessMLModule> MLModule;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bEnableMachineLearning = false;

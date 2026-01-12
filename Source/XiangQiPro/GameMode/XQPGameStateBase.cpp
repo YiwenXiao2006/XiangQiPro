@@ -21,8 +21,8 @@
 
 void AXQPGameStateBase::UpdateScore()
 {
-    score1 = AI2P->Evaluate(EChessColor::REDCHESS);
-    score2 = AI2P->Evaluate(EChessColor::BLACKCHESS);
+    //score1 = AI2P->Evaluate(EChessColor::REDCHESS);
+    //score2 = AI2P->Evaluate(EChessColor::BLACKCHESS);
     if (HUD2P.IsValid())
     {
         HUD2P->UpdateScore(score1, score2);
@@ -54,15 +54,15 @@ void AXQPGameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
     }
 
     // 释放掉UObject对象
-    if (board2P.IsValid())
+    if (board2P)
         board2P->RemoveFromRoot();
     board2P = nullptr;
 
-    if (AI2P.IsValid())
+    if (AI2P)
         AI2P->RemoveFromRoot();
     AI2P = nullptr;
 
-    if (MLModule.IsValid())
+    if (MLModule)
         MLModule->RemoveFromRoot();
     AI2P = nullptr;
 
@@ -148,7 +148,7 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
     board2PActor = InBoard2PActor;
     if (board2PActor.IsValid())
     {
-        if (!board2P.IsValid())
+        if (!board2P)
         {
             board2P = GetGameInstance()->GetSubsystem<UChessBoard2P>();
             board2P->AddToRoot();
@@ -157,13 +157,13 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
         board2P->InitializeBoard(board2PActor); // 初始化棋盘
         board2PActor->GenerateChesses(board2P); // 棋盘Actor生成所有象棋并对其初始化
 
-        if (!AI2P.IsValid())
+        if (!AI2P)
         {
             AI2P = GetGameInstance()->GetSubsystem<UAI2P>();
             AI2P->AddToRoot();
         }
 
-        if (!MLModule.IsValid())
+        if (!MLModule)
         {
             MLModule = NewObject<UChessMLModule>(this);
             MLModule->AddToRoot();
@@ -222,6 +222,8 @@ void AXQPGameStateBase::RunAI2P()
     AIAsync = UAsyncWorker::CreateAndStartWorker(
          [this](UAsyncWorker* WorkerInstance)
          {
+
+             board2P->DebugCheckBoardState();
              // 获取最佳移动方式和要移动的棋子 
              AIMove2P = AI2P->GetBestMove(board2P, EChessColor::BLACKCHESS, AIDifficulty, 12000, bEnableMachineLearning, MLModule.Get());
 

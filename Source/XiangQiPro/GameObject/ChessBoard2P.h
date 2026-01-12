@@ -60,10 +60,10 @@ public:
     void DebugCheckBoardState() const;
 
     // 移动棋子,仅AI计算使用,你不应该调用这个函数
-    void MakeTestMove(FChessMove2P move);
+    void MakeTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> movedPiece);
 
     // 撤销移动,仅AI计算使用,你不应该调用这个函数
-    void UndoTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> capturedPiece);
+    void UndoTestMove(FChessMove2P move, TWeakObjectPtr<AChesses> movedPiece, TWeakObjectPtr<AChesses> capturedPiece);
 
     // 应用棋子移动
     void ApplyMove(TWeakObjectPtr<AChesses> target, FChessMove2P move);
