@@ -44,6 +44,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Settings")
 	float RotationZOffset = 3.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Settings")
+	FVector LocationOffset;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Music")
 	USoundBase* MainMusic;
 

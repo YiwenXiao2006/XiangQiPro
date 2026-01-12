@@ -83,39 +83,43 @@ bool UChessMLModule::StartTraining(int32 Epochs)
     }
 
     bIsTraining = true;
+    TWeakObjectPtr<UChessMLModule> WeakThis;
 
     // 在后台线程中进行训练
     UAsyncWorker::CreateAndStartWorker(
-        [this, Epochs](UAsyncWorker* WorkerInstance)
+        [WeakThis, Epochs](UAsyncWorker* WorkerInstance)
         {
+            if (!WeakThis.IsValid()) return;
+
             // 获取最佳移动方式和要移动的棋子
-            ULogger::Log(FString::Printf(TEXT("开始训练，数据量: %d, 轮次: %d"), TrainingData.Num(), Epochs));
+            ULogger::Log(FString::Printf(TEXT("开始训练，数据量: %d, 轮次: %d"), WeakThis->TrainingData.Num(), Epochs));
 
             // 转换为特征向量
-            UpdateFeatureCache();
+            WeakThis->UpdateFeatureCache();
 
-            if (FeatureCache.Num() == 0)
+            if (WeakThis->FeatureCache.Num() == 0)
             {
                 ULogger::LogError(UTF8_TO_TCHAR("特征提取失败，无法训练"));
-                bIsTraining = false;
+                WeakThis->bIsTraining = false;
                 return;
             }
 
             // 训练神经网络
-            TrainNeuralNetwork(Epochs);
+            WeakThis->TrainNeuralNetwork(Epochs);
 
             // 训练决策树
-            TrainDecisionTree(Epochs);
+            WeakThis->TrainDecisionTree(Epochs);
 
-            bIsTraining = false;
-            TrainingResult.EpochsTrained += Epochs;
-            TrainingResult.LastTrainingTime = FDateTime::Now();
+            WeakThis->bIsTraining = false;
+            WeakThis->TrainingResult.EpochsTrained += Epochs;
+            WeakThis->TrainingResult.LastTrainingTime = FDateTime::Now();
 
-            ULogger::Log(FString::Printf(TEXT("训练完成，总训练轮次: %d"), TrainingResult.EpochsTrained));
+            ULogger::Log(FString::Printf(TEXT("训练完成，总训练轮次: %d"), WeakThis->TrainingResult.EpochsTrained));
         },
-        [this](EAsyncWorkerState State)
+        [WeakThis](EAsyncWorkerState State)
         {
-            SaveModel(TEXT("ChineseChess"));
+            if (WeakThis.IsValid())
+                WeakThis->SaveModel(TEXT("ChineseChess"));
         }
     );
 

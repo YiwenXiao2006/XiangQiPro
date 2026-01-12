@@ -232,7 +232,7 @@ void ACameraMainActor::Tick(float DeltaTime)
 		Offset.Y = CameraDistance * FMath::Cos(Phi) * FMath::Sin(Theta);
 		Offset.Z = CameraDistance * FMath::Sin(Phi) + CameraHeightOffset;
 
-		FVector NewCameraLocation = TargetLocation + Offset;
+		FVector NewCameraLocation = TargetLocation + LocationOffset + Offset;
 		SetActorLocation(NewCameraLocation);
 
 		// 确保相机始终看向目标
