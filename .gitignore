@@ -370,6 +370,12 @@ FodyWeavers.xsd
 /.vsconfig
 /XiangQiPro.sln
 /XiangQiPro.uproject
-/Content
 /Build/Windows
 /enc_temp_folder
+/Content/Audio
+/Content/Material
+/Content/Mesh
+/Content/Niagara
+/Content/Texture
+/Content/UMG/Texture
+/Content/UMG/Font
