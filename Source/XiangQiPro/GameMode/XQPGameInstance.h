@@ -24,8 +24,6 @@ private:
 
 	FDoOnce<void(FLoadingScreenAttributes&)> FirstLoad;
 
-	bool IsLoadingLevel = false;
-
 	UUIManager* UIManager;
 
 public:
@@ -34,6 +32,9 @@ public:
 
 	UPROPERTY()
 	UUserWidget* CurrentWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "MoviePlayer")
+	bool bIsLoadingLevel = false;
 
 	// loading widget
 	UPROPERTY(EditAnywhere)
@@ -50,5 +51,8 @@ public:
 	void BeginLoadMap(const FString& MapName);
 
 	void EndLoadMap(UWorld* LoadedWorld);
+
+	UFUNCTION(BlueprintCallable, Category = "MoviePlayer")
+	void StopMovie();
 	
 };

@@ -21,7 +21,6 @@ void UXQPGameInstance::Init()
 	}
 
 	FirstLoad = FDoOnce<void(FLoadingScreenAttributes&)>([this](FLoadingScreenAttributes& LoadingScreen) {
-		LoadingScreen.MinimumLoadingScreenDisplayTime = 2.f; // movie最少播放时间
 		// 第一次加载
 		if (FirstLoadingWidget != nullptr)
 		{
@@ -47,23 +46,27 @@ void UXQPGameInstance::Init()
 void UXQPGameInstance::BeginLoadMap(const FString& MapName)
 {
 	ULogger::Log(TEXT("Begin loading map..."));
-	IsLoadingLevel = true;
+	bIsLoadingLevel = true;
 
 	FLoadingScreenAttributes LoadingScreen;
 
-	LoadingScreen.bWaitForManualStop = false;
-	LoadingScreen.bMoviesAreSkippable = false;
-	LoadingScreen.bAutoCompleteWhenLoadingCompletes = false;
+	LoadingScreen.bMoviesAreSkippable = true;
 
 	LoadingScreen.WidgetLoadingScreen = FLoadingScreenAttributes::NewTestLoadingScreenWidget(); // movie不存在时，显示的widget
 	
 	if (FirstLoad.IsExecutable())
 	{
+		LoadingScreen.bWaitForManualStop = false;
+		LoadingScreen.bAutoCompleteWhenLoadingCompletes = true;
+		LoadingScreen.MinimumLoadingScreenDisplayTime = 2.f; // movie最少播放时间
 		FirstLoad.Execute(LoadingScreen); // 执行第一次加载(开屏加载)的界面显示
 	}
 	else
 	{
-		LoadingScreen.MinimumLoadingScreenDisplayTime = 3.f; // movie最少播放时间
+		LoadingScreen.bWaitForManualStop = false;
+		LoadingScreen.bAllowEngineTick = false;
+		LoadingScreen.bAutoCompleteWhenLoadingCompletes = true;
+		LoadingScreen.MinimumLoadingScreenDisplayTime = 5.f; // movie最少播放时间
 		// 非第一次加载
 		if (LoadingWidget != nullptr)
 		{
@@ -82,11 +85,11 @@ void UXQPGameInstance::BeginLoadMap(const FString& MapName)
 void UXQPGameInstance::EndLoadMap(UWorld* LoadedWorld)
 {
 	ULogger::Log(TEXT("End load map"));
-	IsLoadingLevel = false;
+	bIsLoadingLevel = false;
+	GetMoviePlayer()->StopMovie();
+}
 
-	// 检测关卡是否完全初始化（包括异步资源）
-	if (LoadedWorld->IsInitialized()) 
-	{
-		GetMoviePlayer()->StopMovie(); // 关闭加载界面
-	}
+void UXQPGameInstance::StopMovie()
+{
+	GetMoviePlayer()->StopMovie();
 }
