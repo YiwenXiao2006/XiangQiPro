@@ -12,6 +12,8 @@
 #include "Camera2PActor.generated.h"
 
 class AXQP_HUD;
+class UUI_Battle2P_Base;
+class UUI_InGamePause;
 
 /**
  * 
@@ -42,6 +44,8 @@ private:
     FRotator TargetRotation;
 
     bool bIsRotatingCamera;
+
+    UUI_Battle2P_Base* BaseUI;
 
 public:
 
@@ -108,6 +112,8 @@ protected:
 
 	virtual void BeginPlay() override;
 
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
     // 初始化相机
     void InitCamera();
 
@@ -124,12 +130,6 @@ public:
     virtual void GamePause(UObject* OwnerObject) override;
 
     virtual void GameResume(UObject* OwnerObject) override;
-
-    // 窗口大小变化事件
-    void OnViewportResized(FViewport* Viewport, uint32 Param);
-
-    // 更新FOV
-    void UpdateVerticalFOV();
 
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 

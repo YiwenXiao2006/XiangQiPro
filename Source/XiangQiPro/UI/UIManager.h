@@ -24,6 +24,8 @@ private:
 
 	TWeakObjectPtr<UUserWidget> PauseUI;
 
+	TSubclassOf<UUserWidget> PauseWidgetClass;
+
 	TArray<UUserWidget*> ui_stack;
 
 	UUIManager() : BasicUI(nullptr), PauseUI(nullptr), ui_stack() {};
@@ -39,8 +41,10 @@ public:
 
 	void Init(UUserWidget* InBasicUI);
 
-	UFUNCTION(BlueprintCallable, Category = "UIManager")
 	void Init(UUserWidget* InBasicUI, UUserWidget* InPauseUI);
+
+	UFUNCTION(BlueprintCallable, Category = "UIManager")
+	void Init(UUserWidget* InBasicUI, TSubclassOf<UUserWidget> InPauseWidgetClass);
 
 	/*
 	* 添加UI到玩家屏幕

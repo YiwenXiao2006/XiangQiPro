@@ -22,6 +22,15 @@ void UUIManager::Init(UUserWidget* InBasicUI, UUserWidget* InPauseUI)
 
 	BasicUI = InBasicUI;
 	PauseUI = InPauseUI;
+}
+
+void UUIManager::Init(UUserWidget* InBasicUI, TSubclassOf<UUserWidget> InPauseWidgetClass)
+{
+	ui_stack.Empty();
+
+	BasicUI = InBasicUI;
+	PauseWidgetClass = InPauseWidgetClass;
+	PauseUI.Reset();
 
 	if (BasicUI)
 		BasicUI->AddToPlayerScreen();
@@ -79,6 +88,11 @@ void UUIManager::FinishUI()
 {
 	if (ui_stack.IsEmpty())
 	{
+		if (!PauseUI.IsValid() && IsValid(PauseWidgetClass))
+		{
+			PauseUI = CreateWidget<UUserWidget>(GetWorld(), PauseWidgetClass);
+		}
+
 		if (PauseUI.IsValid()) // 仅当暂停界面存在时才允许隐藏基础UI
 		{
 			SetUIVisibility(BasicUI, false); // 隐藏基础UI
