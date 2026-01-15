@@ -11,6 +11,8 @@ void UUIManager::Init(UUserWidget* InBasicUI)
 	ui_stack.Empty();
 
 	BasicUI = InBasicUI;
+	PauseUI.Reset();
+	PauseWidgetClass = nullptr;
 
 	if (BasicUI)
 		BasicUI->AddToPlayerScreen();
@@ -19,9 +21,9 @@ void UUIManager::Init(UUserWidget* InBasicUI)
 void UUIManager::Init(UUserWidget* InBasicUI, UUserWidget* InPauseUI)
 {
 	ui_stack.Empty();
-
 	BasicUI = InBasicUI;
 	PauseUI = InPauseUI;
+	PauseWidgetClass = nullptr;
 }
 
 void UUIManager::Init(UUserWidget* InBasicUI, TSubclassOf<UUserWidget> InPauseWidgetClass)
@@ -29,8 +31,8 @@ void UUIManager::Init(UUserWidget* InBasicUI, TSubclassOf<UUserWidget> InPauseWi
 	ui_stack.Empty();
 
 	BasicUI = InBasicUI;
-	PauseWidgetClass = InPauseWidgetClass;
 	PauseUI.Reset();
+	PauseWidgetClass = InPauseWidgetClass;
 
 	if (BasicUI)
 		BasicUI->AddToPlayerScreen();

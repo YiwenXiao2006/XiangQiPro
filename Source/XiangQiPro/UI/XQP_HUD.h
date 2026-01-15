@@ -6,6 +6,8 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Components/MultiLineEditableTextBox.h"
+#include "Components/ComboBoxString.h"
+#include "Components/Slider.h"
 
 #include "UI_Battle2P_Base.h"
 #include "UI_Main_Base.h"
