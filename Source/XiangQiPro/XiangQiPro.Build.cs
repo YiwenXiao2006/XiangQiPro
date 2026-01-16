@@ -22,7 +22,9 @@ public class XiangQiPro : ModuleRules
 
 
         PrivateDependencyModuleNames.AddRange(new string[] {
-            "CinematicCamera" 
+            "CinematicCamera",
+            "Slate", 
+            "SlateCore"
         });
 
         // 启用异常处理(try语句)

@@ -243,6 +243,7 @@ void ACameraMainActor::Tick(float DeltaTime)
 
 		// 更新对焦距离
 		float CurrentFocusDistance = FVector::Distance(NewCameraLocation, TargetLocation);
+		CineCameraComponent->FocusSettings.FocusMethod = ECameraFocusMethod::Manual;
 		CineCameraComponent->FocusSettings.ManualFocusDistance = CurrentFocusDistance;
 	}
 }

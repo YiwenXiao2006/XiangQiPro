@@ -8,6 +8,7 @@
 #include "Components/MultiLineEditableTextBox.h"
 #include "Components/ComboBoxString.h"
 #include "Components/Slider.h"
+#include "Components/ListView.h"
 
 #include "UI_Battle2P_Base.h"
 #include "UI_Main_Base.h"
