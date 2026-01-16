@@ -16,5 +16,4 @@ void UUI_QualitySettings::NativeConstruct()
 	ADD_QUALITY_OPTION("贴图质量", Texture);
 	ADD_QUALITY_OPTION("细节质量", Foliage);
 	ADD_QUALITY_OPTION("特效质量", VisualEffect);
-	ADD_QUALITY_OPTION("着色质量", Shading);
 }

@@ -22,6 +22,8 @@ class XIANGQIPRO_API UUI_Item_QualitySetting : public UUserWidget, public IUserO
 
 private:
 
+	bool bIsInitItem = false;
+
 	TArray<FString> LevelText = {
 			FString(UTF8_TO_TCHAR("低")),
 			FString(UTF8_TO_TCHAR("中")),

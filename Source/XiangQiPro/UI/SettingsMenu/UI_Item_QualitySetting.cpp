@@ -18,13 +18,17 @@ void UUI_Item_QualitySetting::NativeConstruct()
 void UUI_Item_QualitySetting::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
+	if (bIsInitItem)
+	{
+		return;
+	}
 	if (UQualitySettingObject* QSObj = Cast<UQualitySettingObject>(ListItemObject))
 	{
 		XQP_ComboBox->ComboBox->SetSelectedIndex(QSObj->DefaultSelect); // 已选择的质量
 		QualityName = QSObj->QualityName;								// 画质选项名称
 		OnSelectionChangedCallBack = QSObj->OnSelectionChangedCallBack; // 选择回调
-
 		QualityText->SetText(QualityName);
+		bIsInitItem = true;
 	}
 }
 
