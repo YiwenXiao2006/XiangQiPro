@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "../Util/DoOnce.h"
-#include "../Util/Logger.h"
-#include "../UI/UI_LoadingScreen.h"
-#include "../UI/UIManager.h"
+#include "XiangQiPro/Util/DoOnce.h"
+#include "XiangQiPro/Util/Logger.h"
+#include "XiangQiPro/UI/Util/UI_LoadingScreen.h"
+#include "XiangQiPro/UI/UIManager.h"
 #include "MoviePlayer.h"
 
 #include "CoreMinimal.h"
@@ -29,6 +29,9 @@ private:
 public:
 
 	UXQPGameInstance();
+
+	UPROPERTY(BlueprintReadWrite)
+	uint8 AIDifficulty;
 
 	UPROPERTY()
 	UUserWidget* CurrentWidget;

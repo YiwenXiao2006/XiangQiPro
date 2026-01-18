@@ -13,7 +13,7 @@
 #include "UI_Item_QualitySetting.generated.h"
 
 /**
- * 
+ * 画面设置列表条目
  */
 UCLASS()
 class XIANGQIPRO_API UUI_Item_QualitySetting : public UUserWidget, public IUserObjectListEntry

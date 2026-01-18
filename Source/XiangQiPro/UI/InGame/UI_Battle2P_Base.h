@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "../Util/ChessInfo.h"
-#include "../Util/ChessMove.h"
+#include "XiangQiPro/Util/ChessInfo.h"
+#include "XiangQiPro/Util/ChessMove.h"
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
@@ -20,7 +20,7 @@ enum class EPlayerTag : uint8;
 typedef UUI_Battle2P_Base UI_Battle2P_Base;
 
 /**
- * 
+ * 双人对战主界面
  */
 UCLASS()
 class XIANGQIPRO_API UUI_Battle2P_Base : public UUserWidget

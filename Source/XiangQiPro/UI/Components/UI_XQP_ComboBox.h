@@ -18,7 +18,7 @@ class XIANGQIPRO_API UUI_XQP_ComboBox : public UUserWidget
 
 public:
 
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	UComboBoxString* ComboBox;
 	
 };

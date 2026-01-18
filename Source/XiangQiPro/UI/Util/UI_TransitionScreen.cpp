@@ -3,7 +3,7 @@
 
 #include "UI_TransitionScreen.h"
 
-#include "XQP_HUD.h"
+#include "XiangQiPro/UI/XQP_HUD.h"
 
 void UUI_TransitionScreen::NativeConstruct()
 {

@@ -2,10 +2,10 @@
 
 
 #include "UI_Battle2P_Base.h"
-#include "XQP_HUD.h"
-#include "../Chess/Chesses.h"
+#include "XiangQiPro/UI/XQP_HUD.h"
+#include "XiangQiPro/Chess/Chesses.h"
 
-#include "../GameMode/XQPGameStateBase.h"
+#include "XiangQiPro/GameMode/XQPGameStateBase.h"
 
 void UUI_Battle2P_Base::NativeConstruct()
 {

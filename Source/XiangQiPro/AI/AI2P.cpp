@@ -3357,8 +3357,6 @@ FChessMove2P UAI2P::GetBestMove(TWeakObjectPtr<UChessBoard2P> InBoard2P, EChessC
 {
     SetBoard(InBoard2P);
 
-    int32 Depth = GetSearchDepth(AIDifficulty);
-
     FChessMove2P MLMove;
     MLMove.bIsValid = false;
     // 如果启用机器学习，尝试使用机器学习预测
@@ -3387,6 +3385,7 @@ FChessMove2P UAI2P::GetBestMove(TWeakObjectPtr<UChessBoard2P> InBoard2P, EChessC
     AIDifficulty = InDifficulty;
     MaxTime = InMaxTime;
     GamePhase = GetGamePhase();
+    int32 Depth = GetSearchDepth(AIDifficulty);
 
     // 执行迭代加深搜索
     IterativeDeepeningSearch(Depth, InAiColor);

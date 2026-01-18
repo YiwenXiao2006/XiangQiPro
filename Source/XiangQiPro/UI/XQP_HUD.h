@@ -10,10 +10,10 @@
 #include "Components/Slider.h"
 #include "Components/ListView.h"
 
-#include "UI_Battle2P_Base.h"
-#include "UI_Main_Base.h"
-#include "UI_TransitionScreen.h"
-#include "UI_InGamePause.h"
+#include "InGame/UI_Battle2P_Base.h"
+#include "InGame/UI_InGamePause.h"
+#include "Main/UI_Main_Base.h"
+#include "Util/UI_TransitionScreen.h"
 #include "UIManager.h"
 
 #include "CoreMinimal.h"

@@ -1,6 +1,8 @@
 ﻿// Copyright 2026 Ultimate Player All Rights Reserved.
 
+
 #include "XQPGameStateBase.h"
+#include "XQPGameInstance.h"
 #include "Async/Async.h"
 
 #include "XiangQiPro/AI/AI2P.h"
@@ -9,7 +11,7 @@
 #include "XiangQiPro/GameObject/ChessBoard2P.h"
 #include "XiangQiPro/GameObject/ChessBoard2PActor.h"
 
-#include "XiangQiPro/UI/UI_Battle2P_Base.h"
+#include "XiangQiPro/UI/InGame/UI_Battle2P_Base.h"
 
 #include "XiangQiPro/Util/Logger.h"
 #include "XiangQiPro/Util/ChessMove.h"
@@ -40,6 +42,10 @@ AXQPGameStateBase::AXQPGameStateBase() : Super(), battleType(EBattleType::P2_AI)
 void AXQPGameStateBase::BeginPlay()
 {
 	Super::BeginPlay();
+    if (UXQPGameInstance* GI = GetGameInstance<UXQPGameInstance>())
+    {
+        AIDifficulty = static_cast<EAI2PDifficulty>(GI->AIDifficulty);
+    }
 }
 
 void AXQPGameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)

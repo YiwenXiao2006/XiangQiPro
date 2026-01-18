@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../Util/DoOnce.h"
+#include "XiangQiPro/Util/DoOnce.h"
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"

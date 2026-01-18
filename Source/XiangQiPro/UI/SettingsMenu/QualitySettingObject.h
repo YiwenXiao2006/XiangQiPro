@@ -7,7 +7,7 @@
 #include "QualitySettingObject.generated.h"
 
 /**
- * 
+ * 画面设置列表数据
  */
 UCLASS()
 class XIANGQIPRO_API UQualitySettingObject : public UObject
