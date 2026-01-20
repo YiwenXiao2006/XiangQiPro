@@ -6,7 +6,8 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
-#include <XiangQiPro/Util/Logger.h>
+#include "XiangQiPro/Util/Logger.h"
+#include <Blueprint/WidgetBlueprintLibrary.h>
 
 void UUI_Item_ClassicGame::NativeConstruct()
 {
@@ -32,6 +33,9 @@ void UUI_Item_ClassicGame::NativeOnListItemObjectSet(UObject* ListItemObject)
         ItemText->SetText(Obj->ItemText);
         OnItemClickedDelegate = Obj->OnItemClickedDelegate;
         bIsInitItem = true;
+
+        FSlateBrush brush = UWidgetBlueprintLibrary::MakeBrushFromTexture(Obj->Icon, 96, 96); // ´´½¨±ÊË¢
+        Icon->SetBrush(brush);
     }
 }
 

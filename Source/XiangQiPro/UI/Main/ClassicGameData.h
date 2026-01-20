@@ -23,6 +23,8 @@ public:
 
 	FText ItemText;
 
-	void Init(int32 InIndex, FText InItemText, FOnListItemClicked CallBackFunc);
+	UTexture2D* Icon;
+
+	void Init(int32 InIndex, FText InItemText, UTexture2D* InIcon, FOnListItemClicked CallBackFunc);
 	
 };

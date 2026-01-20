@@ -10,6 +10,9 @@
  *	which should be included in cpp files that need access to these macros.
  */
 
+#include <Kismet/GameplayStatics.h>
+#include <Blueprint/WidgetBlueprintLibrary.h>
+
  // 函数接口调用
 #define CALL_INTERFACE_EVENT(InterfaceClass, EventName) \
 TArray<AActor*> AllActors; \

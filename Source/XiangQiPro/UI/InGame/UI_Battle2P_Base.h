@@ -78,6 +78,9 @@ public:
 	// 显示游戏结束
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowGameOver(EChessColor winner);
+
+	UFUNCTION(BlueprintCallable)
+	void ExecGamePlayAgain();
 	
 	// 增加落子历史记录
 	void AddOperatingRecord(EPlayerTag player, TWeakObjectPtr<AChesses> targetChess, FChessMove2P move);

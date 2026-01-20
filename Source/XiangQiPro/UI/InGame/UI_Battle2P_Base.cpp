@@ -4,6 +4,7 @@
 #include "UI_Battle2P_Base.h"
 #include "XiangQiPro/UI/XQP_HUD.h"
 #include "XiangQiPro/Chess/Chesses.h"
+#include "XiangQiPro/Interface/IF_GameState.h"
 
 #include "XiangQiPro/GameMode/XQPGameStateBase.h"
 
@@ -39,6 +40,13 @@ void UUI_Battle2P_Base::SetAITurn(bool bAITurn)
 		Image_RoundMark_P1->SetVisibility(ESlateVisibility::Visible); // 更新回合标记
 		Image_RoundMark_P2->SetVisibility(ESlateVisibility::Collapsed);
 	}
+}
+
+void UUI_Battle2P_Base::ExecGamePlayAgain()
+{
+    EXEC_PLAYAGAIN();
+    SetAITurn(false); // 更新AI回合结束
+    Text_OperatingRecord->SetText(FText());
 }
 
 void UUI_Battle2P_Base::AddOperatingRecord(EPlayerTag player, TWeakObjectPtr<AChesses> targetChess, FChessMove2P move)

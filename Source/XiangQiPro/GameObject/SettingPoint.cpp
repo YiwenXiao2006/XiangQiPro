@@ -48,6 +48,12 @@ void ASettingPoint::BeginPlay()
 	DefaultWorldPosition = GetActorLocation(); // 获取默认世界坐标
 }
 
+void ASettingPoint::GamePlayAgain(UObject* OwnerObject)
+{
+	Destroy();
+	IIF_GameState::GamePlayAgain(OwnerObject);
+}
+
 // Called every frame
 void ASettingPoint::Tick(float DeltaTime)
 {
@@ -84,7 +90,7 @@ void ASettingPoint::HandleHoverEnd(UPrimitiveComponent* TouchedComponent)
 // 统一的点击处理
 void ASettingPoint::HandleClick(UPrimitiveComponent* TouchedComponent, FKey ButtonPressed)
 {
-	GameState->ApplyMove2P(TargetChess, FChessMove2P(TargetChess->GetSimpPosition(), Position2P));
+	GameState->ApplyMove2P(TargetChess, FChessMove2P(TargetChess->GetPosition(), Position2P));
 }
 
 void ASettingPoint::SetActivate(bool bInActive)

@@ -18,9 +18,6 @@
 #include "XiangQiPro/Util/ChessInfo.h"
 #include "XiangQiPro/Util/AsyncWorker.h"
 
-#include <Kismet/GameplayStatics.h>
-#include <Blueprint/WidgetBlueprintLibrary.h>
-
 void AXQPGameStateBase::UpdateScore()
 {
     //score1 = AI2P->Evaluate(EChessColor::REDCHESS);
@@ -151,6 +148,9 @@ int32 AXQPGameStateBase::GetScore3() const
 
 void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2PActor)
 {
+    bGameOver = false;
+    battleTurn = EPlayerTag::P1;
+
     board2PActor = InBoard2PActor;
     if (board2PActor.IsValid())
     {
@@ -235,7 +235,7 @@ void AXQPGameStateBase::RunAI2P()
 
              board2P->DebugCheckBoardState();
              // 获取最佳移动方式和要移动的棋子 
-             AIMove2P = AI2P->GetBestMove(board2P, EChessColor::BLACKCHESS, AIDifficulty, 12000, bEnableMachineLearning, MLModule.Get());
+             AIMove2P = AI2P->GetBestMove(board2P, EChessColor::BLACKCHESS, AIDifficulty, 12000);
 
              while (WorkerInstance->IsPaused())
              {

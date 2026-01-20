@@ -99,6 +99,7 @@ void AChesses::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard
 		if (WeakThis.IsValid())
 		{
 			WeakThis->ChessMesh->SetHiddenInGame(true); // 吃掉，将其隐藏
+			WeakThis->Destroy();
 		}
 		}));
 }
@@ -120,6 +121,12 @@ void AChesses::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Timeline_Fade->Stop();
 
 	Super::EndPlay(EndPlayReason);
+}
+
+void AChesses::GamePlayAgain(UObject* OwnerObject)
+{
+	Destroy();
+	IIF_GameState::GamePlayAgain(OwnerObject);
 }
 
 // Called every frame
@@ -259,7 +266,7 @@ EChessType AChesses::GetType() const
 	return MyType;
 }
 
-FVector2D AChesses::GetSimpPosition() const
+FVector2D AChesses::GetPosition() const
 {
 	return Pos;
 }

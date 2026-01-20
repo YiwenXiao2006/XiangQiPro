@@ -13,7 +13,7 @@ void UUI_ClassicGameMenu::NativeConstruct()
 
 }
 
-void UUI_ClassicGameMenu::InitializeList(const TArray<FString>& Items)
+void UUI_ClassicGameMenu::InitializeList(const TArray<FString>& Items, const TArray<UTexture2D*>& Icons)
 {
     if (!ItemListView) return;
 
@@ -27,7 +27,7 @@ void UUI_ClassicGameMenu::InitializeList(const TArray<FString>& Items)
             FOnListItemClicked CallBackFunc;
             CallBackFunc.AddDynamic(this, &UUI_ClassicGameMenu::OnListItemClicked);
 
-            DataObj->Init(i, FText::FromString(Items[i]), CallBackFunc);
+            DataObj->Init(i, FText::FromString(Items[i]), Icons[i], CallBackFunc);
 
             ItemListView->AddItem(DataObj);
             DataObjList.Add(DataObj);

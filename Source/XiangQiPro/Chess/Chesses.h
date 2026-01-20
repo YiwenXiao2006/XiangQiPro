@@ -99,6 +99,8 @@ protected:
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	virtual void GamePlayAgain(UObject* OwnerObject) override;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -141,7 +143,7 @@ public:
 	EChessType GetType() const;
 
 	// 获取简化坐标
-	FVector2D GetSimpPosition() const;
+	FVector2D GetPosition() const;
 
 	virtual void GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target);
 

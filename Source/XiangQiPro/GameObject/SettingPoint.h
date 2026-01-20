@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "../Util/ChessMove.h"
+#include "XiangQiPro/Interface/IF_GameState.h"
+#include "XiangQiPro/Util/ChessMove.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
@@ -18,7 +19,7 @@ class UNiagaraSystem;
 class USphereComponent;
 
 UCLASS()
-class XIANGQIPRO_API ASettingPoint : public APawn
+class XIANGQIPRO_API ASettingPoint : public APawn, public IIF_GameState
 {
 	GENERATED_BODY()
 
@@ -53,6 +54,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void GamePlayAgain(UObject* OwnerObject) override;
 
 public:	
 	// Called every frame

@@ -35,6 +35,16 @@ void AChessBoard2PActor::BeginPlay()
     }
 }
 
+void AChessBoard2PActor::GamePlayAgain(UObject* OwnerObject)
+{
+    AXQPGameStateBase* GameState = Cast<AXQPGameStateBase>(GetWorld()->GetGameState());
+    if (GameState)
+    {
+        GameState->Start2PGame(this);
+    }
+    IIF_GameState::GamePlayAgain(OwnerObject);
+}
+
 // Called every frame
 void AChessBoard2PActor::Tick(float DeltaTime)
 {

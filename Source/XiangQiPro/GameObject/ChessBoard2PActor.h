@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "XiangQiPro/Interface/IF_GameState.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ChessBoard2PActor.generated.h"
@@ -12,7 +14,7 @@ class UStaticMeshComponent;
 class UChessBoard2P;
 
 UCLASS()
-class XIANGQIPRO_API AChessBoard2PActor : public AActor
+class XIANGQIPRO_API AChessBoard2PActor : public AActor, public IIF_GameState
 {
 	GENERATED_BODY()
 
@@ -33,6 +35,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void GamePlayAgain(UObject* OwnerObject) override;
 
 public:	
 	// Called every frame

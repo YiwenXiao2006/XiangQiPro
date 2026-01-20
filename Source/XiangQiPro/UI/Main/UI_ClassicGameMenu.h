@@ -18,7 +18,7 @@ public:
     virtual void NativeConstruct() override;
 
     UFUNCTION(BlueprintCallable)
-    void InitializeList(const TArray<FString>& Items);
+    void InitializeList(const TArray<FString>& Items, const TArray<UTexture2D*>& Icons);
 
     UFUNCTION(BlueprintCallable)
     void SetSelection(int32 Index);

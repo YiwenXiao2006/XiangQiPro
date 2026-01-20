@@ -47,6 +47,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
     class UImage* SelectedIndicator;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+    class UImage* Icon;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FLinearColor DefaultColor = FLinearColor(0.f, 0.f, 0.f, 0.3f);
 
