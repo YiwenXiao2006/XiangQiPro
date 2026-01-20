@@ -28,7 +28,6 @@ void AChessBoard2PActor::BeginPlay()
 	Super::BeginPlay();
     BorderLoc1 += (GetActorLocation() + FVector(0, 0, 1.5f));
     BorderLoc2 += (GetActorLocation() + FVector(0, 0, 1.5f));
-    ULogger::Log(BorderLoc1.ToString());
     AXQPGameStateBase* GameState = Cast<AXQPGameStateBase>(GetWorld()->GetGameState());
     if (GameState)
     {

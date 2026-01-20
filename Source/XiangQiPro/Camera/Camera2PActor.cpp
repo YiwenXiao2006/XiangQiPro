@@ -43,7 +43,6 @@ void ACamera2PActor::BeginPlay()
 
 	InitCamera();
 	InitAudio();
-	InitUI();
 }
 
 void ACamera2PActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -61,40 +60,6 @@ void ACamera2PActor::InitAudio()
 {
 	BattleAudio->SetSound(BattleMusic); // 设置音频资源
 	BattleAudio->Play(); // 开始播放背景音乐
-}
-
-void ACamera2PActor::InitUI()
-{
-	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
-	{
-		HUD = Cast<AXQP_HUD>(PC->GetHUD());
-		if (HUD)
-		{
-			BaseUI = CreateWidget<UI_Battle2P_Base>(GetWorld(), HUD->Class_Battle2P_Base);
-
-			if (UUIManager* UIManager = GetGameInstance()->GetSubsystem<UUIManager>())
-			{
-				UIManager->Init(BaseUI, HUD->Class_InGamePause); // 初始化用户界面管理器
-			}
-
-			if (AXQPGameStateBase* GameState = Cast<GS>(GetWorld()->GetGameState()))
-			{
-				GameState->SetHUD2P(BaseUI); // 把HUD交给游戏状态
-			}
-			else
-			{
-				ULogger::LogError(TEXT("ACamera2PActor::BeginPlay: GameState is nullptr!"));
-			}
-		}
-		else
-		{
-			ULogger::LogError(TEXT("ACamera2PActor::BeginPlay: HUD is nullptr!"));
-		}
-	}
-	else
-	{
-		ULogger::LogError(TEXT("ACamera2PActor::BeginPlay: Player controller is nullptr!"));
-	}
 }
 
 // 如果需要每帧更新，可以重写Tick函数

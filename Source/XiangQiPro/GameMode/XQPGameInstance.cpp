@@ -87,9 +87,20 @@ void UXQPGameInstance::EndLoadMap(UWorld* LoadedWorld)
 	ULogger::Log(TEXT("End load map"));
 	bIsLoadingLevel = false;
 	GetMoviePlayer()->StopMovie();
+	
 }
 
 void UXQPGameInstance::StopMovie()
 {
 	GetMoviePlayer()->StopMovie();
+}
+
+void UXQPGameInstance::SetGameMode(EGameMode InGameMode)
+{
+	MyGameMode = InGameMode;
+}
+
+EGameMode UXQPGameInstance::GetGameMode() const
+{
+	return MyGameMode;
 }

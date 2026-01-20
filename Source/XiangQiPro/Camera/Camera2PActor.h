@@ -120,9 +120,6 @@ protected:
     // 初始化音频
     void InitAudio();
 
-    // 初始化用户界面
-    void InitUI();
-
 public:
 
     virtual void Tick(float DeltaTime) override;

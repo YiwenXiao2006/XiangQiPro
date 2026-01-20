@@ -12,6 +12,14 @@
 #include "Engine/GameInstance.h"
 #include "XQPGameInstance.generated.h"
 
+UENUM()
+enum class EGameMode : uint8
+{
+	Default = 0,
+	AI2P = 1,
+	Ending = 2
+};
+
 /**
  * ”Œœ∑ µ¿˝¿‡
  */
@@ -25,6 +33,8 @@ private:
 	FDoOnce<void(FLoadingScreenAttributes&)> FirstLoad;
 
 	UUIManager* UIManager;
+
+	EGameMode MyGameMode = EGameMode::Default;
 
 public:
 
@@ -57,5 +67,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "MoviePlayer")
 	void StopMovie();
+
+	UFUNCTION(BlueprintCallable)
+	void SetGameMode(EGameMode InGameMode);
+
+	UFUNCTION(BlueprintCallable)
+	EGameMode GetGameMode() const;
 	
 };

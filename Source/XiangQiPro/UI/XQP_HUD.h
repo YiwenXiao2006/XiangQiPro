@@ -44,5 +44,12 @@ public:
 	TSubclassOf<UI_TransitionScreen> Class_TransitionScreen;
 
 	TSubclassOf<UI_InGamePause> Class_InGamePause;
+
+protected:
+
+	virtual void BeginPlay() override;
+
+	// 初始化用户界面
+	void InitUI();
 	
 };
