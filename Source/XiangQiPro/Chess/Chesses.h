@@ -47,10 +47,10 @@ protected:
 	EChessType MyType;
 
 	// 棋子当前的简化坐标
-	FVector2D Pos;
+	Position Pos;
 
 	// 目标移动的位置
-	FVector2D TargetPos;
+	Position TargetPos;
 
 	AXQPGameStateBase* GameState;
 
@@ -68,7 +68,7 @@ public:
 	// Sets default values for this pawn's properties
 	AChesses();
 
-	virtual void Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard2P> board2P);
+	virtual void Init(EChessColor color, Position pos, TWeakObjectPtr<UChessBoard2P> board2P);
 	 
 	// 棋子静态网格体组件
 	UPROPERTY(EditAnywhere)
@@ -143,7 +143,7 @@ public:
 	EChessType GetType() const;
 
 	// 获取简化坐标
-	FVector2D GetPosition() const;
+	Position GetPosition() const;
 
 	virtual void GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObjectPtr<AChesses> target);
 

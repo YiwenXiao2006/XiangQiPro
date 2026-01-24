@@ -69,6 +69,8 @@ private:
 
 	bool bGameOver = false;
 
+	bool bIsJueSha = false;
+
 	// AI“Ï≤Ω»ŒŒÒ
 	UAsyncWorker* AIAsync;
 

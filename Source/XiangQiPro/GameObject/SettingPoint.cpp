@@ -132,7 +132,7 @@ FVector2D ASettingPoint::GetPosition2P()
 	return Position2P;
 }
 
-void ASettingPoint::SetPosition2P(FVector2D InPosition2P)
+void ASettingPoint::SetPosition2P(Position InPosition2P)
 {
 	Position2P = InPosition2P;
 }

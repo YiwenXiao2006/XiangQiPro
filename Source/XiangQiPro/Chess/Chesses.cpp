@@ -35,7 +35,7 @@ AChesses::AChesses()
 	CF_ChessMove = OM::GetConstructorObject<UCurveFloat>(PATH_CF_CHESSMOVE);
 }
 
-void AChesses::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard2P> board2P)
+void AChesses::Init(EChessColor color, Position pos, TWeakObjectPtr<UChessBoard2P> board2P)
 {
 	MyColor = color;
 	Pos = pos;
@@ -266,7 +266,7 @@ EChessType AChesses::GetType() const
 	return MyType;
 }
 
-FVector2D AChesses::GetPosition() const
+Position AChesses::GetPosition() const
 {
 	return Pos;
 }
@@ -289,7 +289,7 @@ void AChesses::GenerateMove2P(TWeakObjectPtr<UChessBoard2P> board2P, TWeakObject
 
 void AChesses::ApplyMove(FChessMove2P Move)
 {
-	TargetPos = FVector2D(Move.to.X, Move.to.Y); // 获取移动的目标位置
+	TargetPos = Position(Move.to.X, Move.to.Y); // 获取移动的目标位置
 
 	PlayMoveAnim();
 

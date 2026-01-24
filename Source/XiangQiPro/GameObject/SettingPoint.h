@@ -31,7 +31,7 @@ private:
 	FVector DefaultWorldPosition;
 
 	// ¼ò»¯×ø±ê
-	FVector2D Position2P;
+	Position Position2P;
 
 	AXQPGameStateBase* GameState;
 
@@ -93,6 +93,6 @@ public:
 
 	FVector2D GetPosition2P();
 
-	void SetPosition2P(FVector2D InPosition2P);
+	void SetPosition2P(Position InPosition2P);
 
 };

@@ -63,16 +63,41 @@ UAI2P::UAI2P()
 
 void UAI2P::SetBoard(TWeakObjectPtr<UChessBoard2P> AIMove2P)
 {
-    LocalAllChess = AIMove2P->AllChess;
+    LocalAllChess = AIMove2P->AllChess; 
+    int32 ChessNum = 0;
+    for (const auto& list : LocalAllChess)
+    {
+        for (const auto& chess : list)
+        {
+            if (chess.IsValid())
+            {
+                ChessNum++;
+            }
+        }
+    }
+
+    if (ChessNum > 30)
+    {
+        Phase = EGamePhase::Opening;
+    }
+    else if (ChessNum <= 15)
+    {
+        Phase = EGamePhase::Ending;
+    }
+    else
+    {
+        Phase = EGamePhase::Middle;
+    }
 }
 
 // 获取AI最优走法（对外接口）
-FChessMove2P UAI2P::GetBestMove(TWeakObjectPtr<UChessBoard2P> InBoard2P, EChessColor InAiColor, EAI2PDifficulty InDifficulty, int32 InMaxTime)
+FChessMove2P UAI2P::GetBestMove(TWeakObjectPtr<UChessBoard2P> InBoard2P, EChessColor InAiColor, EAI2PDifficulty InDifficulty)
 {
     bStopThinking = false;
     SetBoard(InBoard2P);
     GlobalAIColor = InAiColor;
     GlobalPlayerColor = (GlobalAIColor == EChessColor::BLACKCHESS ? EChessColor::REDCHESS : EChessColor::BLACKCHESS);
+
     int32 Depth = 4;
     switch (InDifficulty)
     {
@@ -111,7 +136,8 @@ std::pair<FChessMove2P, int32> UAI2P::Minimax(int32 depth, int32 alpha, int32 be
     }
 
 
-    TArray<FChessMove2P> moves = GetAllPossibleMoves(maximiziongPlayer ? GlobalAIColor : GlobalPlayerColor);
+    EChessColor CurrentColor = maximiziongPlayer ? GlobalAIColor : GlobalPlayerColor;
+    TArray<FChessMove2P> moves = GetAllPossibleMoves(CurrentColor);
 
     if (moves.Num() == 0)
     {
@@ -125,9 +151,7 @@ std::pair<FChessMove2P, int32> UAI2P::Minimax(int32 depth, int32 alpha, int32 be
         for (const FChessMove2P& move : moves)
         {
             // 执行移动
-            WeakChess OriginalChess = MakeTestMove(move);
-            
-            // 递归评估
+            WeakChessPtr OriginalChess = MakeTestMove(move);
             int32 evaluation = Minimax(depth - 1, alpha, beta, false).second;
 
             // 恢复移动
@@ -161,9 +185,7 @@ std::pair<FChessMove2P, int32> UAI2P::Minimax(int32 depth, int32 alpha, int32 be
         for (const FChessMove2P& move : moves)
         {
             // 执行移动
-            WeakChess OriginalChess = MakeTestMove(move);
-
-            // 递归评估
+            WeakChessPtr OriginalChess = MakeTestMove(move);
             int32 evaluation = Minimax(depth - 1, alpha, beta, true).second;
 
             // 恢复移动
@@ -198,7 +220,7 @@ int32 UAI2P::EvaluateBoard(EChessColor Color)
     {
         for (int32 j = 0; j < 9; j++)
         {
-            WeakChess piece = LocalAllChess[i][j];
+            WeakChessPtr piece = GetChess(i, j);
             if (piece.IsValid())
             {
                 int32 value = GetChessValue(piece->GetType());
@@ -221,19 +243,48 @@ int32 UAI2P::EvaluateBoard(EChessColor Color)
 TArray<FChessMove2P> UAI2P::GetAllPossibleMoves(EChessColor Color)
 {
     TArray<FChessMove2P> Moves = GenerateAllMoves(Color);
+    TArray<FChessMove2P> SelectedMoves;
 
-    Moves.Sort([this, Color](const FChessMove2P& a, const FChessMove2P& b) {
+    if (Phase == EGamePhase::Ending)
+    {
+        EChessColor OppoColor = Color == EChessColor::REDCHESS ? EChessColor::BLACKCHESS : EChessColor::REDCHESS;
+        Position KingPos = GetKingPos(Color);
+        Position OppoKingPos = GetKingPos(OppoColor);
+
+        for (const auto& move : Moves)
+        {
+            if (move.to == OppoKingPos)
+            {
+                return { move };
+            }
+
+            WeakChessPtr chess = MakeTestMove(move);
+            if (!IsInCheck(Color, move.from != KingPos ? KingPos : move.to /* 如果是将移动，则需要传入移动后的位置 */))
+            {
+                SelectedMoves.Add(move);
+            }
+            UndoTestMove(move, chess);
+        }
+    }
+
+    if (SelectedMoves.IsEmpty())
+    {
+        SelectedMoves.Append(Moves);
+    }
+
+    SelectedMoves.Sort([this, Color](const FChessMove2P& a, const FChessMove2P& b) {
+
         // 优先考虑吃子
-        bool aCapture = LocalAllChess[a.to.X][a.to.Y].IsValid() && LocalAllChess[a.to.X][a.to.Y]->GetColor() != Color;
-        bool bCapture = LocalAllChess[b.to.X][b.to.Y].IsValid() && LocalAllChess[b.to.X][b.to.Y]->GetColor() != Color;
+        bool aCapture = GetChess(a.to.X, a.to.Y).IsValid() && GetChess(a.to.X, a.to.Y)->GetColor() != Color;
+        bool bCapture = GetChess(b.to.X, b.to.Y).IsValid() && GetChess(b.to.X, b.to.Y)->GetColor() != Color;
 
         if (aCapture != bCapture)
         {
             return bCapture < aCapture;
         }
 
-        int32 aValue = GetChessValue(LocalAllChess[a.from.X][a.from.Y]->GetType());
-        int32 bValue = GetChessValue(LocalAllChess[b.from.X][b.from.Y]->GetType());
+        int32 aValue = GetChessValue(GetChess(a.from.X, a.from.Y)->GetType());
+        int32 bValue = GetChessValue(GetChess(b.from.X, b.from.Y)->GetType());
 
         if (aValue != bValue)
         {
@@ -245,20 +296,20 @@ TArray<FChessMove2P> UAI2P::GetAllPossibleMoves(EChessColor Color)
         }
         return a.to.Y < b.to.Y;
         });
-    return Moves;
+    return SelectedMoves;
 }
 
-WeakChess UAI2P::MakeTestMove(FChessMove2P Move)
+WeakChessPtr UAI2P::MakeTestMove(FChessMove2P Move)
 {
-    WeakChess OriginalChess = LocalAllChess[Move.to.X][Move.to.Y];
-    LocalAllChess[Move.to.X][Move.to.Y] = LocalAllChess[Move.from.X][Move.from.Y];
+    WeakChessPtr OriginalChess = GetChess(Move.to.X, Move.to.Y);
+    LocalAllChess[Move.to.X][Move.to.Y] = GetChess(Move.from.X, Move.from.Y);
     LocalAllChess[Move.from.X][Move.from.Y] = nullptr;
     return OriginalChess;
 }
 
-void UAI2P::UndoTestMove(FChessMove2P Move, WeakChess OriginalChess)
+void UAI2P::UndoTestMove(FChessMove2P Move, WeakChessPtr OriginalChess)
 {
-    LocalAllChess[Move.from.X][Move.from.Y] = LocalAllChess[Move.to.X][Move.to.Y];
+    LocalAllChess[Move.from.X][Move.from.Y] = GetChess(Move.to.X, Move.to.Y);
     LocalAllChess[Move.to.X][Move.to.Y] = OriginalChess;
 }
 
@@ -311,7 +362,7 @@ TArray<FChessMove2P> UAI2P::GenerateAllMoves(EChessColor Color)
     {
         for (int32 j = 0; j < 9; j++)
         {
-            TWeakObjectPtr<AChesses> Chess = LocalAllChess[i][j];
+            TWeakObjectPtr<AChesses> Chess = GetChess(i, j);
             if (!Chess.IsValid())
             {
                 continue;
@@ -652,7 +703,7 @@ void UAI2P::GenerateBingMoves(int32 x, int32 y, EChessColor color, TArray<FChess
     }
 }
 
-WeakChess UAI2P::GetChess(int32 X, int32 Y)
+WeakChessPtr UAI2P::GetChess(int32 X, int32 Y)
 {
     return LocalAllChess[X][Y];
 }
@@ -672,4 +723,91 @@ bool UAI2P::IsInPalace(int32 x, int32 y, EChessColor color)
     {
         return x >= 7 && x <= 9 && y >= 3 && y <= 5;
     }
+}
+
+bool UAI2P::IsInCheck(EChessColor Color, Position KingPos)
+{
+    EChessColor OppoColor = (Color == EChessColor::BLACKCHESS ? EChessColor::REDCHESS : EChessColor::BLACKCHESS);
+    auto OppoMoves = GenerateAllMoves(OppoColor);
+    for (const auto& move : OppoMoves)
+    {
+        if (move.to == KingPos)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+Position UAI2P::GetKingPos(EChessColor Color)
+{
+    // 找到将/帅的位置
+    int32 kingX = -1, kingY = -1;
+
+    for (int32 i = 9; i >= 0; i--)
+    {
+        for (int32 j = 3; j < 6; j++)
+        {
+            WeakChessPtr chess = GetChess(i, j);
+            if (chess.IsValid() && chess->GetType() == EChessType::JIANG && chess->GetColor() == Color)
+            {
+                kingX = i;
+                kingY = j;
+                break;
+            }
+        }
+        if (kingX != -1) break;
+    }
+    return Position(kingX, kingY);
+}
+
+bool UAI2P::IsJueSha(EChessColor AIColor)
+{
+    EChessColor PlayerColor = (AIColor == EChessColor::BLACKCHESS ? EChessColor::REDCHESS : EChessColor::BLACKCHESS);
+    Position KingPos = GetKingPos(AIColor);
+
+    bool InCheck = false;
+    auto PlayerMoves = GetAllPossibleMoves(PlayerColor);
+
+    for (const auto& move : PlayerMoves)
+    {
+        if (move.to == KingPos)
+        {
+            InCheck = true;
+            break;
+        }
+    }
+
+    if (!InCheck)
+    {
+        return false;
+    }
+
+    auto AIMoves = GetAllPossibleMoves(AIColor);
+    for (const auto& aimove : AIMoves)
+    {
+        WeakChessPtr chess = MakeTestMove(aimove);
+
+        auto playerMoves = GetAllPossibleMoves(PlayerColor);
+
+        bool StillInCheck = false;
+        for (const auto& player_move : playerMoves)
+        {
+            if (player_move.to == (aimove.from == KingPos ? aimove.to : KingPos))
+            {
+                StillInCheck = true;
+                break;
+            }
+        }
+
+        UndoTestMove(aimove, chess);
+
+        if (!StillInCheck)
+        {
+            InCheck = false;
+            break;
+        }
+    }
+
+    return InCheck;
 }

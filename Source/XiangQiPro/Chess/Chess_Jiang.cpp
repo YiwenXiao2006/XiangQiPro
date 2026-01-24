@@ -8,7 +8,7 @@ AChess_Jiang::AChess_Jiang() : Super()
 	MyType = EChessType::JIANG;
 }
 
-void AChess_Jiang::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard2P> board2P)
+void AChess_Jiang::Init(EChessColor color, Position pos, TWeakObjectPtr<UChessBoard2P> board2P)
 {
 	Super::Init(color, pos, board2P);
 	if (color == EChessColor::REDCHESS)

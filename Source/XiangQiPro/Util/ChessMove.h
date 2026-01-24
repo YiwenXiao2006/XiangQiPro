@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "ChessMove.generated.h"
 
-typedef FVector2D Position;
+typedef FIntPoint Position;
 
  // 走法结构
 USTRUCT(BlueprintType)

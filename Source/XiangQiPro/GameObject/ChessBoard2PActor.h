@@ -3,6 +3,7 @@
 #pragma once
 
 #include "XiangQiPro/Interface/IF_GameState.h"
+#include "XiangQiPro/Interface/IF_EndingGame.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -14,9 +15,11 @@ class UStaticMeshComponent;
 class UChessBoard2P;
 
 UCLASS()
-class XIANGQIPRO_API AChessBoard2PActor : public AActor, public IIF_GameState
+class XIANGQIPRO_API AChessBoard2PActor : public AActor, public IIF_GameState, public IIF_EndingGame
 {
 	GENERATED_BODY()
+
+	TWeakObjectPtr<UChessBoard2P> Board2P;
 
 public:
 
@@ -30,6 +33,8 @@ public:
 	// Sets default values for this actor's properties
 	AChessBoard2PActor();
 
+	void Init(TWeakObjectPtr<UChessBoard2P> InBoard2P);
+
 	UStaticMeshComponent* ChessBoardMesh;
 
 protected:
@@ -38,11 +43,15 @@ protected:
 
 	virtual void GamePlayAgain(UObject* OwnerObject) override;
 
+	virtual void OnEndingGameStart(UObject* OwnerObject, int32 Index) override;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// 生成棋子Actor并保存到ChessBoard2P
-	void GenerateChesses(TWeakObjectPtr<UChessBoard2P> board2P);
+	void GenerateChesses();
+
+	void GenerateSettingPoints();
 
 };

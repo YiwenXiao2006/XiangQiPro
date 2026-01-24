@@ -8,7 +8,7 @@ AChess_Shi::AChess_Shi()
 	MyType = EChessType::SHI;
 }
 
-void AChess_Shi::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard2P> board2P)
+void AChess_Shi::Init(EChessColor color, Position pos, TWeakObjectPtr<UChessBoard2P> board2P)
 {
 	Super::Init(color, pos, board2P);
 	if (color == EChessColor::REDCHESS)

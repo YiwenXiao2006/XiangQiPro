@@ -149,6 +149,7 @@ int32 AXQPGameStateBase::GetScore3() const
 void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2PActor)
 {
     bGameOver = false;
+    bIsJueSha = false;
     battleTurn = EPlayerTag::P1;
 
     board2PActor = InBoard2PActor;
@@ -161,7 +162,21 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
         }
 
         board2P->InitializeBoard(board2PActor); // 初始化棋盘
-        board2PActor->GenerateChesses(board2P); // 棋盘Actor生成所有象棋并对其初始化
+        board2PActor->Init(board2P);
+
+        switch (Cast<UXQPGameInstance>(GetGameInstance())->GetGameMode())
+        {
+        case EGameMode::Ending:
+        {
+            EXEC_ONENDINGGAMESTART(2);
+            break;
+        }
+        case EGameMode::AI2P:
+            board2PActor->GenerateChesses(); // 棋盘Actor生成所有象棋并对其初始化
+            break;
+        default:
+            break;
+        }
 
         if (!AI2P)
         {
@@ -232,10 +247,20 @@ void AXQPGameStateBase::RunAI2P()
     AIAsync = UAsyncWorker::CreateAndStartWorker(
          [this](UAsyncWorker* WorkerInstance)
          {
-
-             board2P->DebugCheckBoardState();
+             if (Cast<UXQPGameInstance>(GetGameInstance())->GetGameMode() == EGameMode::Ending)
+             {
+                 AIDifficulty = EAI2PDifficulty::Normal;
+                 AI2P->SetBoard(board2P);
+                 board2P->DebugCheckBoardState();
+                 if (AI2P->IsJueSha(EChessColor::BLACKCHESS))
+                 {
+                     bIsJueSha = true;
+                     ULogger::Log(UTF8_TO_TCHAR("绝杀"));
+                     return;
+                 }
+             }
              // 获取最佳移动方式和要移动的棋子 
-             AIMove2P = AI2P->GetBestMove(board2P, EChessColor::BLACKCHESS, AIDifficulty, 12000);
+             AIMove2P = AI2P->GetBestMove(board2P, EChessColor::BLACKCHESS, AIDifficulty);
 
              while (WorkerInstance->IsPaused())
              {
@@ -246,11 +271,24 @@ void AXQPGameStateBase::RunAI2P()
          {
              if (State != EAsyncWorkerState::Cancelled) // 任务正常执行完成
              {
-                 // 应用棋子的移动
-                 AIMovedChess = board2P->GetChess(AIMove2P.from.X, AIMove2P.from.Y);
-                 ApplyMove2P(AIMovedChess, AIMove2P);
-                 board2P->DebugCheckBoardState();
-                 ULogger::Log(TEXT("AXQPGameStateBase::RunAI2P: AI FINISH"));
+                 if (bIsJueSha)
+                 {
+                     bIsJueSha = false;
+                     EXEC_ONJUESHA();
+                     return;
+                 }
+
+                 if (AIMove2P.IsValid())
+                 {
+                     // 应用棋子的移动
+                     AIMovedChess = board2P->GetChess(AIMove2P.from.X, AIMove2P.from.Y);
+                     ApplyMove2P(AIMovedChess, AIMove2P);
+                     ULogger::Log(TEXT("AXQPGameStateBase::RunAI2P: AI FINISH"));
+                 }
+                 else
+                 {
+                     ULogger::LogWarning(TEXT("AXQPGameStateBase::RunAI2P: Invalid move."));
+                 }
              }
              else
              {

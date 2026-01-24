@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "XiangQiPro/Interface/IF_EndingGame.h"
+
 #include "XiangQiPro/Util/ChessInfo.h"
 #include "XiangQiPro/Util/ChessMove.h"
 #include "XiangQiPro/Util/Clock.h"
@@ -16,7 +18,7 @@ class AChesses;
 
 typedef UAI2P AI2P;
 typedef UKismetMathLibrary Math;
-typedef TWeakObjectPtr<AChesses> WeakChess;
+typedef TWeakObjectPtr<AChesses> WeakChessPtr;
 
 UENUM(BlueprintType)
 enum class EAI2PDifficulty : uint8
@@ -25,6 +27,13 @@ enum class EAI2PDifficulty : uint8
     Normal = 1, // 普通
     Hard = 2,   // 困难
     Master = 3  // 大师
+};
+
+enum class EGamePhase : uint8
+{
+    Opening = 0,
+    Middle = 1,
+    Ending = 2
 };
 
 UCLASS()
@@ -41,7 +50,7 @@ public:
     UAI2P();
 
     // 核心：获取AI最优走法
-    FChessMove2P GetBestMove(TWeakObjectPtr<UChessBoard2P> InBoard2P, EChessColor InAiColor, EAI2PDifficulty InDifficulty, int32 InMaxTime = 10000);
+    FChessMove2P GetBestMove(TWeakObjectPtr<UChessBoard2P> InBoard2P, EChessColor InAiColor, EAI2PDifficulty InDifficulty);
 
     // 立刻停止搜索
     UFUNCTION(BlueprintCallable, Category = "Chess AI")
@@ -58,11 +67,13 @@ private:
 
     FClock Clock;
 
+    EGamePhase Phase;
+
     EChessColor GlobalAIColor = EChessColor::BLACKCHESS;
 
     EChessColor GlobalPlayerColor = EChessColor::REDCHESS;
 
-    TArray<TArray<TWeakObjectPtr<AChesses>>> LocalAllChess;  // 10行9列的棋盘
+    TArray<TArray<WeakChessPtr>> LocalAllChess;  // 10行9列的棋盘
 
     std::unordered_map<EChessType, std::unordered_map<EChessColor, TArray<TArray<int32>>>> PositionValues;
 
@@ -75,9 +86,9 @@ private:
     // 获取所有可能走法
     TArray<FChessMove2P> GetAllPossibleMoves(EChessColor Color);
 
-    WeakChess MakeTestMove(FChessMove2P Move);
+    WeakChessPtr MakeTestMove(FChessMove2P Move);
 
-    void UndoTestMove(FChessMove2P Move, WeakChess OriginalChess);
+    void UndoTestMove(FChessMove2P Move, WeakChessPtr OriginalChess);
 
     int32 GetChessValue(EChessType Type);
 
@@ -104,11 +115,21 @@ private:
 
     void GenerateBingMoves(int32 x, int32 y, EChessColor color, TArray<FChessMove2P>& moves);
 
-    WeakChess GetChess(int32 X, int32 Y);
+    WeakChessPtr GetChess(int32 X, int32 Y);
 
     // 检查位置是否在棋盘内
     bool IsValidPosition(int32 x, int32 y);
 
     // 检查位置是否在九宫格内
     bool IsInPalace(int32 x, int32 y, EChessColor color);
+
+    bool IsInCheck(EChessColor Color, Position KingPos);
+
+    // 找到将的位置
+    Position GetKingPos(EChessColor Color);
+
+public:
+
+    // 检查是否绝杀
+    bool IsJueSha(EChessColor AIColor);
 };

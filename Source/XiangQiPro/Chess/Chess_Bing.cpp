@@ -8,7 +8,7 @@ AChess_Bing::AChess_Bing()
 	MyType = EChessType::BING; 
 }
 
-void AChess_Bing::Init(EChessColor color, FVector2D pos, TWeakObjectPtr<UChessBoard2P> board2P)
+void AChess_Bing::Init(EChessColor color, Position pos, TWeakObjectPtr<UChessBoard2P> board2P)
 {
 	Super::Init(color, pos, board2P);
 	if (color == EChessColor::REDCHESS)

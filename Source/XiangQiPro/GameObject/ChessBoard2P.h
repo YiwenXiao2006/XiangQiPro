@@ -14,7 +14,6 @@ class AChessBoard2PActor;
 class ASettingPoint;
 
 typedef UKismetMathLibrary Math;
-typedef FVector2D Position;
 typedef UChessBoard2P ChessBoard2P;
 
 /**
