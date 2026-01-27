@@ -3,7 +3,7 @@
 
 #include "ClassicGameData.h"
 
-void UClassicGameData::Init(int32 InIndex, FText InItemText, UTexture2D* InIcon, FOnListItemClicked CallBackFunc)
+void UClassicGameData::Init(int32 InIndex, FText InItemText, UTexture2D* InIcon, FOnClassicGameListItemClicked CallBackFunc)
 {
 	Index = InIndex;
 	ItemText = InItemText;

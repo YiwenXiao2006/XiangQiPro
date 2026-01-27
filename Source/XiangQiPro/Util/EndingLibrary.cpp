@@ -17,7 +17,7 @@ TArray<FChessGenerationInfo> UEndingLibrary::GetChessGenerateInfo(int32 Index)
     if (Index < 0 || Index >= rowName.Num())
     {
         ULogger::LogError(TEXT("UEndingLibrary::GetChessGenerateInfo"), TEXT("Get generate information index out of bounds!"));
-        return TArray<FChessGenerationInfo>();
+        Index = rowName.Num() - 1;
     }
 
     FString ContextString;
@@ -31,4 +31,13 @@ TArray<FChessGenerationInfo> UEndingLibrary::GetChessGenerateInfo(int32 Index)
         ULogger::LogError(TEXT("UEndingLibrary::GetChessGenerateInfo"), "Can't find row by name!");
         return TArray<FChessGenerationInfo>();
     }
+}
+
+int32 UEndingLibrary::GetEndingGameNum()
+{
+    FChessGenerationInfo Infos;
+    auto DataTable = OM::GetObject<UDataTable>(DATATABLE_PATH);
+
+    TArray<FName> rowName = DataTable->GetRowNames();
+    return rowName.Num();
 }

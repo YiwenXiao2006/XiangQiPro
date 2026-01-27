@@ -39,6 +39,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FChessGenerationInfo> Infos;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 PerfectStepNum = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 GoodStepNum = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 PassStep = 8;
 };
 
 /**
@@ -53,4 +62,7 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	static TArray<FChessGenerationInfo> GetChessGenerateInfo(int32 Index);
+
+	UFUNCTION(BlueprintPure)
+	static int32 GetEndingGameNum();
 };

@@ -765,13 +765,14 @@ bool UAI2P::IsJueSha(EChessColor AIColor)
 {
     EChessColor PlayerColor = (AIColor == EChessColor::BLACKCHESS ? EChessColor::REDCHESS : EChessColor::BLACKCHESS);
     Position KingPos = GetKingPos(AIColor);
+    Position PlayerKingPos = GetKingPos(PlayerColor);
 
     bool InCheck = false;
     auto PlayerMoves = GetAllPossibleMoves(PlayerColor);
 
     for (const auto& move : PlayerMoves)
     {
-        if (move.to == KingPos)
+        if (move.to == KingPos) // AI被将军
         {
             InCheck = true;
             break;
@@ -786,6 +787,10 @@ bool UAI2P::IsJueSha(EChessColor AIColor)
     auto AIMoves = GetAllPossibleMoves(AIColor);
     for (const auto& aimove : AIMoves)
     {
+        if (aimove.to == PlayerKingPos)
+        {
+            return false; // 能吃掉玩家的将，如对面笑的情况
+        }
         WeakChessPtr chess = MakeTestMove(aimove);
 
         auto playerMoves = GetAllPossibleMoves(PlayerColor);
@@ -802,7 +807,7 @@ bool UAI2P::IsJueSha(EChessColor AIColor)
 
         UndoTestMove(aimove, chess);
 
-        if (!StillInCheck)
+        if (!StillInCheck) // 找到了破除将军的办法
         {
             InCheck = false;
             break;

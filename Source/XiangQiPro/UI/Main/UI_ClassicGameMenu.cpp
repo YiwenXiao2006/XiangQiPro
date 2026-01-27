@@ -24,7 +24,7 @@ void UUI_ClassicGameMenu::InitializeList(const TArray<FString>& Items, const TAr
         UClassicGameData* DataObj = NewObject<UClassicGameData>();
         if (DataObj)
         {
-            FOnListItemClicked CallBackFunc;
+            FOnClassicGameListItemClicked CallBackFunc;
             CallBackFunc.AddDynamic(this, &UUI_ClassicGameMenu::OnListItemClicked);
 
             DataObj->Init(i, FText::FromString(Items[i]), Icons[i], CallBackFunc);
@@ -45,7 +45,7 @@ void UUI_ClassicGameMenu::OnListItemClicked(UUI_Item_ClassicGame* ClickedItem)
     SelectedIndex = ClickedItem->GetIndex();
     ClickedItem->SetSelected(true);
 
-    // 触发事件
+    // 触发蓝图事件
     OnSelectedChange(SelectedIndex);
 }
 

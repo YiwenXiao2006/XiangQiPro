@@ -17,7 +17,7 @@ class XIANGQIPRO_API UClassicGameData : public UObject
 
 public:
 
-	FOnListItemClicked OnItemClickedDelegate;
+	FOnClassicGameListItemClicked OnItemClickedDelegate;
 
 	int32 Index = 0;
 
@@ -25,6 +25,6 @@ public:
 
 	UTexture2D* Icon;
 
-	void Init(int32 InIndex, FText InItemText, UTexture2D* InIcon, FOnListItemClicked CallBackFunc);
+	void Init(int32 InIndex, FText InItemText, UTexture2D* InIcon, FOnClassicGameListItemClicked CallBackFunc);
 	
 };

@@ -7,7 +7,7 @@
 #include "Blueprint/IUserObjectListEntry.h"
 #include "UI_Item_ClassicGame.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnListItemClicked, UUI_Item_ClassicGame*, ClickedItem);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnClassicGameListItemClicked, UUI_Item_ClassicGame*, ClickedItem);
 
 /**
  * 经典游戏列表条目
@@ -36,7 +36,7 @@ public:
     void OnItemClicked();
 
     UPROPERTY(BlueprintAssignable)
-    FOnListItemClicked OnItemClickedDelegate;
+    FOnClassicGameListItemClicked OnItemClickedDelegate;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
     class UButton* ItemButton;

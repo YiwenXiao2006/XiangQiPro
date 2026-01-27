@@ -10,6 +10,7 @@
 #include "XiangQiPro/Chess/Chesses.h"
 #include "XiangQiPro/GameObject/ChessBoard2P.h"
 #include "XiangQiPro/GameObject/ChessBoard2PActor.h"
+#include "XiangQiPro/SaveGame/SaveGameLibrary.h"
 
 #include "XiangQiPro/UI/InGame/UI_Battle2P_Base.h"
 
@@ -17,6 +18,7 @@
 #include "XiangQiPro/Util/ChessMove.h"
 #include "XiangQiPro/Util/ChessInfo.h"
 #include "XiangQiPro/Util/AsyncWorker.h"
+#include "XiangQiPro/Util/EndingLibrary.h"
 
 void AXQPGameStateBase::UpdateScore()
 {
@@ -168,7 +170,7 @@ void AXQPGameStateBase::Start2PGame(TWeakObjectPtr<AChessBoard2PActor> InBoard2P
         {
         case EGameMode::Ending:
         {
-            EXEC_ONENDINGGAMESTART(2);
+            EXEC_ONENDINGGAMESTART(USaveGameLibrary::GetEndingGameLevel());
             break;
         }
         case EGameMode::AI2P:
@@ -251,7 +253,6 @@ void AXQPGameStateBase::RunAI2P()
              {
                  AIDifficulty = EAI2PDifficulty::Normal;
                  AI2P->SetBoard(board2P);
-                 board2P->DebugCheckBoardState();
                  if (AI2P->IsJueSha(EChessColor::BLACKCHESS))
                  {
                      bIsJueSha = true;
@@ -274,6 +275,13 @@ void AXQPGameStateBase::RunAI2P()
                  if (bIsJueSha)
                  {
                      bIsJueSha = false;
+                     int32 EndingGameLevel = USaveGameLibrary::GetEndingGameLevel();
+                     int32 EndingGameLevel_Max = USaveGameLibrary::GetEndingGameLevel_Max();
+                     if (EndingGameLevel != EndingGameLevel_Max ||                      // 并非最大关卡
+                         EndingGameLevel_Max + 1 < UEndingLibrary::GetEndingGameNum())  // 未到达峰值
+                     {
+                         USaveGameLibrary::UpdateEndingGameLevelData(); // 更新残局关卡数据
+                     }
                      EXEC_ONJUESHA();
                      return;
                  }
